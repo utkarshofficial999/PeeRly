@@ -1,7 +1,7 @@
-import { createBrowserClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
-export const runtime = 'edge' // Use Vercel Edge for faster response
+// Note: Not using Edge runtime for better Netlify compatibility
 
 interface ListingsQuery {
     category?: string
@@ -15,12 +15,16 @@ interface ListingsQuery {
     limit?: number
 }
 
-// Edge-compatible Supabase client
+// Server-side Supabase client
 function getSupabaseClient() {
-    return createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (!url || !key) {
+        throw new Error('Missing Supabase environment variables')
+    }
+
+    return createClient(url, key)
 }
 
 export async function GET(request: NextRequest) {

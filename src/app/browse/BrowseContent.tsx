@@ -1,12 +1,14 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import SearchBar from '@/components/ui/SearchBar'
 import FilterSidebar from '@/components/ui/FilterSidebar'
 import ListingCard from '@/components/cards/ListingCard'
 import { Grid3X3, List, ChevronDown, Loader2, AlertCircle } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 interface Listing {
     id: string
@@ -20,15 +22,6 @@ interface Listing {
     college?: { name: string }
 }
 
-interface Props {
-    initialListings: Listing[]
-    categories: any[]
-    colleges: any[]
-    totalCount: number
-    categoryFromUrl: string
-    serverError: string | null
-}
-
 const sortOptions = [
     { value: 'newest', label: 'Newest First' },
     { value: 'oldest', label: 'Oldest First' },
@@ -37,27 +30,26 @@ const sortOptions = [
     { value: 'popular', label: 'Most Popular' },
 ]
 
-export default function BrowseClient({
-    initialListings,
-    categories,
-    colleges,
-    totalCount: initialTotal,
-    categoryFromUrl,
-    serverError
-}: Props) {
-    // State initialized with SERVER data - never empty on first render
-    const [listings, setListings] = useState<Listing[]>(initialListings)
-    const [totalCount, setTotalCount] = useState(initialTotal)
-    const [isLoading, setIsLoading] = useState(false)
+export default function BrowseContent() {
+    const searchParams = useSearchParams()
+    const categoryFromUrl = searchParams?.get('category') || ''
+
+    const supabase = useMemo(() => createClient(), [])
+
+    const [listings, setListings] = useState<Listing[]>([])
+    const [categories, setCategories] = useState<any[]>([])
+    const [colleges, setColleges] = useState<any[]>([])
+    const [totalCount, setTotalCount] = useState(0)
+    const [isLoading, setIsLoading] = useState(true)
     const [isLoadingMore, setIsLoadingMore] = useState(false)
-    const [error, setError] = useState<string | null>(serverError)
+    const [error, setError] = useState<string | null>(null)
     const [searchInput, setSearchInput] = useState('')
     const [searchQuery, setSearchQuery] = useState('')
     const [isFilterOpen, setIsFilterOpen] = useState(false)
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
     const [sortBy, setSortBy] = useState('newest')
-    const [hasMore, setHasMore] = useState(initialTotal > 20)
-    const [offset, setOffset] = useState(20)
+    const [hasMore, setHasMore] = useState(false)
+    const [offset, setOffset] = useState(0)
 
     const [filters, setFilters] = useState({
         category: categoryFromUrl,
@@ -67,8 +59,24 @@ export default function BrowseClient({
         college: '',
     })
 
-    const abortControllerRef = useRef<AbortController | null>(null)
-    const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+    const initialLoadRef = useRef(false)
+
+    // Load categories and colleges once on mount
+    useEffect(() => {
+        const loadMetadata = async () => {
+            try {
+                const [catResult, colResult] = await Promise.all([
+                    supabase.from('categories').select('*').order('name'),
+                    supabase.from('colleges').select('*').order('name'),
+                ])
+                setCategories(catResult.data || [])
+                setColleges(colResult.data || [])
+            } catch (err) {
+                console.error('Failed to load metadata:', err)
+            }
+        }
+        loadMetadata()
+    }, [supabase])
 
     // Debounce search
     useEffect(() => {
@@ -76,15 +84,8 @@ export default function BrowseClient({
         return () => clearTimeout(timeoutId)
     }, [searchInput])
 
-    // GUARANTEED fetch with timeout protection
+    // Fetch listings
     const fetchListings = useCallback(async (loadMore = false) => {
-        // Cancel previous
-        if (abortControllerRef.current) abortControllerRef.current.abort()
-        if (fetchTimeoutRef.current) clearTimeout(fetchTimeoutRef.current)
-
-        const controller = new AbortController()
-        abortControllerRef.current = controller
-
         const currentOffset = loadMore ? offset : 0
 
         if (loadMore) {
@@ -94,75 +95,82 @@ export default function BrowseClient({
             setError(null)
         }
 
-        // HARD TIMEOUT - guarantees loading state resolves
-        const timeoutId = setTimeout(() => {
-            controller.abort()
-            setError('Request timed out after 10 seconds. Please check your connection.')
-            setIsLoading(false)
-            setIsLoadingMore(false)
-        }, 10000)
-
-        fetchTimeoutRef.current = timeoutId
-
         try {
-            const params = new URLSearchParams()
-            if (filters.category) params.set('category', filters.category)
-            if (filters.condition) params.set('condition', filters.condition)
-            if (filters.priceMin) params.set('priceMin', filters.priceMin)
-            if (filters.priceMax) params.set('priceMax', filters.priceMax)
-            if (filters.college) params.set('college', filters.college)
-            if (searchQuery) params.set('search', searchQuery)
-            params.set('sortBy', sortBy)
-            params.set('offset', currentOffset.toString())
-            params.set('limit', '20')
+            let query = supabase
+                .from('listings')
+                .select(`
+                    id,
+                    title,
+                    price,
+                    condition,
+                    images,
+                    created_at,
+                    views_count,
+                    seller:profiles!listings_seller_id_fkey(full_name, avatar_url),
+                    college:colleges(name)
+                `, { count: 'exact' })
+                .eq('is_active', true)
+                .eq('is_sold', false)
 
-            const response = await fetch(`/api/listings?${params.toString()}`, {
-                signal: controller.signal,
-            })
-
-            clearTimeout(timeoutId)
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`)
+            // Apply filters
+            if (filters.category) {
+                const cat = categories.find(c => c.slug === filters.category || c.name === filters.category)
+                if (cat) query = query.eq('category_id', cat.id)
             }
-
-            const result = await response.json()
-
-            if (result.error) {
-                throw new Error(result.error)
+            if (filters.condition) query = query.eq('condition', filters.condition)
+            if (filters.priceMin) query = query.gte('price', parseFloat(filters.priceMin))
+            if (filters.priceMax) query = query.lte('price', parseFloat(filters.priceMax))
+            if (filters.college) {
+                const col = colleges.find(c => c.name === filters.college)
+                if (col) query = query.eq('college_id', col.id)
             }
+            if (searchQuery) query = query.ilike('title', `%${searchQuery}%`)
+
+            // Apply sorting
+            if (sortBy === 'newest') query = query.order('created_at', { ascending: false })
+            else if (sortBy === 'oldest') query = query.order('created_at', { ascending: true })
+            else if (sortBy === 'price_low') query = query.order('price', { ascending: true })
+            else if (sortBy === 'price_high') query = query.order('price', { ascending: false })
+            else if (sortBy === 'popular') query = query.order('views_count', { ascending: false })
+
+            query = query.range(currentOffset, currentOffset + 19)
+
+            const { data, error: fetchError, count } = await query
+
+            if (fetchError) throw fetchError
 
             if (loadMore) {
-                setListings(prev => [...prev, ...(result.data || [])])
+                setListings(prev => [...prev, ...(data || [])])
                 setOffset(currentOffset + 20)
             } else {
-                setListings(result.data || [])
+                setListings(data || [])
                 setOffset(20)
             }
 
-            setTotalCount(result.count || 0)
-            setHasMore(result.hasMore || false)
+            setTotalCount(count || 0)
+            setHasMore((count || 0) > currentOffset + 20)
 
         } catch (err: any) {
-            if (err.name === 'AbortError') return
+            console.error('Fetch error:', err)
             setError(err.message || 'Failed to load listings')
             if (!loadMore) setListings([])
         } finally {
-            clearTimeout(timeoutId)
             setIsLoading(false)
             setIsLoadingMore(false)
         }
-    }, [filters, searchQuery, sortBy, offset])
+    }, [supabase, filters, searchQuery, sortBy, offset, categories, colleges])
 
-    // Trigger fetch ONLY when filters change
+    // Initial load and filter changes
     useEffect(() => {
+        // Skip if categories/colleges haven't loaded yet (except first load)
+        if (!initialLoadRef.current) {
+            initialLoadRef.current = true
+            fetchListings(false)
+            return
+        }
+
         setOffset(0)
         fetchListings(false)
-
-        return () => {
-            if (abortControllerRef.current) abortControllerRef.current.abort()
-            if (fetchTimeoutRef.current) clearTimeout(fetchTimeoutRef.current)
-        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filters, searchQuery, sortBy])
 
@@ -262,14 +270,12 @@ export default function BrowseClient({
                         />
 
                         <div className="flex-1">
-                            {/* LOADING: Only shown during filter changes, not initial load */}
                             {isLoading ? (
                                 <div className="flex flex-col items-center justify-center py-20">
                                     <Loader2 className="w-12 h-12 text-primary-500 animate-spin mb-4" />
                                     <p className="text-dark-400">Fetching listings...</p>
                                 </div>
                             ) : error ? (
-                                /* ERROR: Always resolves after timeout */
                                 <div className="glass-card p-12 text-center">
                                     <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
                                     <h3 className="text-xl font-semibold text-white mb-2">Something went wrong</h3>
@@ -279,7 +285,6 @@ export default function BrowseClient({
                                     </button>
                                 </div>
                             ) : listings.length > 0 ? (
-                                /* DATA: Server-rendered on first load, filtered data after */
                                 <>
                                     <div className={`grid gap-4 ${viewMode === 'grid'
                                         ? 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
@@ -323,7 +328,6 @@ export default function BrowseClient({
                                     )}
                                 </>
                             ) : (
-                                /* EMPTY: Only shown after loading completes with 0 results */
                                 <div className="glass-card p-12 text-center">
                                     <div className="text-6xl mb-4">🔍</div>
                                     <h3 className="text-xl font-semibold text-white mb-2">No listings found</h3>

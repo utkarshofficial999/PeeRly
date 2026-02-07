@@ -1,81 +1,35 @@
+'use client'
+
 import { Suspense } from 'react'
-import BrowseClient from './BrowseClient'
-import { createClient } from '@/lib/supabase/server'
+import dynamic from 'next/dynamic'
+import Header from '@/components/layout/Header'
+import Footer from '@/components/layout/Footer'
+import { Loader2 } from 'lucide-react'
 
-// This is a Server Component - runs on Vercel's server, not in browser
-export default async function BrowsePage({ searchParams }: { searchParams: { category?: string } }) {
-    let categories: any[] = []
-    let colleges: any[] = []
-    let initialListings: any[] = []
-    let totalCount = 0
-    let serverError: string | null = null
+// Dynamically import the content to avoid SSR issues with useSearchParams
+const BrowseContent = dynamic(() => import('./BrowseContent'), { ssr: false })
 
-    try {
-        const supabase = createClient()
-
-        // Fetch initial data on the server (guaranteed to run once, before page loads)
-        const [categoriesResult, collegesResult, listingsResult] = await Promise.all([
-            supabase.from('categories').select('*').order('name'),
-            supabase.from('colleges').select('*').order('name'),
-            supabase
-                .from('listings')
-                .select(`
-                    id,
-                    title,
-                    price,
-                    condition,
-                    images,
-                    created_at,
-                    views_count,
-                    seller:profiles!listings_seller_id_fkey(full_name, avatar_url),
-                    college:colleges(name)
-                `, { count: 'exact' })
-                .eq('is_active', true)
-                .eq('is_sold', false)
-                .order('created_at', { ascending: false })
-                .limit(20)
-        ])
-
-        // Check for errors
-        if (categoriesResult.error) {
-            console.error('Server: Categories fetch error:', categoriesResult.error)
-        }
-        if (collegesResult.error) {
-            console.error('Server: Colleges fetch error:', collegesResult.error)
-        }
-        if (listingsResult.error) {
-            console.error('Server: Listings fetch error:', listingsResult.error)
-            serverError = listingsResult.error.message
-        }
-
-        // Safe extraction with fallbacks
-        categories = categoriesResult.data || []
-        colleges = collegesResult.data || []
-        initialListings = listingsResult.data || []
-        totalCount = listingsResult.count || 0
-
-        console.log('Server: Fetched data', {
-            categories: categories.length,
-            colleges: colleges.length,
-            listings: initialListings.length,
-            totalCount
-        })
-
-    } catch (error: any) {
-        console.error('Server: Critical error in BrowsePage:', error)
-        serverError = error.message || 'Failed to load data'
-    }
-
-    // Pass server-fetched data to client component
-    // Even if fetch fails, we pass empty arrays so page doesn't crash
+function LoadingFallback() {
     return (
-        <BrowseClient
-            initialListings={initialListings}
-            categories={categories}
-            colleges={colleges}
-            totalCount={totalCount}
-            categoryFromUrl={searchParams.category || ''}
-            serverError={serverError}
-        />
+        <div className="min-h-screen bg-dark-950">
+            <Header />
+            <main className="pt-28 pb-16 px-4">
+                <div className="max-w-7xl mx-auto">
+                    <div className="flex flex-col items-center justify-center py-20">
+                        <Loader2 className="w-12 h-12 text-primary-500 animate-spin mb-4" />
+                        <p className="text-dark-400">Loading browse page...</p>
+                    </div>
+                </div>
+            </main>
+            <Footer />
+        </div>
+    )
+}
+
+export default function BrowsePage() {
+    return (
+        <Suspense fallback={<LoadingFallback />}>
+            <BrowseContent />
+        </Suspense>
     )
 }
