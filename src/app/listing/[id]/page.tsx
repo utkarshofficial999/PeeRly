@@ -49,25 +49,45 @@ export default function ListingDetailPage() {
 
             console.log('✅ Listing loaded:', data.title)
 
-            // Fetch seller and college separately in parallel
-            const [sellerData, collegeData] = await Promise.all([
-                supabase.from('profiles').select('*').eq('id', data.seller_id).single(),
-                supabase.from('colleges').select('*').eq('id', data.college_id).single()
-            ])
+            // Fetch seller and college separately in parallel (only if IDs exist)
+            const promises = []
+
+            if (data.seller_id) {
+                promises.push(
+                    supabase.from('profiles').select('*').eq('id', data.seller_id).single()
+                        .then((res: any) => ({ seller: res.data }))
+                )
+            } else {
+                promises.push(Promise.resolve({ seller: null }))
+            }
+
+            if (data.college_id) {
+                promises.push(
+                    supabase.from('colleges').select('*').eq('id', data.college_id).single()
+                        .then((res: any) => ({ college: res.data }))
+                )
+            } else {
+                promises.push(Promise.resolve({ college: null }))
+            }
+
+            const [sellerResult, collegeResult] = await Promise.all(promises)
 
             // Combine data
             const fullListing = {
                 ...data,
-                seller: sellerData.data,
-                college: collegeData.data
+                seller: sellerResult.seller,
+                college: collegeResult.college
             }
 
             setListing(fullListing)
 
-            // Increment view count (non-blocking)
-            supabase.rpc('increment_views', { listing_id: id }).catch((err: any) => {
-                console.warn('⚠️ Failed to increment views:', err)
-            })
+            // Increment view count (optional, skip if function doesn't exist)
+            try {
+                await supabase.rpc('increment_views', { listing_id: id })
+            } catch (viewErr) {
+                // Silently ignore if function doesn't exist
+                console.debug('View count not incremented:', viewErr)
+            }
 
         } catch (err: any) {
             console.error('❌ Error fetching listing:', err)
