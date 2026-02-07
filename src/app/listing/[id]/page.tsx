@@ -150,8 +150,12 @@ export default function ListingDetailPage() {
                 setListing(fullListing)
                 setStatus('success')
 
-                // Fire and forget: increment views
-                supabase.rpc('increment_views', { listing_id: id }).catch(() => { })
+                // Fire and forget: increment views (wrapped in try-catch)
+                try {
+                    await supabase.rpc('increment_views', { listing_id: id })
+                } catch {
+                    // Silently ignore - view count is not critical
+                }
 
             } catch (err: any) {
                 if (cancelled) return
