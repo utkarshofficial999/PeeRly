@@ -11,6 +11,32 @@ export function createClient() {
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
     if (!supabaseUrl || !supabaseAnonKey) {
+        if (typeof window === 'undefined') {
+            console.warn('Supabase environment variables are missing during build. Returning a mock client to prevent build crash.')
+            // Return a mock object that prevents crashes during static generation
+            return {
+                auth: {
+                    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => { } } } }),
+                    getSession: async () => ({ data: { session: null }, error: null }),
+                },
+                from: () => ({
+                    select: () => ({
+                        eq: () => ({
+                            eq: () => ({
+                                order: () => ({
+                                    limit: () => Promise.resolve({ data: [], error: null }),
+                                    range: () => Promise.resolve({ data: [], error: null }),
+                                    single: () => Promise.resolve({ data: null, error: null }),
+                                }),
+                                limit: () => Promise.resolve({ data: [], error: null }),
+                            }),
+                            order: () => Promise.resolve({ data: [], error: null }),
+                        }),
+                        order: () => Promise.resolve({ data: [], error: null }),
+                    }),
+                }),
+            } as any
+        }
         throw new Error('Missing Supabase environment variables')
     }
 

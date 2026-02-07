@@ -50,6 +50,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [user, fetchProfile])
 
     useEffect(() => {
+        if (!supabase) {
+            setIsLoading(false)
+            return
+        }
+
         let mounted = true
 
         const initializeAuth = async () => {
@@ -79,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event: string, currentSession: Session | null) => {
+            async (event: any, currentSession: Session | null) => {
                 if (!mounted) return
 
                 setSession(currentSession)

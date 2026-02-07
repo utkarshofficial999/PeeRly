@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useState, useEffect, useCallback, Suspense, useMemo, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
@@ -40,7 +40,8 @@ const sortOptions = [
 ]
 
 function BrowseContent() {
-    const supabase = createClient()
+    // FIXED: Memoize Supabase client to prevent re-creation
+    const supabase = useMemo(() => createClient(), [])
     const { user } = useAuth()
     const searchParams = useSearchParams()
     const categoryFromUrl = searchParams.get('category') || ''
@@ -69,11 +70,16 @@ function BrowseContent() {
         college: '',
     })
 
+    // FIXED: Use refs to prevent duplicate fetches
+    const abortControllerRef = useRef<AbortController | null>(null)
+    const isFetchingRef = useRef(false)
+    const lastFetchParamsRef = useRef<string>('')
+
     // Debounce search input to avoid too many queries
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             setSearchQuery(searchInput)
-        }, 500) // Wait 500ms after user stops typing
+        }, 500)
 
         return () => clearTimeout(timeoutId)
     }, [searchInput])
@@ -85,16 +91,19 @@ function BrowseContent() {
         }
     }, [categoryFromUrl])
 
-    // Fetch initial metadata ONCE and cache
+    // FIXED: Fetch metadata ONCE with stable dependencies
     useEffect(() => {
+        let mounted = true
+
         const fetchMeta = async () => {
-            // Check if we already have cached data in sessionStorage
             const cachedCategories = sessionStorage.getItem('categories')
             const cachedColleges = sessionStorage.getItem('colleges')
 
             if (cachedCategories && cachedColleges) {
-                setCategories(JSON.parse(cachedCategories))
-                setColleges(JSON.parse(cachedColleges))
+                if (mounted) {
+                    setCategories(JSON.parse(cachedCategories))
+                    setColleges(JSON.parse(cachedColleges))
+                }
                 return
             }
 
@@ -103,32 +112,60 @@ function BrowseContent() {
                     supabase.from('categories').select('*'),
                     supabase.from('colleges').select('*')
                 ])
-                if (catRes.data) {
-                    setCategories(catRes.data)
-                    sessionStorage.setItem('categories', JSON.stringify(catRes.data))
-                }
-                if (colRes.data) {
-                    setColleges(colRes.data)
-                    sessionStorage.setItem('colleges', JSON.stringify(colRes.data))
+                if (mounted) {
+                    if (catRes.data) {
+                        setCategories(catRes.data)
+                        sessionStorage.setItem('categories', JSON.stringify(catRes.data))
+                    }
+                    if (colRes.data) {
+                        setColleges(colRes.data)
+                        sessionStorage.setItem('colleges', JSON.stringify(colRes.data))
+                    }
                 }
             } catch (err) {
                 console.error('Error fetching metadata:', err)
             }
         }
+
         fetchMeta()
+
+        return () => {
+            mounted = false
+        }
     }, [supabase])
 
-    // Fetch listings with pagination
-    const fetchListings = useCallback(async (loadMore = false) => {
+    // FIXED: Stable fetchListings with proper abort handling
+    const fetchListings = useCallback(async (loadMore = false, currentOffset = 0) => {
+        // Create unique signature for this fetch
+        const fetchParams = JSON.stringify({
+            filters,
+            searchQuery,
+            sortBy,
+            loadMore,
+            currentOffset
+        })
+
+        // Prevent duplicate fetches with same parameters
+        if (isFetchingRef.current && lastFetchParamsRef.current === fetchParams) {
+            return
+        }
+
+        // Cancel any ongoing fetch
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort()
+        }
+
+        // Create new abort controller
+        abortControllerRef.current = new AbortController()
+        isFetchingRef.current = true
+        lastFetchParamsRef.current = fetchParams
+
         if (loadMore) {
             setIsLoadingMore(true)
         } else {
             setIsLoading(true)
-            setOffset(0)
         }
         setError(null)
-
-        const currentOffset = loadMore ? offset : 0
 
         try {
             let query = supabase
@@ -182,6 +219,11 @@ function BrowseContent() {
 
             const { data, error: fetchError, count } = await query
 
+            // Check if request was aborted
+            if (abortControllerRef.current?.signal.aborted) {
+                return
+            }
+
             if (fetchError) throw fetchError
 
             if (loadMore) {
@@ -193,24 +235,42 @@ function BrowseContent() {
             }
 
             // Check if there are more items
-            setHasMore(count ? count > (loadMore ? offset + ITEMS_PER_PAGE : ITEMS_PER_PAGE) : false)
+            setHasMore(count ? count > (loadMore ? currentOffset + ITEMS_PER_PAGE : ITEMS_PER_PAGE) : false)
         } catch (err: any) {
             // Ignore abort errors
-            if (err.name === 'AbortError' || err.message?.includes('aborted')) return
+            if (err.name === 'AbortError' || err.message?.includes('aborted')) {
+                return
+            }
 
             console.error('Error fetching listings:', err)
             setError(err.message)
         } finally {
+            isFetchingRef.current = false
             setIsLoading(false)
             setIsLoadingMore(false)
         }
-    }, [filters, searchQuery, sortBy, categories, colleges, offset, supabase])
+    }, [filters, searchQuery, sortBy, categories, colleges, supabase])
 
+    // FIXED: Trigger fetch only when filters/search/sort change, with metadata ready
     useEffect(() => {
-        if (categories.length > 0 && colleges.length > 0) {
-            fetchListings(false)
+        // Wait for metadata to load
+        if (categories.length === 0 || colleges.length === 0) {
+            return
         }
-    }, [filters, searchQuery, sortBy, categories, colleges, fetchListings])
+
+        // Reset offset and fetch from beginning
+        setOffset(0)
+        fetchListings(false, 0)
+
+        // Cleanup on unmount or before next fetch
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort()
+            }
+        }
+        // FIXED: Remove fetchListings from dependencies to prevent infinite loop
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters, searchQuery, sortBy, categories.length, colleges.length])
 
     const handleFilterChange = (key: string, value: string) => {
         setFilters(prev => ({ ...prev, [key]: value }))
@@ -226,6 +286,10 @@ function BrowseContent() {
         })
         setSearchInput('')
         setSearchQuery('')
+    }
+
+    const handleLoadMore = () => {
+        fetchListings(true, offset)
     }
 
     return (
@@ -322,7 +386,7 @@ function BrowseContent() {
                             ) : error ? (
                                 <div className="glass-card p-12 text-center text-red-400">
                                     <p>Error: {error}</p>
-                                    <button onClick={() => fetchListings(false)} className="mt-4 btn-secondary">Retry</button>
+                                    <button onClick={() => fetchListings(false, 0)} className="mt-4 btn-secondary">Retry</button>
                                 </div>
                             ) : listings.length > 0 ? (
                                 <div className={`grid gap-4 ${viewMode === 'grid'
@@ -363,7 +427,7 @@ function BrowseContent() {
                             {!isLoading && hasMore && listings.length > 0 && (
                                 <div className="mt-8 text-center">
                                     <button
-                                        onClick={() => fetchListings(true)}
+                                        onClick={handleLoadMore}
                                         disabled={isLoadingMore}
                                         className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
