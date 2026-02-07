@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import NextImage from 'next/image'
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Menu, X, Search, Plus, User, Bell, MessageSquare, LogOut } from 'lucide-react'
@@ -181,9 +182,21 @@ export default function Header() {
                                     <div className="relative">
                                         <button
                                             onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                            className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-semibold hover:opacity-90 transition-opacity"
+                                            className="w-10 h-10 rounded-xl overflow-hidden hover:opacity-90 transition-opacity ring-2 ring-white/10 hover:ring-primary-500/50"
                                         >
-                                            {profile?.full_name ? getInitials(profile.full_name) : 'U'}
+                                            {profile?.avatar_url ? (
+                                                <NextImage
+                                                    src={profile.avatar_url}
+                                                    alt="Profile"
+                                                    width={40}
+                                                    height={40}
+                                                    className="object-cover w-full h-full"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-semibold">
+                                                    {profile?.full_name ? getInitials(profile.full_name) : 'U'}
+                                                </div>
+                                            )}
                                         </button>
                                         {/* Dropdown Menu */}
                                         {isProfileOpen && (
