@@ -1,18 +1,17 @@
 'use client'
 
-import { useState, useEffect, useCallback, Suspense, useMemo, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import SearchBar from '@/components/ui/SearchBar'
 import FilterSidebar from '@/components/ui/FilterSidebar'
 import ListingCard from '@/components/cards/ListingCard'
-import { Grid3X3, List, ChevronDown, Loader2 } from 'lucide-react'
+import { Grid3X3, List, ChevronDown, Loader2, AlertCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { useAuth } from '@/context/AuthContext'
 
-// Types for our data
-interface DBListing {
+// Types
+interface Listing {
     id: string
     title: string
     price: number
@@ -20,8 +19,6 @@ interface DBListing {
     images: string[]
     created_at: string
     views_count: number
-    is_active: boolean
-    is_sold: boolean
     seller?: {
         full_name: string
         avatar_url: string
@@ -39,26 +36,25 @@ const sortOptions = [
     { value: 'popular', label: 'Most Popular' },
 ]
 
-function BrowseContent() {
-    // FIXED: Memoize Supabase client to prevent re-creation
+export default function BrowsePage() {
     const supabase = useMemo(() => createClient(), [])
-    const { user } = useAuth()
     const searchParams = useSearchParams()
     const categoryFromUrl = searchParams.get('category') || ''
 
-    // States
-    const [listings, setListings] = useState<DBListing[]>([])
+    // State
+    const [listings, setListings] = useState<Listing[]>([])
     const [categories, setCategories] = useState<any[]>([])
     const [colleges, setColleges] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [isLoadingMore, setIsLoadingMore] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const [searchInput, setSearchInput] = useState('') // User's input
-    const [searchQuery, setSearchQuery] = useState('') // Debounced search
+    const [searchInput, setSearchInput] = useState('')
+    const [searchQuery, setSearchQuery] = useState('')
     const [isFilterOpen, setIsFilterOpen] = useState(false)
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
     const [sortBy, setSortBy] = useState('newest')
-    const [hasMore, setHasMore] = useState(true)
+    const [hasMore, setHasMore] = useState(false)
+    const [totalCount, setTotalCount] = useState(0)
     const [offset, setOffset] = useState(0)
     const ITEMS_PER_PAGE = 20
 
@@ -70,265 +66,170 @@ function BrowseContent() {
         college: '',
     })
 
-    // FIXED: Use refs to prevent duplicate fetches
+    // Refs for request management
     const abortControllerRef = useRef<AbortController | null>(null)
-    const isFetchingRef = useRef(false)
-    const lastFetchParamsRef = useRef<string>('')
+    const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-    // Debounce search input to avoid too many queries
+    // Debounce search
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             setSearchQuery(searchInput)
         }, 500)
-
         return () => clearTimeout(timeoutId)
     }, [searchInput])
 
-    // Update filter if URL param changes
+    // Update filter from URL
     useEffect(() => {
         if (categoryFromUrl) {
             setFilters(prev => ({ ...prev, category: categoryFromUrl }))
         }
     }, [categoryFromUrl])
 
-    // FIXED: Fetch metadata ONCE with stable dependencies
+    // Fetch metadata once
     useEffect(() => {
         let mounted = true
 
-        const fetchMeta = async () => {
+        const fetchMetadata = async () => {
             const cachedCategories = sessionStorage.getItem('categories')
             const cachedColleges = sessionStorage.getItem('colleges')
 
             if (cachedCategories && cachedColleges) {
                 if (mounted) {
-                    const cats = JSON.parse(cachedCategories)
-                    const cols = JSON.parse(cachedColleges)
-                    console.log('📦 Using cached metadata:', { categories: cats.length, colleges: cols.length })
-                    setCategories(cats)
-                    setColleges(cols)
+                    setCategories(JSON.parse(cachedCategories))
+                    setColleges(JSON.parse(cachedColleges))
                 }
                 return
             }
 
-            console.log('🔄 Fetching metadata from Supabase...')
             try {
                 const [catRes, colRes] = await Promise.all([
                     supabase.from('categories').select('*'),
                     supabase.from('colleges').select('*')
                 ])
 
-                console.log('📊 Metadata response:', {
-                    categories: catRes.data?.length || 0,
-                    colleges: colRes.data?.length || 0,
-                    catError: catRes.error,
-                    colError: colRes.error
-                })
-
                 if (mounted) {
-                    if (catRes.data && catRes.data.length > 0) {
+                    if (catRes.data) {
                         setCategories(catRes.data)
                         sessionStorage.setItem('categories', JSON.stringify(catRes.data))
-                    } else {
-                        console.warn('⚠️ No categories found, using empty array')
-                        setCategories([])
                     }
-
-                    if (colRes.data && colRes.data.length > 0) {
+                    if (colRes.data) {
                         setColleges(colRes.data)
                         sessionStorage.setItem('colleges', JSON.stringify(colRes.data))
-                    } else {
-                        console.warn('⚠️ No colleges found, using empty array')
-                        setColleges([])
                     }
                 }
             } catch (err) {
-                console.error('❌ Error fetching metadata:', err)
-                if (mounted) {
-                    // Set empty arrays to allow page to continue
-                    setCategories([])
-                    setColleges([])
-                }
+                console.error('Error fetching metadata:', err)
             }
         }
 
-        fetchMeta()
-
-        return () => {
-            mounted = false
-        }
+        fetchMetadata()
+        return () => { mounted = false }
     }, [supabase])
 
-    // FIXED: Stable fetchListings with proper abort handling
-    const fetchListings = useCallback(async (loadMore = false, currentOffset = 0) => {
-        // Create unique signature for this fetch
-        const fetchParams = JSON.stringify({
-            filters,
-            searchQuery,
-            sortBy,
-            loadMore,
-            currentOffset
-        })
-
-        console.log('🔍 fetchListings called:', { loadMore, currentOffset, filters, searchQuery, sortBy })
-
-        // Prevent duplicate fetches with same parameters
-        if (isFetchingRef.current && lastFetchParamsRef.current === fetchParams) {
-            console.log('⏭️ Skipping duplicate fetch')
-            return
-        }
-
-        // Cancel any ongoing fetch
+    // Main fetch function using API route
+    const fetchListings = useCallback(async (loadMore = false) => {
+        // Cancel previous request
         if (abortControllerRef.current) {
-            console.log('🛑 Aborting previous fetch')
             abortControllerRef.current.abort()
+        }
+        if (fetchTimeoutRef.current) {
+            clearTimeout(fetchTimeoutRef.current)
         }
 
         // Create new abort controller
         abortControllerRef.current = new AbortController()
-        isFetchingRef.current = true
-        lastFetchParamsRef.current = fetchParams
+
+        const currentOffset = loadMore ? offset : 0
 
         if (loadMore) {
             setIsLoadingMore(true)
         } else {
             setIsLoading(true)
+            setError(null)
         }
-        setError(null)
+
+        // Set timeout for slow requests
+        fetchTimeoutRef.current = setTimeout(() => {
+            if (isLoading || isLoadingMore) {
+                setError('Request is taking longer than expected. Please check your connection.')
+            }
+        }, 10000)
 
         try {
-            let query = supabase
-                .from('listings')
-                .select(`
-                    *,
-                    seller:profiles!listings_seller_id_fkey(full_name, avatar_url),
-                    college:colleges(name)
-                `, { count: 'exact' })
-                .eq('is_active', true)
-                .eq('is_sold', false)
+            // Build query params
+            const params = new URLSearchParams()
+            if (filters.category) params.set('category', filters.category)
+            if (filters.condition) params.set('condition', filters.condition)
+            if (filters.priceMin) params.set('priceMin', filters.priceMin)
+            if (filters.priceMax) params.set('priceMax', filters.priceMax)
+            if (filters.college) params.set('college', filters.college)
+            if (searchQuery) params.set('search', searchQuery)
+            params.set('sortBy', sortBy)
+            params.set('offset', currentOffset.toString())
+            params.set('limit', ITEMS_PER_PAGE.toString())
 
-            // Category Filter
-            if (filters.category) {
-                const selectedCat = categories.find(c => c.slug === filters.category)
-                if (selectedCat) query = query.eq('category_id', selectedCat.id)
-            }
-
-            // Condition Filter
-            if (filters.condition) {
-                query = query.eq('condition', filters.condition)
-            }
-
-            // Price Filters
-            if (filters.priceMin) query = query.gte('price', parseFloat(filters.priceMin))
-            if (filters.priceMax) query = query.lte('price', parseFloat(filters.priceMax))
-
-            // Search Query
-            if (searchQuery) {
-                query = query.ilike('title', `%${searchQuery}%`)
-            }
-
-            // College Filter
-            if (filters.college) {
-                const selectedCol = colleges.find(c => c.slug === filters.college)
-                if (selectedCol) query = query.eq('college_id', selectedCol.id)
-            }
-
-            // Sorting
-            switch (sortBy) {
-                case 'newest': query = query.order('created_at', { ascending: false }); break
-                case 'oldest': query = query.order('created_at', { ascending: true }); break
-                case 'price_low': query = query.order('price', { ascending: true }); break
-                case 'price_high': query = query.order('price', { ascending: false }); break
-                case 'popular': query = query.order('views_count', { ascending: false }); break
-                default: query = query.order('created_at', { ascending: false })
-            }
-
-            // Add pagination
-            query = query.range(currentOffset, currentOffset + ITEMS_PER_PAGE - 1)
-
-            const { data, error: fetchError, count } = await query
-
-            console.log('📥 Query response:', {
-                dataCount: data?.length || 0,
-                totalCount: count,
-                error: fetchError,
-                aborted: abortControllerRef.current?.signal.aborted
+            const response = await fetch(`/api/listings?${params.toString()}`, {
+                signal: abortControllerRef.current.signal,
             })
 
-            // Check if request was aborted
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+            }
+
+            const result = await response.json()
+
             if (abortControllerRef.current?.signal.aborted) {
-                console.log('⏹️ Request was aborted')
                 return
             }
 
-            if (fetchError) throw fetchError
+            if (result.error) {
+                throw new Error(result.error)
+            }
 
             if (loadMore) {
-                setListings(prev => [...prev, ...(data || [])])
+                setListings(prev => [...prev, ...(result.data || [])])
                 setOffset(currentOffset + ITEMS_PER_PAGE)
             } else {
-                setListings(data || [])
+                setListings(result.data || [])
                 setOffset(ITEMS_PER_PAGE)
             }
 
-            // Check if there are more items
-            setHasMore(count ? count > (loadMore ? currentOffset + ITEMS_PER_PAGE : ITEMS_PER_PAGE) : false)
+            setTotalCount(result.count || 0)
+            setHasMore(result.hasMore || false)
+
         } catch (err: any) {
-            // Ignore abort errors
-            if (err.name === 'AbortError' || err.message?.includes('aborted')) {
+            if (err.name === 'AbortError') {
                 return
             }
-
             console.error('Error fetching listings:', err)
-            setError(err.message)
+            setError(err.message || 'Failed to load listings')
+            if (!loadMore) {
+                setListings([])
+            }
         } finally {
-            isFetchingRef.current = false
+            if (fetchTimeoutRef.current) {
+                clearTimeout(fetchTimeoutRef.current)
+            }
             setIsLoading(false)
             setIsLoadingMore(false)
         }
-    }, [filters, searchQuery, sortBy, categories, colleges, supabase])
+    }, [filters, searchQuery, sortBy, offset, isLoading, isLoadingMore])
 
-    // FIXED: Trigger fetch only when filters/search/sort change, with metadata ready
+    // Trigger fetch when filters change
     useEffect(() => {
-        // Add a timeout to prevent infinite loading
-        const timeoutId = setTimeout(() => {
-            if (isLoading) {
-                console.warn('⏱️ Fetch timeout - forcing load with available data')
-                setIsLoading(false)
-                setError('Loading took too long. Please check your connection and try again.')
-            }
-        }, 10000) // 10 second timeout
-
-        // Don't wait for metadata if filters don't need it
-        const needsMetadata = filters.category || filters.college
-
-        // If we need metadata but don't have it yet, wait
-        if (needsMetadata && categories.length === 0 && colleges.length === 0) {
-            console.log('⏳ Waiting for metadata before filtering...')
-            return () => clearTimeout(timeoutId)
-        }
-
-        console.log('🚀 Triggering fetch with:', {
-            filters,
-            searchQuery,
-            sortBy,
-            hasCategories: categories.length > 0,
-            hasColleges: colleges.length > 0
-        })
-
-        // Reset offset and fetch from beginning
         setOffset(0)
-        fetchListings(false, 0)
+        fetchListings(false)
 
-        // Cleanup on unmount or before next fetch
         return () => {
-            clearTimeout(timeoutId)
             if (abortControllerRef.current) {
                 abortControllerRef.current.abort()
             }
+            if (fetchTimeoutRef.current) {
+                clearTimeout(fetchTimeoutRef.current)
+            }
         }
-        // FIXED: Remove fetchListings from dependencies to prevent infinite loop
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filters, searchQuery, sortBy, categories.length, colleges.length])
+    }, [filters, searchQuery, sortBy])
 
     const handleFilterChange = (key: string, value: string) => {
         setFilters(prev => ({ ...prev, [key]: value }))
@@ -347,7 +248,7 @@ function BrowseContent() {
     }
 
     const handleLoadMore = () => {
-        fetchListings(true, offset)
+        fetchListings(true)
     }
 
     return (
@@ -377,7 +278,14 @@ function BrowseContent() {
                     {/* Toolbar */}
                     <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
                         <p className="text-sm text-dark-400">
-                            Showing <span className="text-white font-medium">{listings.length}</span> results
+                            {isLoading ? (
+                                'Loading...'
+                            ) : (
+                                <>
+                                    Showing <span className="text-white font-medium">{listings.length}</span> of{' '}
+                                    <span className="text-white font-medium">{totalCount}</span> results
+                                </>
+                            )}
                         </p>
 
                         <div className="flex items-center gap-4">
@@ -436,39 +344,69 @@ function BrowseContent() {
 
                         {/* Listings Grid */}
                         <div className="flex-1">
+                            {/* Loading State */}
                             {isLoading ? (
                                 <div className="flex flex-col items-center justify-center py-20">
                                     <Loader2 className="w-12 h-12 text-primary-500 animate-spin mb-4" />
                                     <p className="text-dark-400">Fetching listings...</p>
                                 </div>
                             ) : error ? (
-                                <div className="glass-card p-12 text-center text-red-400">
-                                    <p>Error: {error}</p>
-                                    <button onClick={() => fetchListings(false, 0)} className="mt-4 btn-secondary">Retry</button>
+                                /* Error State */
+                                <div className="glass-card p-12 text-center">
+                                    <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
+                                    <h3 className="text-xl font-semibold text-white mb-2">Something went wrong</h3>
+                                    <p className="text-red-400 mb-6">{error}</p>
+                                    <button onClick={() => fetchListings(false)} className="btn-primary">
+                                        Try Again
+                                    </button>
                                 </div>
                             ) : listings.length > 0 ? (
-                                <div className={`grid gap-4 ${viewMode === 'grid'
-                                    ? 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-                                    : 'grid-cols-1'
-                                    }`}>
-                                    {listings.map((listing) => (
-                                        <ListingCard
-                                            key={listing.id}
-                                            id={listing.id}
-                                            title={listing.title}
-                                            price={listing.price}
-                                            condition={listing.condition}
-                                            images={listing.images}
-                                            sellerName={listing.seller?.full_name || 'Student'}
-                                            sellerAvatar={listing.seller?.avatar_url}
-                                            collegeName={listing.college?.name}
-                                            viewsCount={listing.views_count}
-                                            createdAt={listing.created_at}
-                                            onSave={() => console.log('Save', listing.id)}
-                                        />
-                                    ))}
-                                </div>
+                                /* Listings Grid */
+                                <>
+                                    <div className={`grid gap-4 ${viewMode === 'grid'
+                                        ? 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                                        : 'grid-cols-1'
+                                        }`}>
+                                        {listings.map((listing) => (
+                                            <ListingCard
+                                                key={listing.id}
+                                                id={listing.id}
+                                                title={listing.title}
+                                                price={listing.price}
+                                                condition={listing.condition}
+                                                images={listing.images}
+                                                sellerName={listing.seller?.full_name || 'Student'}
+                                                sellerAvatar={listing.seller?.avatar_url}
+                                                collegeName={listing.college?.name}
+                                                viewsCount={listing.views_count}
+                                                createdAt={listing.created_at}
+                                                onSave={() => console.log('Save', listing.id)}
+                                            />
+                                        ))}
+                                    </div>
+
+                                    {/* Load More */}
+                                    {hasMore && (
+                                        <div className="mt-8 text-center">
+                                            <button
+                                                onClick={handleLoadMore}
+                                                disabled={isLoadingMore}
+                                                className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {isLoadingMore ? (
+                                                    <span className="flex items-center gap-2">
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                        Loading...
+                                                    </span>
+                                                ) : (
+                                                    'Load More Listings'
+                                                )}
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
                             ) : (
+                                /* Empty State */
                                 <div className="glass-card p-12 text-center">
                                     <div className="text-6xl mb-4">🔍</div>
                                     <h3 className="text-xl font-semibold text-white mb-2">No listings found</h3>
@@ -480,26 +418,6 @@ function BrowseContent() {
                                     </button>
                                 </div>
                             )}
-
-                            {/* Load More */}
-                            {!isLoading && hasMore && listings.length > 0 && (
-                                <div className="mt-8 text-center">
-                                    <button
-                                        onClick={handleLoadMore}
-                                        disabled={isLoadingMore}
-                                        className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {isLoadingMore ? (
-                                            <span className="flex items-center gap-2">
-                                                <Loader2 className="w-4 h-4 animate-spin" />
-                                                Loading...
-                                            </span>
-                                        ) : (
-                                            'Load More Listings'
-                                        )}
-                                    </button>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
@@ -507,17 +425,5 @@ function BrowseContent() {
 
             <Footer />
         </div>
-    )
-}
-
-export default function BrowsePage() {
-    return (
-        <Suspense fallback={
-            <div className="min-h-screen bg-dark-950 flex items-center justify-center">
-                <Loader2 className="w-12 h-12 text-primary-500 animate-spin" />
-            </div>
-        }>
-            <BrowseContent />
-        </Suspense>
     )
 }
