@@ -15,199 +15,179 @@ import Link from 'next/link'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
+// State machine to prevent loading loop
+type FetchStatus = 'idle' | 'loading' | 'success' | 'error'
+
 export default function ListingDetailPage() {
     const params = useParams()
     const id = params?.id as string
     const router = useRouter()
-    const { user, profile } = useAuth()
+    const { user } = useAuth()
 
     // Stable Supabase client - created once and memoized
     const supabase = useMemo(() => createClient(), [])
 
+    // State
     const [listing, setListing] = useState<any>(null)
-    const [isLoading, setIsLoading] = useState(true)
+    const [status, setStatus] = useState<FetchStatus>('idle')
     const [activeImage, setActiveImage] = useState(0)
     const [isSaved, setIsSaved] = useState(false)
-    const [error, setError] = useState<string | null>(null)
+    const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
-    // Guards against duplicate fetches
-    const fetchedRef = useRef<Set<string>>(new Set())
-    const abortControllerRef = useRef<AbortController | null>(null)
-    const isMountedRef = useRef(true)
+    // CRITICAL: Track last successfully fetched ID to prevent refetch
+    const lastFetchedIdRef = useRef<string | null>(null)
 
+    // Single effect for fetching - NO dependencies except id and supabase
     useEffect(() => {
-        isMountedRef.current = true
-        return () => {
-            isMountedRef.current = false
-        }
-    }, [])
-
-    // Fetch listing - stable function, runs ONCE per ID
-    useEffect(() => {
-        // Guard: Invalid ID
+        // Guard: No ID
         if (!id || typeof id !== 'string') {
-            setError('Invalid listing ID')
-            setIsLoading(false)
+            console.log('❌ Invalid listing ID')
+            setStatus('error')
+            setErrorMsg('Invalid listing ID')
             return
         }
 
-        // Guard: Already fetched this ID
-        if (fetchedRef.current.has(id)) {
-            console.log('✅ Listing already fetched, skipping:', id)
+        // Guard: Already fetched THIS ID successfully
+        if (lastFetchedIdRef.current === id && listing !== null) {
+            console.log('✅ Already have data for this ID, skipping fetch')
             return
         }
 
-        // Guard: Already fetching (shouldn't happen but extra safety)
-        if (abortControllerRef.current) {
-            console.log('⚠️ Fetch already in progress, skipping')
+        // Guard: Currently loading (prevent double-fetch from Strict Mode)
+        if (status === 'loading') {
+            console.log('⏳ Already loading, skipping')
             return
         }
 
-        // Mark as fetching
-        fetchedRef.current.add(id)
-        abortControllerRef.current = new AbortController()
+        let cancelled = false
 
-        const fetchListing = async () => {
-            console.log('📄 Fetching listing:', id)
-            setIsLoading(true)
-            setError(null)
+        const fetchData = async () => {
+            console.log('📄 Starting fetch for listing:', id)
+            setStatus('loading')
+            setErrorMsg(null)
 
             try {
-                // Fetch listing without joins for speed
-                const { data, error: fetchError } = await supabase
+                // Direct fetch - no abort signal complexity
+                const { data: listingData, error: listingError } = await supabase
                     .from('listings')
                     .select('*')
                     .eq('id', id)
-                    .abortSignal(abortControllerRef.current!.signal)
                     .single()
 
-                // Check if component unmounted
-                if (!isMountedRef.current) return
-
-                console.log('📄 Listing fetch result:', { data, error: fetchError })
-
-                if (fetchError) {
-                    console.error('❌ Fetch error:', fetchError)
-                    throw fetchError
-                }
-
-                if (!data) {
-                    console.error('❌ No listing data returned')
-                    throw new Error('Listing not found')
-                }
-
-                console.log('✅ Listing loaded:', data.title)
-
-                // Fetch seller and college separately in parallel (only if IDs exist)
-                const promises: Promise<any>[] = []
-
-                if (data.seller_id) {
-                    promises.push(
-                        supabase
-                            .from('profiles')
-                            .select('*')
-                            .eq('id', data.seller_id)
-                            .abortSignal(abortControllerRef.current!.signal)
-                            .single()
-                            .then((res) => ({ seller: res.data }))
-                            .catch(() => ({ seller: null }))
-                    )
-                } else {
-                    promises.push(Promise.resolve({ seller: null }))
-                }
-
-                if (data.college_id) {
-                    promises.push(
-                        supabase
-                            .from('colleges')
-                            .select('*')
-                            .eq('id', data.college_id)
-                            .abortSignal(abortControllerRef.current!.signal)
-                            .single()
-                            .then((res) => ({ college: res.data }))
-                            .catch(() => ({ college: null }))
-                    )
-                } else {
-                    promises.push(Promise.resolve({ college: null }))
-                }
-
-                const [sellerResult, collegeResult] = await Promise.all(promises)
-
-                // Check again if component unmounted
-                if (!isMountedRef.current) return
-
-                // Combine data
-                const fullListing = {
-                    ...data,
-                    seller: sellerResult.seller,
-                    college: collegeResult.college,
-                }
-
-                setListing(fullListing)
-                setIsLoading(false)
-
-                // Increment view count (fire and forget, non-blocking)
-                supabase.rpc('increment_views', { listing_id: id }).catch(() => {
-                    console.debug('View count not incremented')
-                })
-            } catch (err: any) {
-                // Ignore abort errors
-                if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
-                    console.log('⚠️ Fetch aborted')
+                // Check if this effect was cancelled
+                if (cancelled) {
+                    console.log('🚫 Fetch cancelled (cleanup)')
                     return
                 }
 
-                if (!isMountedRef.current) return
+                console.log('� Listing response:', { listingData, listingError })
 
-                console.error('❌ Error fetching listing:', err)
-                setError(err.message || 'Failed to load listing')
-                setIsLoading(false)
-            } finally {
-                abortControllerRef.current = null
-            }
-        }
-
-        fetchListing()
-
-        // Cleanup: Abort fetch if component unmounts or ID changes
-        return () => {
-            if (abortControllerRef.current) {
-                console.log('🧹 Aborting fetch on cleanup')
-                abortControllerRef.current.abort()
-                abortControllerRef.current = null
-            }
-        }
-    }, [id, supabase]) // Stable dependencies only
-
-    // Check if saved - separate effect, runs only when listing/user changes
-    useEffect(() => {
-        if (!user || !id || !listing) return
-
-        let isActive = true
-
-        const checkIfSaved = async () => {
-            try {
-                const { data } = await supabase
-                    .from('saved_listings')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .eq('listing_id', id)
-                    .maybeSingle()
-
-                if (isActive && data) {
-                    setIsSaved(true)
+                if (listingError) {
+                    console.error('❌ Supabase error:', listingError.message)
+                    setStatus('error')
+                    setErrorMsg(listingError.message)
+                    return
                 }
-            } catch (err) {
-                console.debug('Could not check saved status:', err)
+
+                if (!listingData) {
+                    console.error('❌ No data returned')
+                    setStatus('error')
+                    setErrorMsg('Listing not found')
+                    return
+                }
+
+                console.log('✅ Got listing:', listingData.title)
+
+                // Fetch seller and college in parallel
+                let seller = null
+                let college = null
+
+                const fetches: Promise<void>[] = []
+
+                if (listingData.seller_id) {
+                    fetches.push(
+                        supabase
+                            .from('profiles')
+                            .select('*')
+                            .eq('id', listingData.seller_id)
+                            .single()
+                            .then(({ data }) => { seller = data })
+                            .catch(() => { seller = null })
+                    )
+                }
+
+                if (listingData.college_id) {
+                    fetches.push(
+                        supabase
+                            .from('colleges')
+                            .select('*')
+                            .eq('id', listingData.college_id)
+                            .single()
+                            .then(({ data }) => { college = data })
+                            .catch(() => { college = null })
+                    )
+                }
+
+                await Promise.all(fetches)
+
+                // Final cancelled check
+                if (cancelled) {
+                    console.log('🚫 Fetch cancelled after sub-fetches')
+                    return
+                }
+
+                // Build full listing
+                const fullListing = {
+                    ...listingData,
+                    seller,
+                    college,
+                }
+
+                console.log('✅ Setting listing data, marking success')
+
+                // CRITICAL: Set ref BEFORE setting state
+                lastFetchedIdRef.current = id
+                setListing(fullListing)
+                setStatus('success')
+
+                // Fire and forget: increment views
+                supabase.rpc('increment_views', { listing_id: id }).catch(() => { })
+
+            } catch (err: any) {
+                if (cancelled) return
+
+                console.error('❌ Unexpected error:', err)
+                setStatus('error')
+                setErrorMsg(err.message || 'Failed to load listing')
             }
         }
 
-        checkIfSaved()
+        fetchData()
 
+        // Cleanup function
         return () => {
-            isActive = false
+            cancelled = true
+            console.log('🧹 Effect cleanup for ID:', id)
         }
-    }, [user, id, listing, supabase])
+    }, [id, supabase]) // Only stable deps - listing and status intentionally omitted
+
+    // Separate effect for checking saved status
+    useEffect(() => {
+        if (!user || !id || status !== 'success') return
+
+        const checkSaved = async () => {
+            const { data } = await supabase
+                .from('saved_listings')
+                .select('id')
+                .eq('user_id', user.id)
+                .eq('listing_id', id)
+                .maybeSingle()
+
+            if (data) setIsSaved(true)
+        }
+
+        checkSaved()
+    }, [user, id, status, supabase])
 
     const toggleSave = async () => {
         if (!user) {
@@ -229,33 +209,21 @@ export default function ListingDetailPage() {
     }
 
     const handleChat = async () => {
-        console.log('💬 Chat button clicked')
-
         if (!user) {
-            console.log('❌ No user, redirecting to login')
             router.push('/login')
             return
         }
 
-        if (!listing) {
-            console.error('❌ No listing data available')
-            return
-        }
+        if (!listing) return
 
         if (user.id === listing.seller_id) {
             alert('This is your own listing!')
             return
         }
 
-        console.log('🔍 Creating/finding conversation:', {
-            listingId: id,
-            buyerId: user.id,
-            sellerId: listing.seller_id,
-        })
-
         try {
-            // First, try to find existing conversation
-            const { data: existingConv } = await supabase
+            // Find existing conversation
+            const { data: existing } = await supabase
                 .from('conversations')
                 .select('id')
                 .eq('listing_id', id)
@@ -263,41 +231,32 @@ export default function ListingDetailPage() {
                 .eq('seller_id', listing.seller_id)
                 .maybeSingle()
 
-            if (existingConv) {
-                console.log('✅ Found existing conversation:', existingConv.id)
-                router.push(`/messages?conv=${existingConv.id}`)
+            if (existing) {
+                router.push(`/messages?conv=${existing.id}`)
                 return
             }
 
-            // Create new conversation
-            const { data: newConv, error: createError } = await supabase
+            // Create new
+            const { data: newConv, error } = await supabase
                 .from('conversations')
                 .insert({
                     listing_id: id,
                     buyer_id: user.id,
                     seller_id: listing.seller_id,
                 })
-                .select()
+                .select('id')
                 .single()
 
-            if (createError) {
-                console.error('❌ Error creating conversation:', createError)
-                if (createError.message?.includes('row-level security')) {
-                    alert('Unable to start conversation. Please check permissions.')
-                }
-                throw createError
-            }
-
-            console.log('✅ Created new conversation:', newConv.id)
+            if (error) throw error
             router.push(`/messages?conv=${newConv.id}`)
         } catch (err: any) {
             console.error('Chat error:', err)
-            alert(`Failed to start chat: ${err.message || 'Unknown error'}`)
+            alert(`Failed to start chat: ${err.message}`)
         }
     }
 
-    // Loading state
-    if (isLoading) {
+    // Render based on status
+    if (status === 'idle' || status === 'loading') {
         return (
             <div className="min-h-screen bg-dark-950 flex flex-col">
                 <Header />
@@ -312,8 +271,7 @@ export default function ListingDetailPage() {
         )
     }
 
-    // Error state
-    if (error || !listing) {
+    if (status === 'error' || !listing) {
         return (
             <div className="min-h-screen bg-dark-950 flex flex-col">
                 <Header />
@@ -325,7 +283,8 @@ export default function ListingDetailPage() {
                             </svg>
                         </div>
                         <h1 className="text-2xl font-bold text-white mb-2">Listing Not Found</h1>
-                        <p className="text-dark-400 mb-6">This listing might have been removed or is no longer available.</p>
+                        <p className="text-dark-400 mb-2">{errorMsg || 'This listing might have been removed.'}</p>
+                        <p className="text-dark-500 text-sm mb-6">ID: {id}</p>
                         <Link href="/browse" className="btn-primary inline-block">
                             Back to Browse
                         </Link>
@@ -336,6 +295,7 @@ export default function ListingDetailPage() {
         )
     }
 
+    // Success - render listing
     const images = listing.images || []
     const isOwnListing = user?.id === listing.seller_id
 
@@ -346,7 +306,6 @@ export default function ListingDetailPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Left: Images */}
                     <div className="space-y-4">
-                        {/* Main Image */}
                         <div className="relative aspect-square rounded-3xl overflow-hidden bg-dark-900">
                             {images.length > 0 ? (
                                 <Image
@@ -364,7 +323,6 @@ export default function ListingDetailPage() {
                             )}
                         </div>
 
-                        {/* Thumbnails */}
                         {images.length > 1 && (
                             <div className="grid grid-cols-4 gap-4">
                                 {images.map((img: string, idx: number) => (
@@ -383,7 +341,6 @@ export default function ListingDetailPage() {
 
                     {/* Right: Details */}
                     <div className="space-y-6">
-                        {/* Price & Title */}
                         <div>
                             <div className="flex items-start justify-between mb-2">
                                 <h1 className="text-3xl font-bold text-white">{listing.title}</h1>
@@ -401,15 +358,13 @@ export default function ListingDetailPage() {
                             </div>
                         </div>
 
-                        {/* Condition */}
                         <div className="flex items-center gap-2">
                             <span className="text-dark-400">Condition:</span>
                             <span className="px-3 py-1 rounded-full bg-primary-500/10 text-primary-500 text-sm font-medium">
-                                {CONDITIONS[listing.condition as keyof typeof CONDITIONS] || listing.condition}
+                                {CONDITIONS[listing.condition as keyof typeof CONDITIONS]?.label || listing.condition}
                             </span>
                         </div>
 
-                        {/* Seller Info */}
                         {listing.seller && (
                             <div className="glass-card p-4 flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-semibold">
@@ -427,13 +382,11 @@ export default function ListingDetailPage() {
                             </div>
                         )}
 
-                        {/* Description */}
                         <div className="glass-card p-6">
                             <h2 className="text-xl font-semibold text-white mb-3">Description</h2>
                             <p className="text-dark-300 whitespace-pre-wrap">{listing.description}</p>
                         </div>
 
-                        {/* Actions */}
                         {!isOwnListing && (
                             <div className="flex gap-4">
                                 <button onClick={handleChat} className="flex-1 btn-primary py-4 text-lg justify-center gap-3">
