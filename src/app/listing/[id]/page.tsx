@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
@@ -20,7 +20,9 @@ export default function ListingDetailPage() {
     const id = params?.id as string
     const router = useRouter()
     const { user, profile } = useAuth()
-    const supabase = createClient()
+
+    // Stable Supabase client - created once and memoized
+    const supabase = useMemo(() => createClient(), [])
 
     const [listing, setListing] = useState<any>(null)
     const [isLoading, setIsLoading] = useState(true)
@@ -28,109 +30,184 @@ export default function ListingDetailPage() {
     const [isSaved, setIsSaved] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
-    const fetchListing = useCallback(async () => {
-        // Validate ID before fetching
+    // Guards against duplicate fetches
+    const fetchedRef = useRef<Set<string>>(new Set())
+    const abortControllerRef = useRef<AbortController | null>(null)
+    const isMountedRef = useRef(true)
+
+    useEffect(() => {
+        isMountedRef.current = true
+        return () => {
+            isMountedRef.current = false
+        }
+    }, [])
+
+    // Fetch listing - stable function, runs ONCE per ID
+    useEffect(() => {
+        // Guard: Invalid ID
         if (!id || typeof id !== 'string') {
             setError('Invalid listing ID')
             setIsLoading(false)
             return
         }
 
-        console.log('📄 Fetching listing:', id)
-        setIsLoading(true)
-        setError(null)
-
-        try {
-            // Fetch listing without joins for speed
-            const { data, error: fetchError } = await supabase
-                .from('listings')
-                .select('*')
-                .eq('id', id)
-                .single()
-
-            console.log('📄 Listing fetch result:', { data, error: fetchError })
-
-            if (fetchError) {
-                console.error('❌ Fetch error:', fetchError)
-                throw fetchError
-            }
-
-            if (!data) {
-                console.error('❌ No listing data returned')
-                throw new Error('Listing not found')
-            }
-
-            console.log('✅ Listing loaded:', data.title)
-
-            // Fetch seller and college separately in parallel (only if IDs exist)
-            const promises = []
-
-            if (data.seller_id) {
-                promises.push(
-                    supabase.from('profiles').select('*').eq('id', data.seller_id).single()
-                        .then((res: any) => ({ seller: res.data }))
-                        .catch(() => ({ seller: null }))
-                )
-            } else {
-                promises.push(Promise.resolve({ seller: null }))
-            }
-
-            if (data.college_id) {
-                promises.push(
-                    supabase.from('colleges').select('*').eq('id', data.college_id).single()
-                        .then((res: any) => ({ college: res.data }))
-                        .catch(() => ({ college: null }))
-                )
-            } else {
-                promises.push(Promise.resolve({ college: null }))
-            }
-
-            const [sellerResult, collegeResult] = await Promise.all(promises)
-
-            // Combine data
-            const fullListing = {
-                ...data,
-                seller: sellerResult.seller,
-                college: collegeResult.college
-            }
-
-            setListing(fullListing)
-
-            // Increment view count (optional, skip if function doesn't exist)
-            supabase.rpc('increment_views', { listing_id: id }).catch(() => {
-                console.debug('View count not incremented')
-            })
-
-        } catch (err: any) {
-            console.error('❌ Error fetching listing:', err)
-            setError(err.message || 'Failed to load listing')
-        } finally {
-            setIsLoading(false)
+        // Guard: Already fetched this ID
+        if (fetchedRef.current.has(id)) {
+            console.log('✅ Listing already fetched, skipping:', id)
+            return
         }
-    }, [id, supabase])
 
-    const checkIfSaved = useCallback(async () => {
-        if (!user || !id) return
-        try {
-            const { data } = await supabase
-                .from('saved_listings')
-                .select('*')
-                .eq('user_id', user.id)
-                .eq('listing_id', id)
-                .maybeSingle()
-
-            if (data) setIsSaved(true)
-        } catch (err) {
-            console.debug('Could not check saved status:', err)
+        // Guard: Already fetching (shouldn't happen but extra safety)
+        if (abortControllerRef.current) {
+            console.log('⚠️ Fetch already in progress, skipping')
+            return
         }
-    }, [user, id, supabase])
 
+        // Mark as fetching
+        fetchedRef.current.add(id)
+        abortControllerRef.current = new AbortController()
+
+        const fetchListing = async () => {
+            console.log('📄 Fetching listing:', id)
+            setIsLoading(true)
+            setError(null)
+
+            try {
+                // Fetch listing without joins for speed
+                const { data, error: fetchError } = await supabase
+                    .from('listings')
+                    .select('*')
+                    .eq('id', id)
+                    .abortSignal(abortControllerRef.current!.signal)
+                    .single()
+
+                // Check if component unmounted
+                if (!isMountedRef.current) return
+
+                console.log('📄 Listing fetch result:', { data, error: fetchError })
+
+                if (fetchError) {
+                    console.error('❌ Fetch error:', fetchError)
+                    throw fetchError
+                }
+
+                if (!data) {
+                    console.error('❌ No listing data returned')
+                    throw new Error('Listing not found')
+                }
+
+                console.log('✅ Listing loaded:', data.title)
+
+                // Fetch seller and college separately in parallel (only if IDs exist)
+                const promises: Promise<any>[] = []
+
+                if (data.seller_id) {
+                    promises.push(
+                        supabase
+                            .from('profiles')
+                            .select('*')
+                            .eq('id', data.seller_id)
+                            .abortSignal(abortControllerRef.current!.signal)
+                            .single()
+                            .then((res) => ({ seller: res.data }))
+                            .catch(() => ({ seller: null }))
+                    )
+                } else {
+                    promises.push(Promise.resolve({ seller: null }))
+                }
+
+                if (data.college_id) {
+                    promises.push(
+                        supabase
+                            .from('colleges')
+                            .select('*')
+                            .eq('id', data.college_id)
+                            .abortSignal(abortControllerRef.current!.signal)
+                            .single()
+                            .then((res) => ({ college: res.data }))
+                            .catch(() => ({ college: null }))
+                    )
+                } else {
+                    promises.push(Promise.resolve({ college: null }))
+                }
+
+                const [sellerResult, collegeResult] = await Promise.all(promises)
+
+                // Check again if component unmounted
+                if (!isMountedRef.current) return
+
+                // Combine data
+                const fullListing = {
+                    ...data,
+                    seller: sellerResult.seller,
+                    college: collegeResult.college,
+                }
+
+                setListing(fullListing)
+                setIsLoading(false)
+
+                // Increment view count (fire and forget, non-blocking)
+                supabase.rpc('increment_views', { listing_id: id }).catch(() => {
+                    console.debug('View count not incremented')
+                })
+            } catch (err: any) {
+                // Ignore abort errors
+                if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
+                    console.log('⚠️ Fetch aborted')
+                    return
+                }
+
+                if (!isMountedRef.current) return
+
+                console.error('❌ Error fetching listing:', err)
+                setError(err.message || 'Failed to load listing')
+                setIsLoading(false)
+            } finally {
+                abortControllerRef.current = null
+            }
+        }
+
+        fetchListing()
+
+        // Cleanup: Abort fetch if component unmounts or ID changes
+        return () => {
+            if (abortControllerRef.current) {
+                console.log('🧹 Aborting fetch on cleanup')
+                abortControllerRef.current.abort()
+                abortControllerRef.current = null
+            }
+        }
+    }, [id, supabase]) // Stable dependencies only
+
+    // Check if saved - separate effect, runs only when listing/user changes
     useEffect(() => {
-        if (id) {
-            fetchListing()
-            checkIfSaved()
+        if (!user || !id || !listing) return
+
+        let isActive = true
+
+        const checkIfSaved = async () => {
+            try {
+                const { data } = await supabase
+                    .from('saved_listings')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .eq('listing_id', id)
+                    .maybeSingle()
+
+                if (isActive && data) {
+                    setIsSaved(true)
+                }
+            } catch (err) {
+                console.debug('Could not check saved status:', err)
+            }
         }
-    }, [id, fetchListing, checkIfSaved])
+
+        checkIfSaved()
+
+        return () => {
+            isActive = false
+        }
+    }, [user, id, listing, supabase])
 
     const toggleSave = async () => {
         if (!user) {
@@ -166,14 +243,14 @@ export default function ListingDetailPage() {
         }
 
         if (user.id === listing.seller_id) {
-            alert("This is your own listing!")
+            alert('This is your own listing!')
             return
         }
 
         console.log('🔍 Creating/finding conversation:', {
             listingId: id,
             buyerId: user.id,
-            sellerId: listing.seller_id
+            sellerId: listing.seller_id,
         })
 
         try {
@@ -198,7 +275,7 @@ export default function ListingDetailPage() {
                 .insert({
                     listing_id: id,
                     buyer_id: user.id,
-                    seller_id: listing.seller_id
+                    seller_id: listing.seller_id,
                 })
                 .select()
                 .single()
@@ -248,9 +325,7 @@ export default function ListingDetailPage() {
                             </svg>
                         </div>
                         <h1 className="text-2xl font-bold text-white mb-2">Listing Not Found</h1>
-                        <p className="text-dark-400 mb-6">
-                            This listing might have been removed or is no longer available.
-                        </p>
+                        <p className="text-dark-400 mb-6">This listing might have been removed or is no longer available.</p>
                         <Link href="/browse" className="btn-primary inline-block">
                             Back to Browse
                         </Link>
@@ -296,18 +371,10 @@ export default function ListingDetailPage() {
                                     <button
                                         key={idx}
                                         onClick={() => setActiveImage(idx)}
-                                        className={`relative aspect-square rounded-xl overflow-hidden transition-all ${activeImage === idx
-                                                ? 'ring-2 ring-primary-500 scale-95'
-                                                : 'hover:opacity-80'
+                                        className={`relative aspect-square rounded-xl overflow-hidden transition-all ${activeImage === idx ? 'ring-2 ring-primary-500 scale-95' : 'hover:opacity-80'
                                             }`}
                                     >
-                                        <Image
-                                            src={img}
-                                            alt={`${listing.title} ${idx + 1}`}
-                                            fill
-                                            className="object-cover"
-                                            sizes="150px"
-                                        />
+                                        <Image src={img} alt={`${listing.title} ${idx + 1}`} fill className="object-cover" sizes="150px" />
                                     </button>
                                 ))}
                             </div>
@@ -369,18 +436,13 @@ export default function ListingDetailPage() {
                         {/* Actions */}
                         {!isOwnListing && (
                             <div className="flex gap-4">
-                                <button
-                                    onClick={handleChat}
-                                    className="flex-1 btn-primary py-4 text-lg justify-center gap-3"
-                                >
+                                <button onClick={handleChat} className="flex-1 btn-primary py-4 text-lg justify-center gap-3">
                                     <MessageSquare className="w-6 h-6" />
                                     Chat with Seller
                                 </button>
                                 <button
                                     onClick={toggleSave}
-                                    className={`w-16 rounded-2xl border-2 flex items-center justify-center transition-all ${isSaved
-                                            ? 'bg-rose-500 border-rose-500 text-white'
-                                            : 'border-white/10 text-dark-400 hover:border-white/30 hover:text-white'
+                                    className={`w-16 rounded-2xl border-2 flex items-center justify-center transition-all ${isSaved ? 'bg-rose-500 border-rose-500 text-white' : 'border-white/10 text-dark-400 hover:border-white/30 hover:text-white'
                                         }`}
                                 >
                                     <Heart className={`w-6 h-6 ${isSaved ? 'fill-current' : ''}`} />
