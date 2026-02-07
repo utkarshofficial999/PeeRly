@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createBrowserClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const runtime = 'edge' // Use Vercel Edge for faster response
@@ -13,6 +13,14 @@ interface ListingsQuery {
     sortBy?: string
     offset?: number
     limit?: number
+}
+
+// Edge-compatible Supabase client
+function getSupabaseClient() {
+    return createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
 }
 
 export async function GET(request: NextRequest) {
@@ -31,7 +39,7 @@ export async function GET(request: NextRequest) {
             limit: parseInt(searchParams.get('limit') || '20'),
         }
 
-        const supabase = createClient()
+        const supabase = getSupabaseClient()
 
         // Build query with proper indexes
         let dbQuery = supabase
