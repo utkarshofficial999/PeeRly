@@ -30,14 +30,14 @@ WHERE is_active = true AND is_sold = false;
 -- 3. If counts are 0, add sample data:
 
 -- Add categories (if empty)
-INSERT INTO categories (name, slug, icon, description)
+INSERT INTO categories (name, slug, icon)
 VALUES
-    ('Textbooks', 'textbooks', 'BookOpen', 'Academic books and study materials'),
-    ('Electronics', 'electronics', 'Laptop', 'Gadgets, laptops, and electronic devices'),
-    ('Cycles', 'cycles', 'Bike', 'Bicycles and cycling accessories'),
-    ('Furniture', 'furniture', 'Sofa', 'Dorm and apartment furniture'),
-    ('Clothing', 'clothing', 'Shirt', 'Clothes and fashion items'),
-    ('Other', 'other', 'MoreHorizontal', 'Miscellaneous items')
+    ('Textbooks', 'textbooks', 'BookOpen'),
+    ('Electronics', 'electronics', 'Laptop'),
+    ('Cycles', 'cycles', 'Bike'),
+    ('Furniture', 'furniture', 'Sofa'),
+    ('Clothing', 'clothing', 'Shirt'),
+    ('Other', 'other', 'MoreHorizontal')
 ON CONFLICT (slug) DO NOTHING;
 
 -- Add a test college (if empty)
