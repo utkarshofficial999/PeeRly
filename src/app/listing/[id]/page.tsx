@@ -28,13 +28,10 @@ export default function ListingDetailPage() {
         setIsLoading(true)
         setError(null)
         try {
+            // Fetch listing without joins for speed
             const { data, error: fetchError } = await supabase
                 .from('listings')
-                .select(`
-                    *,
-                    seller:profiles!listings_seller_id_fkey(*),
-                    college:colleges(*)
-                `)
+                .select('*')
                 .eq('id', id)
                 .single()
 
@@ -51,15 +48,27 @@ export default function ListingDetailPage() {
             }
 
             console.log('✅ Listing loaded:', data.title)
-            setListing(data)
 
-            // Increment view count (simple implementation)
-            try {
-                await supabase.rpc('increment_views', { listing_id: id })
-                console.log('✅ View count incremented')
-            } catch (viewError) {
-                console.warn('⚠️ Failed to increment views:', viewError)
+            // Fetch seller and college separately in parallel
+            const [sellerData, collegeData] = await Promise.all([
+                supabase.from('profiles').select('*').eq('id', data.seller_id).single(),
+                supabase.from('colleges').select('*').eq('id', data.college_id).single()
+            ])
+
+            // Combine data
+            const fullListing = {
+                ...data,
+                seller: sellerData.data,
+                college: collegeData.data
             }
+
+            setListing(fullListing)
+
+            // Increment view count (non-blocking)
+            supabase.rpc('increment_views', { listing_id: id }).catch((err: any) => {
+                console.warn('⚠️ Failed to increment views:', err)
+            })
+
         } catch (err: any) {
             console.error('❌ Error fetching listing:', err)
             setError(err.message || 'Failed to load listing')
