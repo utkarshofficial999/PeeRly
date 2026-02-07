@@ -26,6 +26,7 @@ interface Props {
     colleges: any[]
     totalCount: number
     categoryFromUrl: string
+    serverError: string | null
 }
 
 const sortOptions = [
@@ -41,14 +42,15 @@ export default function BrowseClient({
     categories,
     colleges,
     totalCount: initialTotal,
-    categoryFromUrl
+    categoryFromUrl,
+    serverError
 }: Props) {
     // State initialized with SERVER data - never empty on first render
     const [listings, setListings] = useState<Listing[]>(initialListings)
     const [totalCount, setTotalCount] = useState(initialTotal)
     const [isLoading, setIsLoading] = useState(false)
     const [isLoadingMore, setIsLoadingMore] = useState(false)
-    const [error, setError] = useState<string | null>(null)
+    const [error, setError] = useState<string | null>(serverError)
     const [searchInput, setSearchInput] = useState('')
     const [searchQuery, setSearchQuery] = useState('')
     const [isFilterOpen, setIsFilterOpen] = useState(false)
