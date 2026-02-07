@@ -101,29 +101,53 @@ function BrowseContent() {
 
             if (cachedCategories && cachedColleges) {
                 if (mounted) {
-                    setCategories(JSON.parse(cachedCategories))
-                    setColleges(JSON.parse(cachedColleges))
+                    const cats = JSON.parse(cachedCategories)
+                    const cols = JSON.parse(cachedColleges)
+                    console.log('📦 Using cached metadata:', { categories: cats.length, colleges: cols.length })
+                    setCategories(cats)
+                    setColleges(cols)
                 }
                 return
             }
 
+            console.log('🔄 Fetching metadata from Supabase...')
             try {
                 const [catRes, colRes] = await Promise.all([
                     supabase.from('categories').select('*'),
                     supabase.from('colleges').select('*')
                 ])
+
+                console.log('📊 Metadata response:', {
+                    categories: catRes.data?.length || 0,
+                    colleges: colRes.data?.length || 0,
+                    catError: catRes.error,
+                    colError: colRes.error
+                })
+
                 if (mounted) {
-                    if (catRes.data) {
+                    if (catRes.data && catRes.data.length > 0) {
                         setCategories(catRes.data)
                         sessionStorage.setItem('categories', JSON.stringify(catRes.data))
+                    } else {
+                        console.warn('⚠️ No categories found, using empty array')
+                        setCategories([])
                     }
-                    if (colRes.data) {
+
+                    if (colRes.data && colRes.data.length > 0) {
                         setColleges(colRes.data)
                         sessionStorage.setItem('colleges', JSON.stringify(colRes.data))
+                    } else {
+                        console.warn('⚠️ No colleges found, using empty array')
+                        setColleges([])
                     }
                 }
             } catch (err) {
-                console.error('Error fetching metadata:', err)
+                console.error('❌ Error fetching metadata:', err)
+                if (mounted) {
+                    // Set empty arrays to allow page to continue
+                    setCategories([])
+                    setColleges([])
+                }
             }
         }
 
@@ -145,13 +169,17 @@ function BrowseContent() {
             currentOffset
         })
 
+        console.log('🔍 fetchListings called:', { loadMore, currentOffset, filters, searchQuery, sortBy })
+
         // Prevent duplicate fetches with same parameters
         if (isFetchingRef.current && lastFetchParamsRef.current === fetchParams) {
+            console.log('⏭️ Skipping duplicate fetch')
             return
         }
 
         // Cancel any ongoing fetch
         if (abortControllerRef.current) {
+            console.log('🛑 Aborting previous fetch')
             abortControllerRef.current.abort()
         }
 
@@ -219,8 +247,16 @@ function BrowseContent() {
 
             const { data, error: fetchError, count } = await query
 
+            console.log('📥 Query response:', {
+                dataCount: data?.length || 0,
+                totalCount: count,
+                error: fetchError,
+                aborted: abortControllerRef.current?.signal.aborted
+            })
+
             // Check if request was aborted
             if (abortControllerRef.current?.signal.aborted) {
+                console.log('⏹️ Request was aborted')
                 return
             }
 
@@ -253,10 +289,31 @@ function BrowseContent() {
 
     // FIXED: Trigger fetch only when filters/search/sort change, with metadata ready
     useEffect(() => {
-        // Wait for metadata to load
-        if (categories.length === 0 || colleges.length === 0) {
-            return
+        // Add a timeout to prevent infinite loading
+        const timeoutId = setTimeout(() => {
+            if (isLoading) {
+                console.warn('⏱️ Fetch timeout - forcing load with available data')
+                setIsLoading(false)
+                setError('Loading took too long. Please check your connection and try again.')
+            }
+        }, 10000) // 10 second timeout
+
+        // Don't wait for metadata if filters don't need it
+        const needsMetadata = filters.category || filters.college
+
+        // If we need metadata but don't have it yet, wait
+        if (needsMetadata && categories.length === 0 && colleges.length === 0) {
+            console.log('⏳ Waiting for metadata before filtering...')
+            return () => clearTimeout(timeoutId)
         }
+
+        console.log('🚀 Triggering fetch with:', {
+            filters,
+            searchQuery,
+            sortBy,
+            hasCategories: categories.length > 0,
+            hasColleges: colleges.length > 0
+        })
 
         // Reset offset and fetch from beginning
         setOffset(0)
@@ -264,6 +321,7 @@ function BrowseContent() {
 
         // Cleanup on unmount or before next fetch
         return () => {
+            clearTimeout(timeoutId)
             if (abortControllerRef.current) {
                 abortControllerRef.current.abort()
             }
