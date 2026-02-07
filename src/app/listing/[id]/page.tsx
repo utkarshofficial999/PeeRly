@@ -84,7 +84,10 @@ export default function ListingDetailPage() {
     }
 
     const handleChat = async () => {
+        console.log('💬 Chat button clicked')
+
         if (!user) {
+            console.log('❌ No user, redirecting to login')
             router.push('/login')
             return
         }
@@ -94,11 +97,33 @@ export default function ListingDetailPage() {
             return
         }
 
+        console.log('🔍 Creating/finding conversation:', {
+            listingId: id,
+            buyerId: user.id,
+            sellerId: listing.seller_id
+        })
+
         // Logic to create/find conversation and redirect to /messages
         try {
-            const { data: conv, error: convError } = await supabase
+            // First, try to find existing conversation
+            const { data: existingConv, error: findError } = await supabase
                 .from('conversations')
-                .upsert({
+                .select('id')
+                .eq('listing_id', id)
+                .eq('buyer_id', user.id)
+                .eq('seller_id', listing.seller_id)
+                .maybeSingle()
+
+            if (existingConv) {
+                console.log('✅ Found existing conversation:', existingConv.id)
+                router.push(`/messages?conv=${existingConv.id}`)
+                return
+            }
+
+            // Create new conversation
+            const { data: newConv, error: createError } = await supabase
+                .from('conversations')
+                .insert({
                     listing_id: id,
                     buyer_id: user.id,
                     seller_id: listing.seller_id
@@ -106,10 +131,20 @@ export default function ListingDetailPage() {
                 .select()
                 .single()
 
-            if (convError) throw convError
-            router.push(`/messages?conv=${conv.id}`)
-        } catch (err) {
+            if (createError) {
+                console.error('❌ Error creating conversation:', createError)
+                // If RLS policy issue, redirect to messages list
+                if (createError.message?.includes('row-level security')) {
+                    alert('Unable to start conversation. Please check permissions.')
+                }
+                throw createError
+            }
+
+            console.log('✅ Created new conversation:', newConv.id)
+            router.push(`/messages?conv=${newConv.id}`)
+        } catch (err: any) {
             console.error('Chat error:', err)
+            alert(`Failed to start chat: ${err.message || 'Unknown error'}`)
         }
     }
 

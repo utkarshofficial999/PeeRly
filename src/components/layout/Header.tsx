@@ -15,6 +15,17 @@ export default function Header() {
     const { user, profile, isLoading, signOut } = useAuth()
     const supabase = useMemo(() => createClient(), [])
 
+    // DEBUG: Log auth state
+    useEffect(() => {
+        console.log('🔍 Header Auth State:', {
+            isLoading,
+            hasUser: !!user,
+            userId: user?.id,
+            hasProfile: !!profile,
+            profileName: profile?.full_name
+        })
+    }, [isLoading, user, profile])
+
     // Fetch and subscribe to unread messages count
     useEffect(() => {
         if (!user) {

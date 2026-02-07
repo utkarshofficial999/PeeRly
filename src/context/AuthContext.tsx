@@ -69,17 +69,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 if (initialSession) {
                     setSession(initialSession)
                     setUser(initialSession.user)
+                    console.log('✅ Initial session found:', { userId: initialSession.user.id })
                     // Fetch profile in non-blocking way
                     fetchProfile(initialSession.user.id).then(data => {
-                        if (mounted && data) setProfile(data)
+                        if (mounted && data) {
+                            setProfile(data)
+                            console.log('✅ Profile loaded:', { name: data.full_name })
+                        }
                     })
+                } else {
+                    console.log('❌ No initial session found')
                 }
             } catch (error: any) {
                 // Ignore benign errors like AbortError or Lock errors during dev HMR
                 if (error.name === 'AbortError' || error.message?.includes('Lock')) return
                 console.error('Error initializing auth:', error)
             } finally {
-                if (mounted) setIsLoading(false)
+                if (mounted) {
+                    setIsLoading(false)
+                    console.log('✅ Auth initialization complete')
+                }
             }
         }
 
@@ -90,16 +99,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setSession(currentSession)
                 setUser(currentSession?.user ?? null)
 
+                let profileData = null
                 if (currentSession?.user) {
                     try {
-                        const profileData = await fetchProfile(currentSession.user.id)
+                        profileData = await fetchProfile(currentSession.user.id)
                         if (mounted) setProfile(profileData)
                     } catch (err) {
                         console.error('Auth state change profile fetch error:', err)
                     }
                 } else {
-                    setProfile(null)
+                    if (mounted) setProfile(null)
                 }
+
+                console.log('🔐 AuthContext State Changed:', {
+                    event,
+                    hasUser: !!currentSession?.user,
+                    userId: currentSession?.user?.id,
+                    hasProfile: !!profileData
+                })
 
                 // If it's a signed-out event or we have a profile/no-profile, we're done loading
                 if (mounted) setIsLoading(false)
