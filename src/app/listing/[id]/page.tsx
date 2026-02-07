@@ -11,9 +11,8 @@ import { formatPrice, formatRelativeTime, CONDITIONS } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'
 
-// CRITICAL: Force dynamic rendering - prevents build-time static generation
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+// Note: This is a client component that fetches data dynamically
+// No server-side exports needed for static export
 
 // State machine to prevent loading loop
 type FetchStatus = 'idle' | 'loading' | 'success' | 'error'
@@ -111,7 +110,7 @@ export default function ListingDetailPage() {
                             .select('*')
                             .eq('id', listingData.seller_id)
                             .single()
-                            .then(({ data }) => { seller = data })
+                            .then(({ data }: { data: any }) => { seller = data })
                             .catch(() => { seller = null })
                     )
                 }
@@ -123,7 +122,7 @@ export default function ListingDetailPage() {
                             .select('*')
                             .eq('id', listingData.college_id)
                             .single()
-                            .then(({ data }) => { college = data })
+                            .then(({ data }: { data: any }) => { college = data })
                             .catch(() => { college = null })
                     )
                 }

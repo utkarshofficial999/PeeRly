@@ -274,7 +274,7 @@ export default function SettingsPage() {
                                                     <label className="text-sm font-medium text-dark-300">Phone Number</label>
                                                     <input
                                                         type="tel"
-                                                        defaultValue={profile?.phone}
+                                                        defaultValue={profile?.phone || ''}
                                                         className="input-field"
                                                         placeholder="+1 234 567 8900"
                                                     />

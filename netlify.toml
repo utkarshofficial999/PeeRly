@@ -1,0 +1,29 @@
+# Netlify configuration for Next.js with Server-Side Rendering
+
+[build]
+  # Build command - Netlify auto-detects Next.js
+  command = "npm run build"
+  
+  # Use Netlify's Next.js plugin - publish to .next
+  publish = ".next"
+
+# Install Netlify Next.js plugin
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Headers for security and caching
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Environment variables (set secrets in Netlify dashboard)
+[build.environment]
+  NODE_VERSION = "18"
