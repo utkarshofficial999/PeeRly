@@ -24,7 +24,9 @@ export default function ListingDetailPage() {
     const [error, setError] = useState<string | null>(null)
 
     const fetchListing = useCallback(async () => {
+        console.log('📄 Fetching listing:', id)
         setIsLoading(true)
+        setError(null)
         try {
             const { data, error: fetchError } = await supabase
                 .from('listings')
@@ -36,14 +38,31 @@ export default function ListingDetailPage() {
                 .eq('id', id)
                 .single()
 
-            if (fetchError) throw fetchError
+            console.log('📄 Listing fetch result:', { data, error: fetchError })
+
+            if (fetchError) {
+                console.error('❌ Fetch error:', fetchError)
+                throw fetchError
+            }
+
+            if (!data) {
+                console.error('❌ No listing data returned')
+                throw new Error('Listing not found')
+            }
+
+            console.log('✅ Listing loaded:', data.title)
             setListing(data)
 
             // Increment view count (simple implementation)
-            await supabase.rpc('increment_views', { listing_id: id })
+            try {
+                await supabase.rpc('increment_views', { listing_id: id })
+                console.log('✅ View count incremented')
+            } catch (viewError) {
+                console.warn('⚠️ Failed to increment views:', viewError)
+            }
         } catch (err: any) {
-            console.error('Error fetching listing:', err)
-            setError(err.message)
+            console.error('❌ Error fetching listing:', err)
+            setError(err.message || 'Failed to load listing')
         } finally {
             setIsLoading(false)
         }
