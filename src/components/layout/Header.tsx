@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 
 export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const [isProfileOpen, setIsProfileOpen] = useState(false)
     const [unreadCount, setUnreadCount] = useState(0)
     const router = useRouter()
     const { user, profile, isLoading, signOut } = useAuth()
@@ -90,6 +91,7 @@ export default function Header() {
     }, [user, supabase])
 
     const handleSignOut = async () => {
+        setIsProfileOpen(false)
         await signOut()
         router.push('/')
         router.refresh()
@@ -165,28 +167,44 @@ export default function Header() {
                                         Sell
                                     </Link>
                                     {/* Profile Dropdown */}
-                                    <div className="relative group">
-                                        <button className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-semibold hover:opacity-90 transition-opacity">
+                                    <div className="relative">
+                                        <button
+                                            onClick={() => setIsProfileOpen(!isProfileOpen)}
+                                            className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-semibold hover:opacity-90 transition-opacity"
+                                        >
                                             {profile?.full_name ? getInitials(profile.full_name) : 'U'}
                                         </button>
                                         {/* Dropdown Menu */}
-                                        <div className="absolute right-0 top-full mt-2 w-48 py-2 glass-card opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                                            <div className="px-4 py-2 border-b border-white/10">
-                                                <p className="text-sm font-medium text-white truncate">{profile?.full_name}</p>
-                                                <p className="text-xs text-dark-400 truncate">{user.email}</p>
-                                            </div>
-                                            <Link href="/dashboard" className="flex items-center gap-2 px-4 py-2 text-dark-300 hover:text-white hover:bg-white/5 transition-all">
-                                                <User className="w-4 h-4" />
-                                                Dashboard
-                                            </Link>
-                                            <button
-                                                onClick={handleSignOut}
-                                                className="w-full flex items-center gap-2 px-4 py-2 text-red-400 hover:text-red-300 hover:bg-white/5 transition-all"
-                                            >
-                                                <LogOut className="w-4 h-4" />
-                                                Sign Out
-                                            </button>
-                                        </div>
+                                        {isProfileOpen && (
+                                            <>
+                                                {/* Backdrop to close dropdown when clicking outside */}
+                                                <div
+                                                    className="fixed inset-0 z-40"
+                                                    onClick={() => setIsProfileOpen(false)}
+                                                />
+                                                <div className="absolute right-0 top-full mt-2 w-48 py-2 glass-card z-50 animate-fade-in">
+                                                    <div className="px-4 py-2 border-b border-white/10">
+                                                        <p className="text-sm font-medium text-white truncate">{profile?.full_name}</p>
+                                                        <p className="text-xs text-dark-400 truncate">{user.email}</p>
+                                                    </div>
+                                                    <Link
+                                                        href="/dashboard"
+                                                        onClick={() => setIsProfileOpen(false)}
+                                                        className="flex items-center gap-2 px-4 py-2 text-dark-300 hover:text-white hover:bg-white/5 transition-all"
+                                                    >
+                                                        <User className="w-4 h-4" />
+                                                        Dashboard
+                                                    </Link>
+                                                    <button
+                                                        onClick={handleSignOut}
+                                                        className="w-full flex items-center gap-2 px-4 py-2 text-red-400 hover:text-red-300 hover:bg-white/5 transition-all"
+                                                    >
+                                                        <LogOut className="w-4 h-4" />
+                                                        Sign Out
+                                                    </button>
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
                                 </>
                             ) : (
