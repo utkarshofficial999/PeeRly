@@ -95,8 +95,10 @@ export default function BrowseContent() {
                     supabase.from('categories').select('*').order('name').abortSignal(controller.signal),
                     supabase.from('colleges').select('*').order('name').abortSignal(controller.signal),
                 ])
-                setCategories(catResult.data || [])
-                setColleges(colResult.data || [])
+                if (isMountedRef.current) {
+                    setCategories(catResult.data || [])
+                    setColleges(colResult.data || [])
+                }
             } catch (err) {
                 console.error('Failed to load metadata:', err)
             } finally {
@@ -208,11 +210,11 @@ export default function BrowseContent() {
             if (isMountedRef.current && requestCountRef.current === currentRequestId) {
                 if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
                     console.log('Fetch aborted')
-                    return
+                } else {
+                    console.error('Fetch error:', err)
+                    setError(err.message || 'Failed to load listings')
+                    if (!loadMore) setListings([])
                 }
-                console.error('Fetch error:', err)
-                setError(err.message || 'Failed to load listings')
-                if (!loadMore) setListings([])
             }
         } finally {
             clearTimeout(timeoutId)
@@ -228,7 +230,8 @@ export default function BrowseContent() {
 
     // Initial load and filter changes
     useEffect(() => {
-        // Skip if categories/colleges haven't loaded yet (except first load)
+        // Skip if categories/colleges haven't loaded yet and we have a filter depending on them
+        // But always do the first fetch
         if (!initialLoadRef.current) {
             initialLoadRef.current = true
             fetchListings(false)
@@ -238,7 +241,7 @@ export default function BrowseContent() {
         setOffset(0)
         fetchListings(false)
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filters, searchQuery, sortBy])
+    }, [filters, searchQuery, sortBy, categories.length, colleges.length])
 
     const handleFilterChange = (key: string, value: string) => {
         setFilters(prev => ({ ...prev, [key]: value }))

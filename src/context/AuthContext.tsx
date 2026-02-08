@@ -80,28 +80,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setSession(currentSession);
                 setUser(newUser);
 
-                if (newUser) {
-                    const profileData = await fetchProfile(newUser.id);
-                    if (mounted) setProfile(profileData);
-                } else {
-                    if (mounted) setProfile(null);
-                }
-
-                // First event or session check finished
-                if (mounted) {
+                // First event or session check finished - set loading to false immediately
+                if (mounted && isLoading) {
                     setIsLoading(false);
                     console.log('🔐 AuthContext: Ready via onAuthStateChange');
+                }
+
+                if (newUser) {
+                    fetchProfile(newUser.id).then(profileData => {
+                        if (mounted) setProfile(profileData);
+                    });
+                } else {
+                    if (mounted) setProfile(null);
                 }
             }
         );
 
-        // Safety timeout: If still loading after 10 seconds, force-clear it
+        // Immediate check to bypass event listener delay if possible
+        supabase.auth.getSession().then(({ data: { session: initialSession } }: any) => {
+            if (mounted && isLoading) {
+                if (initialSession) {
+                    setSession(initialSession);
+                    setUser(initialSession.user);
+                }
+                setIsLoading(false);
+                console.log('🔐 AuthContext: Ready via immediate check');
+            }
+        });
+
+        // Safety timeout: If still loading after 5 seconds, force-clear it
         const safetyTimeoutId = setTimeout(() => {
             if (mounted && isLoading) {
                 console.warn('🔐 AuthContext: Loading timed out. Forcing ready state.');
                 setIsLoading(false);
             }
-        }, 10000);
+        }, 5000);
 
         return () => {
             mounted = false;

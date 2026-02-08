@@ -62,7 +62,7 @@ export async function middleware(request: NextRequest) {
     if (!isSignOut) {
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s for middleware
+            const timeoutId = setTimeout(() => controller.abort(), 3000); // 3s for middleware - fast or fail
 
             const { data: { session: currentSession } } = await supabase.auth.getSession();
             session = currentSession;
