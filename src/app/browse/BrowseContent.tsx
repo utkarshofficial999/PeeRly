@@ -62,6 +62,13 @@ export default function BrowseContent() {
     const initialLoadRef = useRef(false)
     const abortControllerRef = useRef<AbortController | null>(null)
     const isMountedRef = useRef(true)
+    const requestCountRef = useRef(0)
+    const isLoadingRef = useRef(true)
+
+    // Sync isLoadingRef with state for UI
+    useEffect(() => {
+        isLoadingRef.current = isLoading
+    }, [isLoading])
 
     // Handle mount/unmount
     useEffect(() => {
@@ -76,19 +83,28 @@ export default function BrowseContent() {
 
     // Load categories and colleges once on mount
     useEffect(() => {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => {
+            controller.abort()
+            console.warn('Metadata fetch timed out')
+        }, 8000)
+
         const loadMetadata = async () => {
             try {
                 const [catResult, colResult] = await Promise.all([
-                    supabase.from('categories').select('*').order('name'),
-                    supabase.from('colleges').select('*').order('name'),
+                    supabase.from('categories').select('*').order('name').abortSignal(controller.signal),
+                    supabase.from('colleges').select('*').order('name').abortSignal(controller.signal),
                 ])
                 setCategories(catResult.data || [])
                 setColleges(colResult.data || [])
             } catch (err) {
                 console.error('Failed to load metadata:', err)
+            } finally {
+                clearTimeout(timeoutId)
             }
         }
         loadMetadata()
+        return () => controller.abort()
     }, [supabase])
 
     // Debounce search
@@ -99,12 +115,14 @@ export default function BrowseContent() {
 
     // Fetch listings
     const fetchListings = useCallback(async (loadMore = false) => {
+        // Increment request ID to track this specific call
+        const currentRequestId = ++requestCountRef.current
+
         // Cancel any existing request
         if (abortControllerRef.current) {
             abortControllerRef.current.abort()
         }
 
-        // Create new AbortController
         const controller = new AbortController()
         abortControllerRef.current = controller
 
@@ -117,14 +135,14 @@ export default function BrowseContent() {
             setError(null)
         }
 
-        // Hard timeout: 10 seconds
+        // ABSOLUTE TIMEOUT: Force stop after 10s
         const timeoutId = setTimeout(() => {
-            if (isMountedRef.current && (isLoading || isLoadingMore)) {
+            if (isMountedRef.current && requestCountRef.current === currentRequestId) {
                 controller.abort()
-                setError('Request timed out. Please try again.')
                 setIsLoading(false)
                 setIsLoadingMore(false)
-                console.log('Fetch timed out after 10s')
+                setError('Connection is taking too long. Please refresh.')
+                console.error('Fetch timed out after 10s')
             }
         }, 10000)
 
@@ -173,33 +191,32 @@ export default function BrowseContent() {
 
             if (fetchError) throw fetchError
 
-            if (!isMountedRef.current) return
-
-            if (loadMore) {
-                setListings(prev => [...prev, ...(data || [])])
-                setOffset(currentOffset + 20)
-            } else {
-                setListings(data || [])
-                setOffset(20)
+            // Only update if this is still the current request and component is mounted
+            if (isMountedRef.current && requestCountRef.current === currentRequestId) {
+                if (loadMore) {
+                    setListings(prev => [...prev, ...(data || [])])
+                    setOffset(currentOffset + 20)
+                } else {
+                    setListings(data || [])
+                    setOffset(20)
+                }
+                setTotalCount(count || 0)
+                setHasMore((count || 0) > currentOffset + 20)
             }
-
-            setTotalCount(count || 0)
-            setHasMore((count || 0) > currentOffset + 20)
 
         } catch (err: any) {
-            if (!isMountedRef.current) return
-
-            // Ignore abort errors (normal in React Strict Mode or on new request)
-            if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
-                console.log('Fetch aborted')
-                return
+            if (isMountedRef.current && requestCountRef.current === currentRequestId) {
+                if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
+                    console.log('Fetch aborted')
+                    return
+                }
+                console.error('Fetch error:', err)
+                setError(err.message || 'Failed to load listings')
+                if (!loadMore) setListings([])
             }
-            console.error('Fetch error:', err)
-            setError(err.message || 'Failed to load listings')
-            if (!loadMore) setListings([])
         } finally {
             clearTimeout(timeoutId)
-            if (isMountedRef.current) {
+            if (isMountedRef.current && requestCountRef.current === currentRequestId) {
                 setIsLoading(false)
                 setIsLoadingMore(false)
                 if (abortControllerRef.current === controller) {
@@ -207,7 +224,7 @@ export default function BrowseContent() {
                 }
             }
         }
-    }, [supabase, filters, searchQuery, sortBy, offset, categories, colleges, isLoading, isLoadingMore])
+    }, [supabase, filters, searchQuery, sortBy, offset, categories, colleges])
 
     // Initial load and filter changes
     useEffect(() => {

@@ -15,9 +15,21 @@ export default function SavedItemsPage() {
     const [isLoading, setIsLoading] = useState(true)
     const supabase = useMemo(() => createClient(), [])
     const abortControllerRef = useRef<AbortController | null>(null)
+    const isMountedRef = useRef(true)
+    const requestCountRef = useRef(0)
+
+    // Handle mount/unmount
+    useEffect(() => {
+        isMountedRef.current = true
+        return () => {
+            isMountedRef.current = false
+        }
+    }, [])
 
     const fetchSavedItems = useCallback(async () => {
         if (!user) return
+        const currentReqId = ++requestCountRef.current
+
         if (abortControllerRef.current) abortControllerRef.current.abort()
 
         const controller = new AbortController()
@@ -25,9 +37,11 @@ export default function SavedItemsPage() {
 
         setIsLoading(true)
         const timeoutId = setTimeout(() => {
-            controller.abort()
-            setIsLoading(false)
-            console.log('Saved items fetch timed out')
+            if (isMountedRef.current && requestCountRef.current === currentReqId) {
+                controller.abort()
+                setIsLoading(false)
+                console.warn('Saved items fetch timed out')
+            }
         }, 10000)
 
         try {
@@ -41,15 +55,21 @@ export default function SavedItemsPage() {
                 .eq('user_id', user.id)
                 .abortSignal(controller.signal)
 
+            if (error) throw error
+            if (!isMountedRef.current || requestCountRef.current !== currentReqId) return
+
             if (data) {
                 setSavedItems(data.map((item: any) => item.listings))
             }
         } catch (err: any) {
-            if (err?.name === 'AbortError') return
+            if (!isMountedRef.current || requestCountRef.current !== currentReqId) return
+            if (err?.name === 'AbortError' || err?.message?.includes('aborted')) return
             console.error('Error fetching saved items:', err)
         } finally {
             clearTimeout(timeoutId)
-            setIsLoading(false)
+            if (isMountedRef.current && requestCountRef.current === currentReqId) {
+                setIsLoading(false)
+            }
         }
     }, [user, supabase])
 

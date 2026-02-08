@@ -52,6 +52,17 @@ export default function MessagesContent() {
     const [isLoadingMsgs, setIsLoadingMsgs] = useState(false)
     const [isSending, setIsSending] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
+    const isMountedRef = useRef(true)
+    const convRequestCountRef = useRef(0)
+    const msgRequestCountRef = useRef(0)
+
+    // Handle mount/unmount
+    useEffect(() => {
+        isMountedRef.current = true
+        return () => {
+            isMountedRef.current = false
+        }
+    }, [])
 
     const scrollToBottom = useCallback(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -59,13 +70,16 @@ export default function MessagesContent() {
 
     const fetchConversations = useCallback(async () => {
         if (!user) return
+        const currentReqId = ++convRequestCountRef.current
         setIsLoadingConvs(true)
 
         const controller = new AbortController()
         const timeoutId = setTimeout(() => {
-            controller.abort()
-            setIsLoadingConvs(false)
-            console.log('Conversations fetch timed out')
+            if (isMountedRef.current && convRequestCountRef.current === currentReqId) {
+                controller.abort()
+                setIsLoadingConvs(false)
+                console.warn('Conversations fetch timed out')
+            }
         }, 10000)
 
         try {
@@ -83,8 +97,9 @@ export default function MessagesContent() {
                 .abortSignal(controller.signal)
 
             if (error) throw error
+            if (!isMountedRef.current || convRequestCountRef.current !== currentReqId) return
 
-            // Fetch unread counts for all conversations
+            // Fetch unread counts... (rest of logic)
             const convIds = data.map((c: { id: string }) => c.id)
 
             let unreadCounts: Record<string, number> = {}
@@ -95,8 +110,8 @@ export default function MessagesContent() {
                     .in('conversation_id', convIds)
                     .neq('sender_id', user.id)
                     .eq('is_read', false)
+                    .abortSignal(controller.signal)
 
-                // Count unread messages per conversation
                 unreadData?.forEach((msg: { conversation_id: string }) => {
                     unreadCounts[msg.conversation_id] = (unreadCounts[msg.conversation_id] || 0) + 1
                 })
@@ -113,17 +128,30 @@ export default function MessagesContent() {
 
             setConversations(formatted)
         } catch (err: any) {
-            // Ignore abort errors during cleanup
+            if (!isMountedRef.current || convRequestCountRef.current !== currentReqId) return
             if (err?.name === 'AbortError' || err?.message?.includes('aborted')) return
             console.error('Error fetching conversations:', err)
         } finally {
             clearTimeout(timeoutId)
-            setIsLoadingConvs(false)
+            if (isMountedRef.current && convRequestCountRef.current === currentReqId) {
+                setIsLoadingConvs(false)
+            }
         }
     }, [user, supabase])
 
     const fetchMessages = useCallback(async (convId: string) => {
+        const currentReqId = ++msgRequestCountRef.current
         setIsLoadingMsgs(true)
+
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => {
+            if (isMountedRef.current && msgRequestCountRef.current === currentReqId) {
+                controller.abort()
+                setIsLoadingMsgs(false)
+                console.warn('Messages fetch timed out')
+            }
+        }, 10000)
+
         try {
             const { data, error } = await supabase
                 .from('messages')
@@ -131,8 +159,11 @@ export default function MessagesContent() {
                 .eq('conversation_id', convId)
                 .order('created_at', { ascending: true })
                 .limit(100)
+                .abortSignal(controller.signal)
 
             if (error) throw error
+            if (!isMountedRef.current || msgRequestCountRef.current !== currentReqId) return
+
             setMessages(data || [])
 
             // Mark messages from the other party as read
@@ -146,12 +177,18 @@ export default function MessagesContent() {
                         .from('messages')
                         .update({ is_read: true })
                         .in('id', unreadMessageIds)
+                        .abortSignal(controller.signal)
                 }
             }
-        } catch (err) {
+        } catch (err: any) {
+            if (!isMountedRef.current || msgRequestCountRef.current !== currentReqId) return
+            if (err?.name === 'AbortError' || err?.message?.includes('aborted')) return
             console.error('Error fetching messages:', err)
         } finally {
-            setIsLoadingMsgs(false)
+            clearTimeout(timeoutId)
+            if (isMountedRef.current && msgRequestCountRef.current === currentReqId) {
+                setIsLoadingMsgs(false)
+            }
         }
     }, [user, supabase])
 
