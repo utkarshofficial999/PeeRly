@@ -22,7 +22,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null)
     const [profile, setProfile] = useState<Profile | null>(null)
     const [session, setSession] = useState<Session | null>(null)
-    const [isLoading, setIsLoading] = useState(true)
+    // Start as NOT loading so pages can fetch data immediately as guest
+    // If auth finishes later, the state will update automatically
+    const [isLoading, setIsLoading] = useState(false)
 
     const supabase = useMemo(() => createClient(), [])
 

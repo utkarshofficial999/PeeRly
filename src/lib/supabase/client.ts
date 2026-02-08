@@ -27,7 +27,7 @@ export function createClient() {
         return {} as any
     }
 
-    // Create client
+    // Create client with hardened production settings
     const client = createBrowserClient(
         supabaseUrl,
         supabaseAnonKey,
@@ -36,14 +36,18 @@ export function createClient() {
                 persistSession: true,
                 autoRefreshToken: true,
                 detectSessionInUrl: true,
-                flowType: 'pkce'
+                flowType: 'pkce',
+                storageKey: 'peerly-auth-token', // Use a dedicated key to avoid conflicts
+            },
+            global: {
+                headers: { 'x-client-info': 'peerly-web' },
             }
         }
     )
 
     if (isBrowser) {
         supabaseClient = client
-        console.log('[Supabase] Browser client initialized')
+        console.log('🚀 [Supabase] Client initialized in browser');
     }
 
     return client
