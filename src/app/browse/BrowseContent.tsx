@@ -18,7 +18,7 @@ interface Listing {
     images: string[]
     created_at: string
     views_count: number
-    seller?: { full_name: string; avatar_url: string }
+    seller?: { full_name: string; avatar_url: string; is_verified?: boolean }
     college?: { name: string }
 }
 
@@ -159,7 +159,7 @@ export default function BrowseContent() {
                     images,
                     created_at,
                     views_count,
-                    seller:profiles!listings_seller_id_fkey(full_name, avatar_url),
+                    seller:profiles!listings_seller_id_fkey(full_name, avatar_url, is_verified),
                     college:colleges(name)
                 `, { count: 'exact' })
                 .eq('is_active', true)
@@ -371,6 +371,7 @@ export default function BrowseContent() {
                                                 sellerAvatar={listing.seller?.avatar_url}
                                                 collegeName={listing.college?.name}
                                                 viewsCount={listing.views_count}
+                                                isVerified={listing.seller?.is_verified}
                                                 createdAt={listing.created_at}
                                                 onSave={() => console.log('Save', listing.id)}
                                             />

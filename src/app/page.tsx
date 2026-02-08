@@ -103,7 +103,7 @@ export default function HomePage() {
                 .from('listings')
                 .select(`
                     *,
-                    seller:profiles!listings_seller_id_fkey(full_name, avatar_url),
+                    seller:profiles!listings_seller_id_fkey(full_name, avatar_url, is_verified),
                     college:colleges(name)
                 `)
                 .eq('is_active', true)
@@ -230,6 +230,7 @@ export default function HomePage() {
                                         sellerAvatar={listing.seller?.avatar_url}
                                         collegeName={listing.college?.name}
                                         viewsCount={listing.views_count}
+                                        isVerified={listing.seller?.is_verified}
                                         createdAt={listing.created_at}
                                         onSave={() => console.log('Save', listing.id)}
                                     />
