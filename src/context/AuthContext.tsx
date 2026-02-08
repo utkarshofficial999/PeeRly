@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Subscription for subsequent changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event, currentSession) => {
+            async (event: string, currentSession: any) => {
                 if (!mounted) return;
 
                 console.log(`🔐 AuthContext: Event [${event}]`);
@@ -150,7 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const timeoutId = setTimeout(() => {
             controller.abort()
             console.error('🔐 AuthContext: Sign up timed out')
-        }, 15000)
+        }, 30000) // Increase to 30s
 
         try {
             console.log('🔐 AuthContext: Starting sign up for', email)
@@ -185,7 +185,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const timeoutId = setTimeout(() => {
             controller.abort()
             console.error('🔐 AuthContext: Sign in timed out')
-        }, 15000)
+        }, 30000) // Increase to 30s
 
         try {
             console.log('🔐 AuthContext: Starting sign in for', email)
