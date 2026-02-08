@@ -48,8 +48,8 @@ export default function SettingsPage() {
         try {
             // Generate unique filename
             const fileExt = file.name.split('.').pop()
-            const fileName = `${user.id}-${Date.now()}.${fileExt}`
-            const filePath = `avatars/${fileName}`
+            const fileName = `${Date.now()}.${fileExt}`
+            const filePath = `${user.id}/${fileName}`
 
             console.log('📤 Uploading avatar:', filePath)
 
