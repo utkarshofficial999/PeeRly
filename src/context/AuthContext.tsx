@@ -28,17 +28,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Fetch user profile from profiles table
     const fetchProfile = useCallback(async (userId: string) => {
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', userId)
-            .single()
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 8000)
 
-        if (error) {
-            console.error('Error fetching profile:', error)
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .single()
+                .abortSignal(controller.signal)
+
+            if (error) {
+                console.error('Error fetching profile:', error)
+                return null
+            }
+            return data as Profile
+        } catch (err) {
+            console.error('Profile fetch aborted/failed:', err)
             return null
+        } finally {
+            clearTimeout(timeoutId)
         }
-        return data as Profile
     }, [supabase])
 
     // Refresh profile data

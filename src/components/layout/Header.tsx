@@ -38,12 +38,16 @@ export default function Header() {
         let channel: ReturnType<typeof supabase.channel> | null = null
 
         const fetchUnreadCount = async () => {
+            const controller = new AbortController()
+            const timeoutId = setTimeout(() => controller.abort(), 8000)
+
             try {
                 // Get all conversations where user is participant
                 const { data: conversations, error: convError } = await supabase
                     .from('conversations')
                     .select('id')
                     .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
+                    .abortSignal(controller.signal)
 
                 if (convError || !isMounted) return
 
@@ -61,16 +65,19 @@ export default function Header() {
                     .in('conversation_id', convIds)
                     .neq('sender_id', user.id)
                     .eq('is_read', false)
+                    .abortSignal(controller.signal)
 
                 if (msgError || !isMounted) return
 
                 setUnreadCount(count || 0)
             } catch (err: any) {
-                // Ignore abort errors - these happen during normal cleanup
+                // Ignore abort errors - these happen during normal cleanup or timeout
                 if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
                     return
                 }
                 console.error('Error fetching unread count:', err)
+            } finally {
+                clearTimeout(timeoutId)
             }
         }
 
