@@ -4,7 +4,7 @@ import Link from 'next/link'
 import NextImage from 'next/image'
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Menu, X, Search, Plus, User, Bell, MessageSquare, LogOut } from 'lucide-react'
+import { Menu, X, Search, Plus, User, Bell, MessageSquare, LogOut, ChevronDown, LayoutGrid, Heart, Settings } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { createClient } from '@/lib/supabase/client'
 
@@ -12,9 +12,14 @@ export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [isProfileOpen, setIsProfileOpen] = useState(false)
     const [unreadCount, setUnreadCount] = useState(0)
+    const [mounted, setMounted] = useState(false)
     const router = useRouter()
     const { user, profile, isLoading, signOut } = useAuth()
     const supabase = useMemo(() => createClient(), [])
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     // DEBUG: Log auth state
     useEffect(() => {
@@ -162,89 +167,103 @@ export default function Header() {
                                 <Search className="w-5 h-5" />
                             </button>
 
-                            {isLoading ? (
-                                <div className="w-10 h-10 rounded-xl bg-dark-700 animate-pulse" />
+                            {!mounted ? (
+                                <div className="w-20 h-10 bg-white/5 animate-pulse rounded-xl" />
                             ) : user ? (
                                 <>
-                                    {/* Notifications */}
-                                    <button className="p-2.5 text-dark-300 hover:text-white rounded-xl hover:bg-white/5 transition-all relative">
-                                        <Bell className="w-5 h-5" />
-                                    </button>
-                                    {/* Messages */}
-                                    <Link href="/messages" className="p-2.5 text-dark-300 hover:text-white rounded-xl hover:bg-white/5 transition-all relative">
-                                        <MessageSquare className="w-5 h-5" />
-                                        {unreadCount > 0 && (
-                                            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-gradient-to-r from-rose-500 to-pink-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-lg shadow-rose-500/30 animate-pulse">
-                                                {unreadCount > 9 ? '9+' : unreadCount}
-                                            </span>
-                                        )}
-                                    </Link>
-                                    {/* Sell Button */}
-                                    <Link href="/create" className="btn-primary py-2.5 px-4">
-                                        <Plus className="w-4 h-4" />
-                                        Sell
-                                    </Link>
-                                    {/* Profile Dropdown */}
-                                    <div className="relative">
-                                        <button
-                                            onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                            className="w-10 h-10 rounded-xl overflow-hidden hover:opacity-90 transition-opacity ring-2 ring-white/10 hover:ring-primary-500/50"
-                                        >
-                                            {profile?.avatar_url ? (
-                                                <NextImage
-                                                    src={profile.avatar_url}
-                                                    alt="Profile"
-                                                    width={40}
-                                                    height={40}
-                                                    className="object-cover w-full h-full"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-semibold">
-                                                    {profile?.full_name ? getInitials(profile.full_name) : 'U'}
-                                                </div>
-                                            )}
+                                    <div className="flex items-center gap-3">
+                                        {/* Notifications */}
+                                        <button className="p-2.5 text-dark-300 hover:text-white rounded-xl hover:bg-white/5 transition-all">
+                                            <Bell className="w-5 h-5" />
                                         </button>
-                                        {/* Dropdown Menu */}
-                                        {isProfileOpen && (
-                                            <>
-                                                {/* Backdrop to close dropdown when clicking outside */}
-                                                <div
-                                                    className="fixed inset-0 z-40"
-                                                    onClick={() => setIsProfileOpen(false)}
-                                                />
-                                                <div className="absolute right-0 top-full mt-2 w-48 py-2 glass-card z-50 animate-fade-in">
-                                                    <div className="px-4 py-2 border-b border-white/10">
-                                                        <p className="text-sm font-medium text-white truncate">{profile?.full_name}</p>
-                                                        <p className="text-xs text-dark-400 truncate">{user.email}</p>
-                                                    </div>
-                                                    <Link
-                                                        href="/dashboard"
-                                                        onClick={() => setIsProfileOpen(false)}
-                                                        className="flex items-center gap-2 px-4 py-2 text-dark-300 hover:text-white hover:bg-white/5 transition-all"
-                                                    >
-                                                        <User className="w-4 h-4" />
-                                                        Dashboard
-                                                    </Link>
-                                                    <button
-                                                        onClick={handleSignOut}
-                                                        className="w-full flex items-center gap-2 px-4 py-2 text-red-400 hover:text-red-300 hover:bg-white/5 transition-all"
-                                                    >
-                                                        <LogOut className="w-4 h-4" />
-                                                        Sign Out
-                                                    </button>
+
+                                        {/* Messages */}
+                                        <Link href="/messages" className="p-2.5 text-dark-300 hover:text-white rounded-xl hover:bg-white/5 transition-all relative">
+                                            <MessageSquare className="w-5 h-5" />
+                                            {unreadCount > 0 && (
+                                                <span className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] bg-gradient-to-r from-rose-500 to-pink-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-dark-900">
+                                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                                </span>
+                                            )}
+                                        </Link>
+
+                                        {/* Profile Dropdown */}
+                                        <div className="relative ml-2">
+                                            <button
+                                                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                                                className="flex items-center gap-2 p-1.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all"
+                                            >
+                                                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-sm font-bold text-white">
+                                                    {getInitials(profile?.full_name || user.email || 'U')}
                                                 </div>
-                                            </>
-                                        )}
+                                                <ChevronDown className={`w-4 h-4 text-dark-400 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
+                                            </button>
+
+                                            {isProfileOpen && (
+                                                <>
+                                                    <div
+                                                        className="fixed inset-0 z-40"
+                                                        onClick={() => setIsProfileOpen(false)}
+                                                    />
+                                                    <div className="absolute right-0 mt-3 w-56 glass-card border border-white/10 shadow-2xl py-2 z-50 animate-fade-in origin-top-right">
+                                                        <div className="px-4 py-3 border-b border-white/5 mb-2">
+                                                            <p className="text-xs text-dark-500 font-medium truncate mb-0.5">Signed in as</p>
+                                                            <p className="text-sm text-white font-bold truncate">{profile?.full_name || user.email}</p>
+                                                        </div>
+                                                        <Link
+                                                            href="/dashboard"
+                                                            onClick={() => setIsProfileOpen(false)}
+                                                            className="flex items-center gap-2 px-4 py-2.5 text-dark-200 hover:text-white hover:bg-white/5 transition-all"
+                                                        >
+                                                            <User className="w-4 h-4 text-primary-400" />
+                                                            Dashboard
+                                                        </Link>
+                                                        <Link
+                                                            href="/my-listings"
+                                                            onClick={() => setIsProfileOpen(false)}
+                                                            className="flex items-center gap-2 px-4 py-2.5 text-dark-200 hover:text-white hover:bg-white/5 transition-all"
+                                                        >
+                                                            <LayoutGrid className="w-4 h-4 text-accent-400" />
+                                                            My Listings
+                                                        </Link>
+                                                        <Link
+                                                            href="/saved"
+                                                            onClick={() => setIsProfileOpen(false)}
+                                                            className="flex items-center gap-2 px-4 py-2.5 text-dark-200 hover:text-white hover:bg-white/5 transition-all"
+                                                        >
+                                                            <Heart className="w-4 h-4 text-rose-400" />
+                                                            Saved Items
+                                                        </Link>
+                                                        <Link
+                                                            href="/settings"
+                                                            onClick={() => setIsProfileOpen(false)}
+                                                            className="flex items-center gap-2 px-4 py-2.5 text-dark-200 hover:text-white hover:bg-white/5 transition-all"
+                                                        >
+                                                            <Settings className="w-4 h-4 text-dark-400" />
+                                                            Settings
+                                                        </Link>
+                                                        <hr className="border-white/5 my-2" />
+                                                        <button
+                                                            onClick={handleSignOut}
+                                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-red-400 hover:text-red-300 hover:bg-white/5 transition-all font-medium"
+                                                        >
+                                                            <LogOut className="w-4 h-4" />
+                                                            Sign Out
+                                                        </button>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                 </>
                             ) : (
                                 <>
-                                    <Link href="/login" className="btn-secondary py-2.5 px-5">
+                                    <a href="/login" className="btn-secondary py-2.5 px-5 cursor-pointer">
                                         Log In
-                                    </Link>
-                                    <Link href="/signup" className="btn-primary py-2.5 px-5">
+                                    </a>
+                                    <a href="/signup" className="btn-primary py-2.5 px-5 cursor-pointer">
                                         Sign Up
-                                    </Link>
+                                    </a>
                                 </>
                             )}
                         </div>
@@ -304,12 +323,12 @@ export default function Header() {
                                     </>
                                 ) : (
                                     <>
-                                        <Link href="/login" className="btn-secondary justify-center">
+                                        <a href="/login" className="btn-secondary justify-center">
                                             Log In
-                                        </Link>
-                                        <Link href="/signup" className="btn-primary justify-center">
+                                        </a>
+                                        <a href="/signup" className="btn-primary justify-center">
                                             Sign Up Free
-                                        </Link>
+                                        </a>
                                     </>
                                 )}
                             </div>
