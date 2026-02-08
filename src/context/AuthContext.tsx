@@ -69,60 +69,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         let mounted = true;
 
         const initializeAuth = async () => {
-            try {
-                console.log('🔐 AuthContext: Initializing...');
-                const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-                if (error) throw error;
+            try {
+                console.log('🔐 AuthContext: Initializing user...');
+                // getUser is more reliable than getSession for SSR/Refresh scenarios
+                const { data: { user: initialUser }, error } = await supabase.auth.getUser();
+
+                if (error) {
+                    // Ignore errors on initialization, let onAuthStateChange handle it
+                    console.log('🔐 AuthContext: No initial user found/error');
+                }
 
                 if (!mounted) return;
 
-                if (initialSession) {
-                    setSession(initialSession);
-                    setUser(initialSession.user);
-                    const profileData = await fetchProfile(initialSession.user.id);
-                    if (mounted && profileData) {
-                        setProfile(profileData);
-                    }
+                if (initialUser) {
+                    setUser(initialUser);
+                    // Fetch profile in background
+                    fetchProfile(initialUser.id).then(profileData => {
+                        if (mounted && profileData) setProfile(profileData);
+                    });
                 }
             } catch (error: any) {
-                if (error.name === 'AbortError' || error.message?.includes('Lock')) {
-                    console.log('🔐 AuthContext: Initialization aborted/locked (retrying via listener)');
-                    return;
-                }
-                console.error('🔐 AuthContext: Error initializing auth:', error);
+                console.log('🔐 AuthContext: Initialization non-critical error:', error.message);
             } finally {
+                clearTimeout(timeoutId);
                 if (mounted) {
                     setIsLoading(false);
-                    console.log('🔐 AuthContext: Initialization complete');
+                    console.log('🔐 AuthContext: Ready');
                 }
             }
         };
 
+        // Subscription for subsequent changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event: any, currentSession: Session | null) => {
+            async (event, currentSession) => {
                 if (!mounted) return;
 
-                console.log(`🔐 AuthContext: Auth state changed [${event}]`);
-                setSession(currentSession);
-                setUser(currentSession?.user ?? null);
+                console.log(`🔐 AuthContext: Event [${event}]`);
 
-                if (currentSession?.user) {
-                    try {
-                        const profileData = await fetchProfile(currentSession.user.id);
-                        if (mounted) setProfile(profileData);
-                    } catch (err) {
-                        console.error('🔐 AuthContext: Profile fetch error:', err);
-                    }
+                const newUser = currentSession?.user ?? null;
+                setSession(currentSession);
+                setUser(newUser);
+
+                if (newUser) {
+                    const profileData = await fetchProfile(newUser.id);
+                    if (mounted) setProfile(profileData);
                 } else {
                     if (mounted) setProfile(null);
                 }
 
-                // Any auth state change (including INITIAL_SESSION) means we're done loading
                 if (mounted) setIsLoading(false);
             }
         );
 
+        // Run initialization
         initializeAuth();
 
         // Safety timeout: If still loading after 6 seconds, force-clear it
