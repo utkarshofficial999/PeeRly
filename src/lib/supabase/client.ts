@@ -7,30 +7,28 @@ let supabaseClient: ReturnType<typeof createBrowserClient> | null = null
 
 /**
  * Creates a Supabase client for use in client components.
- * This file MUST be imported only in 'use client' components.
  */
 export function createClient() {
-    // Return existing client if already created
-    if (supabaseClient) return supabaseClient
-
     // Get environment variables
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-    // Validate environment variables
+    // Special handling for browser singleton
+    const isBrowser = typeof window !== 'undefined'
+    if (isBrowser && supabaseClient) return supabaseClient
+
+    // Validate environment variables (warn instead of throw during build if possible)
     if (!supabaseUrl || !supabaseAnonKey) {
-        console.error('[Supabase] Missing environment variables:', {
-            url: supabaseUrl ? '✓' : '✗',
-            key: supabaseAnonKey ? '✓' : '✗'
-        })
-        throw new Error(
-            'Supabase environment variables are missing. ' +
-            'Make sure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set.'
-        )
+        if (isBrowser) {
+            console.error('[Supabase] Missing environment variables')
+            throw new Error('Supabase environment variables are missing')
+        }
+        // Return a mock client during build to prevent crashes
+        return {} as any
     }
 
-    // Create singleton client with optimized settings
-    supabaseClient = createBrowserClient(
+    // Create client
+    const client = createBrowserClient(
         supabaseUrl,
         supabaseAnonKey,
         {
@@ -43,6 +41,10 @@ export function createClient() {
         }
     )
 
-    console.log('[Supabase] Client created successfully')
-    return supabaseClient
+    if (isBrowser) {
+        supabaseClient = client
+        console.log('[Supabase] Browser client initialized')
+    }
+
+    return client
 }

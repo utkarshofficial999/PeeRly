@@ -151,6 +151,11 @@ export default function BrowseContent() {
             setHasMore((count || 0) > currentOffset + 20)
 
         } catch (err: any) {
+            // Ignore abort errors (normal in React Strict Mode)
+            if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
+                console.log('Fetch aborted (normal in dev mode)')
+                return
+            }
             console.error('Fetch error:', err)
             setError(err.message || 'Failed to load listings')
             if (!loadMore) setListings([])

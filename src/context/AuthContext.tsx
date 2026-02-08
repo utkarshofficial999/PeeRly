@@ -51,85 +51,83 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         if (!supabase) {
-            setIsLoading(false)
-            return
+            setIsLoading(true); // Don't set false yet
+            return;
         }
 
-        let mounted = true
+        let mounted = true;
 
         const initializeAuth = async () => {
             try {
-                // Use getSession but be aware it might trigger internal auth locks
-                const { data: { session: initialSession }, error } = await supabase.auth.getSession()
+                console.log('🔐 AuthContext: Initializing...');
+                const { data: { session: initialSession }, error } = await supabase.auth.getSession();
 
-                if (error) throw error
+                if (error) throw error;
 
-                if (!mounted) return
+                if (!mounted) return;
 
                 if (initialSession) {
-                    setSession(initialSession)
-                    setUser(initialSession.user)
-                    console.log('✅ Initial session found:', { userId: initialSession.user.id })
-                    // Fetch profile in non-blocking way
-                    fetchProfile(initialSession.user.id).then(data => {
-                        if (mounted && data) {
-                            setProfile(data)
-                            console.log('✅ Profile loaded:', { name: data.full_name })
-                        }
-                    })
-                } else {
-                    console.log('❌ No initial session found')
+                    setSession(initialSession);
+                    setUser(initialSession.user);
+                    const profileData = await fetchProfile(initialSession.user.id);
+                    if (mounted && profileData) {
+                        setProfile(profileData);
+                    }
                 }
             } catch (error: any) {
-                // Ignore benign errors like AbortError or Lock errors during dev HMR
-                if (error.name === 'AbortError' || error.message?.includes('Lock')) return
-                console.error('Error initializing auth:', error)
+                if (error.name === 'AbortError' || error.message?.includes('Lock')) {
+                    console.log('🔐 AuthContext: Initialization aborted/locked (retrying via listener)');
+                    return;
+                }
+                console.error('🔐 AuthContext: Error initializing auth:', error);
             } finally {
                 if (mounted) {
-                    setIsLoading(false)
-                    console.log('✅ Auth initialization complete')
+                    setIsLoading(false);
+                    console.log('🔐 AuthContext: Initialization complete');
                 }
             }
-        }
+        };
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event: any, currentSession: Session | null) => {
-                if (!mounted) return
+                if (!mounted) return;
 
-                setSession(currentSession)
-                setUser(currentSession?.user ?? null)
+                console.log(`🔐 AuthContext: Auth state changed [${event}]`);
+                setSession(currentSession);
+                setUser(currentSession?.user ?? null);
 
-                let profileData = null
                 if (currentSession?.user) {
                     try {
-                        profileData = await fetchProfile(currentSession.user.id)
-                        if (mounted) setProfile(profileData)
+                        const profileData = await fetchProfile(currentSession.user.id);
+                        if (mounted) setProfile(profileData);
                     } catch (err) {
-                        console.error('Auth state change profile fetch error:', err)
+                        console.error('🔐 AuthContext: Profile fetch error:', err);
                     }
                 } else {
-                    if (mounted) setProfile(null)
+                    if (mounted) setProfile(null);
                 }
 
-                console.log('🔐 AuthContext State Changed:', {
-                    event,
-                    hasUser: !!currentSession?.user,
-                    userId: currentSession?.user?.id,
-                    hasProfile: !!profileData
-                })
-
-                // If it's a signed-out event or we have a profile/no-profile, we're done loading
-                if (mounted) setIsLoading(false)
+                // Any auth state change (including INITIAL_SESSION) means we're done loading
+                if (mounted) setIsLoading(false);
             }
-        )
+        );
 
-        initializeAuth()
+        initializeAuth();
+
+        // Safety timeout: If still loading after 6 seconds, force-clear it
+        const safetyTimeoutId = setTimeout(() => {
+            if (mounted && isLoading) {
+                console.warn('🔐 AuthContext: Loading timed out. Forcing ready state.');
+                setIsLoading(false);
+            }
+        }, 6000);
 
         return () => {
-            mounted = false
-            subscription.unsubscribe()
-        }
-    }, [supabase, fetchProfile])
+            mounted = false;
+            clearTimeout(safetyTimeoutId);
+            subscription.unsubscribe();
+        };
+    }, [supabase, fetchProfile]);
 
     // Sign up with email and password
     const signUp = async (email: string, password: string, fullName: string) => {
