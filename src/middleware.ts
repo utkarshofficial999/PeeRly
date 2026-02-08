@@ -54,21 +54,8 @@ export async function middleware(request: NextRequest) {
         }
     )
 
-    // Bypass session check if we are intentionally signing out
-    const isSignOut = request.nextUrl.searchParams.has('signOut') || request.nextUrl.searchParams.has('clear')
-
-    let session = null;
-    if (!isSignOut) {
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000);
-            const { data: { session: currentSession } } = await supabase.auth.getSession();
-            session = currentSession;
-            clearTimeout(timeoutId);
-        } catch (err) {
-            console.error('Middleware session check timed out');
-        }
-    }
+    // Refresh session if expired
+    const { data: { session } } = await supabase.auth.getSession()
 
     // Protected routes
     const protectedRoutes = ['/dashboard', '/create', '/messages', '/settings']

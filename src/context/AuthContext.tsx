@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Subscription for subsequent changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event: string, currentSession: any) => {
+            async (event, currentSession) => {
                 if (!mounted) return;
 
                 console.log(`🔐 AuthContext: Event [${event}]`);
@@ -146,7 +146,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Sign up with email and password
     const signUp = async (email: string, password: string, fullName: string) => {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => {
+            controller.abort()
+            console.error('🔐 AuthContext: Sign up timed out')
+        }, 15000)
+
         try {
+            console.log('🔐 AuthContext: Starting sign up for', email)
             const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
@@ -158,60 +165,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 },
             })
 
-            if (error) throw error
+            clearTimeout(timeoutId)
+            if (error) {
+                console.error('🔐 AuthContext: Sign up error:', error.message)
+                throw error
+            }
+            console.log('🔐 AuthContext: Sign up successful')
             return { error: null }
-        } catch (error) {
-            return { error: error as Error }
+        } catch (error: any) {
+            clearTimeout(timeoutId)
+            const errMsg = error.name === 'AbortError' ? 'Authentication timed out. Please check your connection.' : error.message
+            return { error: new Error(errMsg) }
         }
     }
 
     // Sign in with email and password
     const signIn = async (email: string, password: string) => {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => {
+            controller.abort()
+            console.error('🔐 AuthContext: Sign in timed out')
+        }, 15000)
+
         try {
+            console.log('🔐 AuthContext: Starting sign in for', email)
             const { data, error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             })
 
-            if (error) throw error
+            clearTimeout(timeoutId)
+            if (error) {
+                console.error('🔐 AuthContext: Sign in error:', error.message)
+                throw error
+            }
+
+            console.log('🔐 AuthContext: Sign in successful');
+
+            // Explicitly update user state in case onAuthStateChange is slow
+            if (data.user) {
+                setUser(data.user);
+                const profileData = await fetchProfile(data.user.id);
+                setProfile(profileData);
+            }
+
             return { error: null }
-        } catch (error) {
-            return { error: error as Error }
+        } catch (error: any) {
+            clearTimeout(timeoutId)
+            const errMsg = error.name === 'AbortError' ? 'Authentication timed out. Please check your connection.' : error.message
+            return { error: new Error(errMsg) }
         }
     }
 
     // Sign out
     const signOut = async () => {
-        try {
-            console.log('🔐 AuthContext: Signing out...')
-            // Try to sign out normally
-            await supabase.auth.signOut()
-        } catch (error) {
-            console.error('🔐 AuthContext: Sign out error, forcing cleanup:', error)
-        } finally {
-            // Force reset state
-            setUser(null)
-            setProfile(null)
-            setSession(null)
-
-            if (typeof window !== 'undefined') {
-                // Hard reset: nuke all cookies to be sure
-                const cookies = document.cookie.split(';')
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i]
-                    const eqPos = cookie.indexOf('=')
-                    const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim()
-                    if (name.includes('sb-') || name.includes('peerly')) {
-                        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;'
-                        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=' + window.location.hostname + ';'
-                    }
-                }
-
-                localStorage.removeItem('peerly-auth-token')
-                // Force a redirect with a 'signOut' flag to bypass middleware cache/redirects
-                window.location.href = '/?signOut=true'
-            }
-        }
+        await supabase.auth.signOut()
+        setUser(null)
+        setProfile(null)
+        setSession(null)
     }
 
     return (
