@@ -69,41 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         let mounted = true;
 
-        const initializeAuth = async () => {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-            try {
-                console.log('🔐 AuthContext: Initializing user...');
-                // getUser is more reliable than getSession for SSR/Refresh scenarios
-                const { data: { user: initialUser }, error } = await supabase.auth.getUser();
-
-                if (error) {
-                    // Ignore errors on initialization, let onAuthStateChange handle it
-                    console.log('🔐 AuthContext: No initial user found/error');
-                }
-
-                if (!mounted) return;
-
-                if (initialUser) {
-                    setUser(initialUser);
-                    // Fetch profile in background
-                    fetchProfile(initialUser.id).then(profileData => {
-                        if (mounted && profileData) setProfile(profileData);
-                    });
-                }
-            } catch (error: any) {
-                console.log('🔐 AuthContext: Initialization non-critical error:', error.message);
-            } finally {
-                clearTimeout(timeoutId);
-                if (mounted) {
-                    setIsLoading(false);
-                    console.log('🔐 AuthContext: Ready');
-                }
-            }
-        };
-
-        // Subscription for subsequent changes
+        // Subscription for all changes including INITIAL_SESSION
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event: string, currentSession: any) => {
                 if (!mounted) return;
@@ -121,20 +87,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     if (mounted) setProfile(null);
                 }
 
-                if (mounted) setIsLoading(false);
+                // First event or session check finished
+                if (mounted) {
+                    setIsLoading(false);
+                    console.log('🔐 AuthContext: Ready via onAuthStateChange');
+                }
             }
         );
 
-        // Run initialization
-        initializeAuth();
-
-        // Safety timeout: If still loading after 6 seconds, force-clear it
+        // Safety timeout: If still loading after 10 seconds, force-clear it
         const safetyTimeoutId = setTimeout(() => {
             if (mounted && isLoading) {
                 console.warn('🔐 AuthContext: Loading timed out. Forcing ready state.');
                 setIsLoading(false);
             }
-        }, 6000);
+        }, 10000);
 
         return () => {
             mounted = false;
@@ -145,12 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Sign up with email and password
     const signUp = async (email: string, password: string, fullName: string) => {
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => {
-            controller.abort()
-            console.error('🔐 AuthContext: Sign up timed out')
-        }, 30000) // Increase to 30s
-
+        // No manual AbortController here to avoid internal auth locking issues
         try {
             console.log('🔐 AuthContext: Starting sign up for', email)
             const { data, error } = await supabase.auth.signUp({
@@ -164,7 +126,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 },
             })
 
-            clearTimeout(timeoutId)
             if (error) {
                 console.error('🔐 AuthContext: Sign up error:', error.message)
                 throw error
@@ -172,20 +133,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.log('🔐 AuthContext: Sign up successful')
             return { error: null }
         } catch (error: any) {
-            clearTimeout(timeoutId)
-            const errMsg = error.name === 'AbortError' ? 'Authentication timed out. Please check your connection.' : error.message
-            return { error: new Error(errMsg) }
+            return { error: new Error(error.message) }
         }
     }
 
     // Sign in with email and password
     const signIn = async (email: string, password: string) => {
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => {
-            controller.abort()
-            console.error('🔐 AuthContext: Sign in timed out')
-        }, 30000) // Increase to 30s
-
         try {
             console.log('🔐 AuthContext: Starting sign in for', email)
             const { data, error } = await supabase.auth.signInWithPassword({
@@ -193,7 +146,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 password,
             })
 
-            clearTimeout(timeoutId)
             if (error) {
                 console.error('🔐 AuthContext: Sign in error:', error.message)
                 throw error
@@ -210,9 +162,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             return { error: null }
         } catch (error: any) {
-            clearTimeout(timeoutId)
-            const errMsg = error.name === 'AbortError' ? 'Authentication timed out. Please check your connection.' : error.message
-            return { error: new Error(errMsg) }
+            return { error: new Error(error.message) }
         }
     }
 
