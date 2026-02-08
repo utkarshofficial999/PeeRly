@@ -110,12 +110,6 @@ export default function DashboardPage() {
         { label: 'Settings', icon: Settings, href: '/settings', color: 'gray' },
     ]
 
-    const statsCards = [
-        { label: 'Active Listings', value: stats.activeListings, icon: Package, color: 'primary' },
-        { label: 'Total Views', value: stats.totalViews, icon: Eye, color: 'accent' },
-        { label: 'Saved Items', value: stats.savedItems, icon: Heart, color: 'rose' },
-        { label: 'Unread Messages', value: stats.messages, icon: MessageSquare, color: 'blue' },
-    ]
 
     return (
         <div className="min-h-screen bg-dark-950">
@@ -128,26 +122,6 @@ export default function DashboardPage() {
                         <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">
                             Welcome back, {profile?.full_name?.split(' ')[0] || 'there'}! 👋
                         </h1>
-                        <p className="text-dark-400">
-                            Here&apos;s what&apos;s happening with your listings
-                        </p>
-                    </div>
-
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                        {statsCards.map((stat, index) => (
-                            <div key={index} className="glass-card p-5">
-                                <div className={`w-10 h-10 rounded-xl mb-3 flex items-center justify-center ${stat.color === 'primary' ? 'bg-primary-500/20 text-primary-400' :
-                                    stat.color === 'accent' ? 'bg-accent-500/20 text-accent-400' :
-                                        stat.color === 'rose' ? 'bg-rose-500/20 text-rose-400' :
-                                            'bg-blue-500/20 text-blue-400'
-                                    }`}>
-                                    <stat.icon className="w-5 h-5" />
-                                </div>
-                                <p className="text-2xl font-bold text-white">{stat.value}</p>
-                                <p className="text-sm text-dark-400">{stat.label}</p>
-                            </div>
-                        ))}
                     </div>
 
                     {/* Quick Actions */}
@@ -198,7 +172,7 @@ export default function DashboardPage() {
                                         href={`/listing/${listing.id}`}
                                         className="flex items-center gap-4 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all"
                                     >
-                                        <div className="w-16 h-16 rounded-lg bg-dark-700 overflow-hidden flex-shrink-0">
+                                        <div className="w-16 h-16 rounded-lg bg-dark-700 overflow-hidden flex-shrink-0 relative">
                                             {listing.images?.[0] && (
                                                 <Image
                                                     src={listing.images[0]}
