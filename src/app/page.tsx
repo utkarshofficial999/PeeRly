@@ -119,96 +119,110 @@ export default function HomePage() {
     }, [])
 
     return (
-        <div className="min-h-screen bg-dark-950 relative overflow-hidden">
-            {/* Background Decorations */}
-            <div className="glow-orb-primary w-[500px] h-[500px] -top-48 -left-48" />
-            <div className="glow-orb-accent w-[400px] h-[400px] top-1/3 -right-32" />
-            <div className="glow-orb-primary w-[300px] h-[300px] bottom-1/4 left-1/4" />
+        <div className="min-h-screen bg-surface-50 relative overflow-hidden">
+            {/* Background Accent orbs - subtle in light mode */}
+            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary-100/30 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
+            <div className="absolute bottom-1/4 left-0 w-[600px] h-[600px] bg-mint-100/20 rounded-full blur-[100px] -translate-x-1/2" />
 
             <Header />
 
             <main>
                 {/* Hero Section */}
-                <section className="relative pt-24 md:pt-32 pb-20 px-4">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="text-center max-w-4xl mx-auto">
-                            {/* Badge */}
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-500/10 border border-primary-500/20 mb-8 animate-fade-in">
-                                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                                <span className="text-sm text-primary-300">Now live at ABES Engineering College</span>
+                <section className="relative pt-32 md:pt-48 pb-20 px-4">
+                    <div className="container-custom">
+                        <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
+                            {/* Live Badge */}
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white shadow-soft border border-surface-100 mb-8 animate-in fade-in transition-all hover:scale-105 cursor-default">
+                                <span className="flex h-2 w-2 relative">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-mint-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-mint-500"></span>
+                                </span>
+                                <span className="text-xs font-black text-surface-900 tracking-wide uppercase">Live at ABES Engineering College</span>
                             </div>
 
                             {/* Heading */}
-                            <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 animate-slide-up">
-                                Buy & Sell Within Your
-                                <span className="block gradient-text">Campus Community</span>
+                            <h1 className="text-6xl md:text-8xl font-display font-extrabold text-surface-900 tracking-tight mb-8 animate-in slide-in-from-bottom-8">
+                                Buy, Sell & <span className="gradient-text">Collaborate</span>
                             </h1>
 
                             {/* Subheading */}
-                            <p className="text-xl text-dark-300 mb-10 max-w-2xl mx-auto animate-slide-up stagger-1">
-                                The trusted marketplace for college students. Trade textbooks, electronics,
-                                furniture, and more with verified peers from your own campus.
+                            <p className="text-xl md:text-2xl text-surface-700 mb-12 max-w-2xl mx-auto animate-in fade-in stagger-1 leading-relaxed font-medium">
+                                The ultimate student marketplace. Trade resources, share skills, and connect with
+                                <span className="text-primary-600 font-black px-1">verified peers</span> across your campus.
                             </p>
 
-                            {/* CTAs */}
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up stagger-2">
-                                <Link href="/browse" className="btn-primary text-lg px-8 py-4">
-                                    Start Browsing
-                                    <ArrowRight className="w-5 h-5" />
+                            {/* Main CTAs */}
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full animate-in slide-in-from-bottom-12 stagger-2">
+                                <Link href="/browse" className="btn-primary w-full sm:w-auto text-lg px-10 py-5 group shadow-button">
+                                    Start Exploring
+                                    <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                                 </Link>
-                                <Link href="/create" className="btn-secondary text-lg px-8 py-4">
-                                    Sell Something
+                                <Link href="/create" className="btn-secondary w-full sm:w-auto text-lg px-10 py-5 border-none bg-white shadow-soft hover:shadow-premium">
+                                    Post a Listing
                                 </Link>
                             </div>
 
-                            {/* Trust Indicators */}
-                            <div className="flex flex-wrap items-center justify-center gap-6 mt-12 text-sm text-dark-400 animate-fade-in stagger-3">
-                                <div className="flex items-center gap-2">
-                                    <CheckCircle className="w-5 h-5 text-emerald-400" />
-                                    <span>Verified Students Only</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Shield className="w-5 h-5 text-primary-400" />
-                                    <span>Safe & Secure</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Star className="w-5 h-5 text-amber-400" />
-                                    <span>4.9/5 User Rating</span>
-                                </div>
+                            {/* Skills/Tags Feed */}
+                            <div className="mt-16 flex flex-wrap justify-center gap-3 animate-in fade-in stagger-3">
+                                {['Notes', 'Projects', 'Electronics', 'Books', 'Services', 'Skills'].map((tag) => (
+                                    <span key={tag} className="skill-chip-primary px-5 py-2">
+                                        {tag}
+                                    </span>
+                                ))}
                             </div>
                         </div>
                     </div>
                 </section>
 
+                {/* Categories Grid */}
+                <section className="py-24 bg-white border-y border-surface-100">
+                    <div className="container-custom">
+                        <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
+                            {categories.map((cat, i) => (
+                                <Link
+                                    key={cat.name}
+                                    href={`/browse?category=${cat.name.toLowerCase()}`}
+                                    className="flex flex-col items-center gap-3 p-6 rounded-3xl transition-all hover:bg-surface-50 group hover:-translate-y-2 stagger-1"
+                                    style={{ animationDelay: `${i * 0.1}s` }}
+                                >
+                                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-white shadow-lg transition-transform group-hover:rotate-6`}>
+                                        <cat.icon className="w-8 h-8" />
+                                    </div>
+                                    <span className="text-sm font-black text-surface-900 group-hover:text-primary-600 transition-colors">{cat.name}</span>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
                 {/* Stats Section */}
-                <section className="py-12 px-4">
-                    <div className="max-w-5xl mx-auto">
-                        <div className="glass-card p-8 grid grid-cols-2 md:grid-cols-4 gap-8">
+                <section className="py-20">
+                    <div className="container-custom">
+                        <div className="bg-surface-50 rounded-[3rem] p-12 border border-surface-100 grid grid-cols-2 md:grid-cols-4 gap-12">
                             {stats.map((stat, index) => (
-                                <div key={index} className="text-center">
-                                    <div className="text-3xl md:text-4xl font-display font-bold gradient-text mb-1">
+                                <div key={index} className="text-center group">
+                                    <div className="text-4xl md:text-5xl font-display font-black text-surface-900 mb-2 transition-transform group-hover:scale-110">
                                         {stat.value}
                                     </div>
-                                    <div className="text-sm text-dark-400">{stat.label}</div>
+                                    <div className="text-xs font-bold text-primary-500 uppercase tracking-widest">{stat.label}</div>
                                 </div>
                             ))}
                         </div>
                     </div>
                 </section>
 
-
-                {/* Fresh on Campus Section */}
-                <section className="py-20 px-4 bg-dark-900/40">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="flex items-center justify-between mb-12">
+                {/* Fresh Feed */}
+                <section className="py-24 overflow-hidden">
+                    <div className="container-custom">
+                        <div className="flex items-end justify-between mb-16 px-4">
                             <div>
-                                <h2 className="text-3xl md:text-4xl font-display font-bold mb-2 text-white">
-                                    Fresh on <span className="gradient-text">Campus</span>
+                                <h2 className="text-4xl md:text-5xl font-display font-black text-surface-900 mb-4 tracking-tight">
+                                    Student <span className="gradient-text">Exclusives</span>
                                 </h2>
-                                <p className="text-dark-400">The latest items posted by students at ABES EC</p>
+                                <p className="text-surface-700 font-bold text-lg">Curated listings from your college peers</p>
                             </div>
-                            <Link href="/browse" className="hidden sm:flex items-center gap-2 text-primary-400 font-bold hover:gap-3 transition-all">
-                                View all <ArrowRight className="w-4 h-4" />
+                            <Link href="/browse" className="hidden sm:flex items-center gap-2 text-primary-600 font-bold hover:gap-3 transition-all">
+                                See Everything <ArrowRight className="w-4 h-4" />
                             </Link>
                         </div>
 
@@ -217,7 +231,7 @@ export default function HomePage() {
                                 <Loader2 className="w-12 h-12 text-primary-500 animate-spin" />
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                                 {recentListings.map((listing) => (
                                     <ListingCard
                                         key={listing.id}
@@ -238,97 +252,71 @@ export default function HomePage() {
                             </div>
                         )}
 
-                        <div className="mt-12 text-center sm:hidden">
-                            <Link href="/browse" className="btn-secondary w-full py-4 justify-center">
+                        <div className="mt-16 text-center sm:hidden w-full">
+                            <Link href="/browse" className="btn-secondary w-full py-5 rounded-2xl">
                                 View all listings
                             </Link>
                         </div>
                     </div>
                 </section>
 
-                {/* Features Section */}
-                <section className="py-20 px-4 relative">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-16">
-                            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-                                Why Students Love <span className="gradient-text">PeeRly</span>
+                {/* Features: The Social Advantage */}
+                <section className="py-24 bg-surface-900 text-white rounded-[4rem] mx-4 my-8 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary-900/50 to-transparent" />
+                    <div className="container-custom relative z-10">
+                        <div className="text-center mb-20">
+                            <h2 className="text-4xl md:text-5xl font-display font-extrabold mb-6 tracking-tight">
+                                Built for the <span className="text-mint-400">Campus Social</span>
                             </h2>
-                            <p className="text-dark-400 max-w-2xl mx-auto">
-                                Built specifically for campus communities, with features that matter
+                            <p className="text-surface-400 text-lg max-w-2xl mx-auto">
+                                PeerLY isn&apos;t just a marketplace. It&apos;s where your college network meets commerce.
                             </p>
                         </div>
 
-                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                             {features.map((feature, index) => (
-                                <div key={index} className="glass-card p-6 group hover:bg-white/10 transition-all duration-300">
-                                    <div className={`w-12 h-12 rounded-xl ${feature.bgColor} flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110`}>
-                                        <feature.icon className={`w-6 h-6 ${feature.color}`} />
+                                <div key={index} className="bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-[2.5rem] group hover:bg-white/10 transition-all duration-500">
+                                    <div className={`w-14 h-14 rounded-2xl ${feature.bgColor} flex items-center justify-center mb-6 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6`}>
+                                        <feature.icon className={`w-7 h-7 ${feature.color}`} />
                                     </div>
-                                    <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
-                                    <p className="text-dark-400 text-sm leading-relaxed">{feature.description}</p>
+                                    <h3 className="text-xl font-bold mb-3 tracking-tight">{feature.title}</h3>
+                                    <p className="text-surface-400 leading-relaxed text-sm">{feature.description}</p>
                                 </div>
                             ))}
                         </div>
                     </div>
                 </section>
 
-                {/* How It Works Section */}
-                <section className="py-20 px-4 bg-dark-900/50">
-                    <div className="max-w-5xl mx-auto">
-                        <div className="text-center mb-16">
-                            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-                                Start Trading in 3 Steps
+                {/* Testimonials */}
+                <section className="py-24">
+                    <div className="container-custom">
+                        <div className="text-center mb-20">
+                            <h2 className="text-4xl md:text-5xl font-display font-black text-surface-900 mb-6 racking-tight">
+                                Trusted by <span className="text-primary-600">Students</span>
                             </h2>
-                            <p className="text-dark-400">It&apos;s as simple as 1-2-3</p>
+                            <p className="text-surface-400 text-lg">Join the thousands of peers trading on PeerLY</p>
                         </div>
 
                         <div className="grid md:grid-cols-3 gap-8">
-                            {[
-                                { step: '01', title: 'Sign Up', desc: 'Create account with your college email and get verified instantly' },
-                                { step: '02', title: 'List or Browse', desc: 'Post what you want to sell or find great deals from peers' },
-                                { step: '03', title: 'Meet & Trade', desc: 'Chat with the other party and meet on campus to complete the deal' },
-                            ].map((item, index) => (
-                                <div key={index} className="relative text-center">
-                                    <div className="text-7xl font-display font-bold text-dark-800 mb-4">{item.step}</div>
-                                    <h3 className="text-xl font-semibold text-white mb-2 -mt-8 relative">{item.title}</h3>
-                                    <p className="text-dark-400">{item.desc}</p>
-                                    {index < 2 && (
-                                        <div className="hidden md:block absolute top-8 right-0 translate-x-1/2">
-                                            <ArrowRight className="w-8 h-8 text-dark-700" />
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
-                {/* Testimonials Section */}
-                <section className="py-20 px-4">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-12">
-                            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-                                What Students Say
-                            </h2>
-                            <p className="text-dark-400">Join thousands of happy students</p>
-                        </div>
-
-                        <div className="grid md:grid-cols-3 gap-6">
                             {testimonials.map((testimonial, index) => (
-                                <div key={index} className="glass-card p-6">
-                                    <div className="flex items-center gap-1 mb-4">
-                                        {[...Array(5)].map((_, i) => (
-                                            <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                                        ))}
+                                <div key={index} className="premium-card p-10 flex flex-col justify-between hover:-translate-y-2 transition-all">
+                                    <div>
+                                        <div className="flex items-center gap-1 mb-8">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star key={i} className="w-4 h-4 fill-peach-400 text-peach-400" />
+                                            ))}
+                                        </div>
+                                        <p className="text-surface-900 text-lg font-medium leading-relaxed italic mb-8">
+                                            &ldquo;{testimonial.quote}&rdquo;
+                                        </p>
                                     </div>
-                                    <p className="text-dark-200 mb-6 leading-relaxed">{testimonial.quote}</p>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-sm font-semibold text-white">
+                                    <div className="flex items-center gap-4 pt-8 border-t border-surface-100">
+                                        <div className="w-12 h-12 rounded-2xl bg-gradient-primary flex items-center justify-center text-sm font-black text-white shadow-soft">
                                             {testimonial.avatar}
                                         </div>
                                         <div>
-                                            <div className="font-medium text-white">{testimonial.author}</div>
-                                            <div className="text-sm text-dark-400">{testimonial.role}</div>
+                                            <div className="font-bold text-surface-900">{testimonial.author}</div>
+                                            <div className="text-xs font-bold text-primary-500 uppercase tracking-widest">{testimonial.role}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -337,27 +325,26 @@ export default function HomePage() {
                     </div>
                 </section>
 
-                {/* CTA Section */}
-                <section className="py-20 px-4">
-                    <div className="max-w-4xl mx-auto">
-                        <div className="gradient-border glass-card p-12 text-center relative overflow-hidden">
-                            <div className="glow-orb-primary w-64 h-64 -top-32 -right-32 opacity-30" />
-                            <div className="glow-orb-accent w-48 h-48 -bottom-24 -left-24 opacity-30" />
+                {/* Final CTA */}
+                <section className="py-32">
+                    <div className="container-custom">
+                        <div className="bg-gradient-primary rounded-[4rem] p-16 md:p-24 text-center relative overflow-hidden shadow-premium">
+                            <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
+                            <div className="absolute bottom-0 left-0 w-64 h-64 bg-mint-400/20 rounded-full blur-[60px] translate-y-1/2 -translate-x-1/4" />
 
-                            <div className="relative">
-                                <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-                                    Ready to Start Trading?
+                            <div className="relative z-10 max-w-3xl mx-auto">
+                                <h2 className="text-4xl md:text-6xl font-display font-black text-white mb-8 tracking-tighter">
+                                    Ready to Elevate Your Campus Experience?
                                 </h2>
-                                <p className="text-dark-300 mb-8 max-w-xl mx-auto">
-                                    Join your campus community today and discover amazing deals from fellow students.
+                                <p className="text-primary-100 text-xl mb-12 font-medium">
+                                    Connect with your peers, unlock hidden deals, and build your campus network today.
                                 </p>
-                                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                    <Link href="/signup" className="btn-primary text-lg px-8 py-4">
-                                        Create Free Account
-                                        <ArrowRight className="w-5 h-5" />
+                                <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                                    <Link href="/signup" className="btn-secondary border-none bg-white text-primary-600 text-lg px-12 py-5 shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all">
+                                        Join PeerLY Now
                                     </Link>
-                                    <Link href="/browse" className="btn-secondary text-lg px-8 py-4">
-                                        Browse Listings
+                                    <Link href="/browse" className="btn-primary bg-primary-900/30 border border-white/20 text-white text-lg px-12 py-5 hover:bg-primary-900/50 shadow-none transition-all">
+                                        Browse Feed
                                     </Link>
                                 </div>
                             </div>

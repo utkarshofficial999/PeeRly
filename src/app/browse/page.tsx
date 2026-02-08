@@ -14,14 +14,17 @@ const BrowseContent = nextDynamic(() => import('./BrowseContent'), { ssr: false 
 
 function LoadingFallback() {
     return (
-        <div className="min-h-screen bg-dark-950">
+        <div className="min-h-screen bg-surface-50 flex flex-col">
             <Header />
-            <main className="pt-20 md:pt-28 pb-16 px-4">
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex flex-col items-center justify-center py-20">
-                        <Loader2 className="w-12 h-12 text-primary-500 animate-spin mb-4" />
-                        <p className="text-dark-400">Loading browse page...</p>
+            <main className="flex-1 flex items-center justify-center pt-20">
+                <div className="text-center">
+                    <div className="relative mb-6">
+                        <div className="w-16 h-16 border-4 border-primary-100 border-t-primary-500 rounded-full animate-spin mx-auto" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse" />
+                        </div>
                     </div>
+                    <p className="text-surface-400 font-bold tracking-widest uppercase text-xs">Summoning Feed...</p>
                 </div>
             </main>
             <Footer />

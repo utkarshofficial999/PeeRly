@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import { MessageSquare, Heart, Share2, MapPin, Clock, Eye, User } from 'lucide-react'
+import { MessageSquare, Heart, Share2, MapPin, Clock, Eye, User, AlertCircle, ArrowRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/context/AuthContext'
 import { formatPrice, formatRelativeTime, CONDITIONS } from '@/lib/utils'
@@ -261,12 +261,17 @@ export default function ListingDetailPage() {
     // Render based on status
     if (status === 'idle' || status === 'loading') {
         return (
-            <div className="min-h-screen bg-dark-950 flex flex-col">
+            <div className="min-h-screen bg-surface-50 flex flex-col">
                 <Header />
                 <main className="flex-1 flex items-center justify-center">
                     <div className="text-center">
-                        <div className="inline-block w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                        <p className="text-dark-400">Loading listing...</p>
+                        <div className="relative mb-6">
+                            <div className="w-16 h-16 border-4 border-primary-100 border-t-primary-500 rounded-full animate-spin mx-auto" />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse" />
+                            </div>
+                        </div>
+                        <p className="text-surface-400 font-bold tracking-widest uppercase text-xs">Summoning Details...</p>
                     </div>
                 </main>
                 <Footer />
@@ -276,20 +281,19 @@ export default function ListingDetailPage() {
 
     if (status === 'error' || !listing) {
         return (
-            <div className="min-h-screen bg-dark-950 flex flex-col">
+            <div className="min-h-screen bg-surface-50 flex flex-col">
                 <Header />
                 <main className="flex-1 flex items-center justify-center px-4">
-                    <div className="max-w-md w-full text-center glass-card p-8">
-                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-yellow-500/10 flex items-center justify-center">
-                            <svg className="w-8 h-8 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
+                    <div className="max-w-md w-full text-center bg-white p-12 rounded-[2.5rem] shadow-premium border border-surface-100">
+                        <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-peach-50 text-peach-500 flex items-center justify-center">
+                            <AlertCircle className="w-10 h-10" />
                         </div>
-                        <h1 className="text-2xl font-bold text-white mb-2">Listing Not Found</h1>
-                        <p className="text-dark-400 mb-2">{errorMsg || 'This listing might have been removed.'}</p>
-                        <p className="text-dark-500 text-sm mb-6">ID: {id}</p>
-                        <Link href="/browse" className="btn-primary inline-block">
-                            Back to Browse
+                        <h1 className="text-3xl font-black text-surface-900 mb-2">Artifact Missing</h1>
+                        <p className="text-surface-400 font-medium mb-8 leading-relaxed">
+                            {errorMsg || 'This listing might have been moved to the campus archives.'}
+                        </p>
+                        <Link href="/browse" className="btn-primary w-full py-4 rounded-2xl">
+                            Return to Feed
                         </Link>
                     </div>
                 </main>
@@ -303,25 +307,29 @@ export default function ListingDetailPage() {
     const isOwnListing = user?.id === listing.seller_id
 
     return (
-        <div className="min-h-screen bg-dark-950 flex flex-col">
+        <div className="min-h-screen bg-surface-50 flex flex-col relative overflow-hidden">
+            {/* Background Orbs */}
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-100/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+
             <Header />
-            <main className="flex-1 container-custom pt-24 md:pt-28 pb-12">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <main className="flex-1 container-custom pt-32 md:pt-40 pb-20">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                     {/* Left: Images */}
-                    <div className="space-y-4">
-                        <div className="relative aspect-square rounded-3xl overflow-hidden bg-dark-900">
+                    <div className="space-y-6">
+                        <div className="relative aspect-[4/3] rounded-[2.5rem] overflow-hidden bg-white shadow-premium border border-surface-100 group">
                             {images.length > 0 ? (
                                 <Image
                                     src={images[activeImage]}
                                     alt={listing.title}
                                     fill
-                                    className="object-cover"
+                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                                     priority
                                     sizes="(max-width: 768px) 100vw, 50vw"
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                    <p className="text-dark-500">No image available</p>
+                                <div className="w-full h-full flex flex-col items-center justify-center bg-surface-50">
+                                    <div className="text-6xl mb-4">📸</div>
+                                    <p className="text-surface-400 font-bold uppercase tracking-widest text-xs">No Visual Evidence</p>
                                 </div>
                             )}
                         </div>
@@ -332,7 +340,9 @@ export default function ListingDetailPage() {
                                     <button
                                         key={idx}
                                         onClick={() => setActiveImage(idx)}
-                                        className={`relative aspect-square rounded-xl overflow-hidden transition-all ${activeImage === idx ? 'ring-2 ring-primary-500 scale-95' : 'hover:opacity-80'
+                                        className={`relative aspect-square rounded-2xl overflow-hidden transition-all shadow-soft border-2 ${activeImage === idx
+                                            ? 'border-primary-500 scale-95 shadow-lg shadow-primary-500/20'
+                                            : 'border-transparent hover:border-primary-200'
                                             }`}
                                     >
                                         <Image src={img} alt={`${listing.title} ${idx + 1}`} fill className="object-cover" sizes="150px" />
@@ -343,101 +353,112 @@ export default function ListingDetailPage() {
                     </div>
 
                     {/* Right: Details */}
-                    <div className="space-y-6">
+                    <div className="space-y-8">
                         <div>
-                            <div className="flex items-start justify-between mb-2">
-                                <h1 className="text-3xl font-bold text-white">{listing.title}</h1>
-                                <span className="text-3xl font-bold text-primary-500">{formatPrice(listing.price)}</span>
-                            </div>
-                            <div className="flex items-center gap-4 text-sm text-dark-400">
-                                <span className="flex items-center gap-1">
-                                    <Clock className="w-4 h-4" />
-                                    {formatRelativeTime(listing.created_at)}
+                            <div className="flex flex-wrap items-center gap-3 mb-6">
+                                <span className="px-4 py-1.5 rounded-2xl bg-mint-50 text-mint-600 border border-mint-100 text-xs font-black uppercase tracking-wider">
+                                    {CONDITIONS[listing.condition as keyof typeof CONDITIONS]?.label || listing.condition}
                                 </span>
-                                <span className="flex items-center gap-1">
-                                    <Eye className="w-4 h-4" />
-                                    {listing.views_count || 0} views
+                                <span className="flex items-center gap-1.5 text-xs font-bold text-surface-400 uppercase tracking-widest">
+                                    <MapPin className="w-3.5 h-3.5 text-primary-500" />
+                                    {listing.college?.name || 'CAMPUS'}
                                 </span>
                             </div>
-                        </div>
 
-                        <div className="flex items-center gap-2">
-                            <span className="text-dark-400">Condition:</span>
-                            <span className="px-3 py-1 rounded-full bg-primary-500/10 text-primary-500 text-sm font-medium">
-                                {CONDITIONS[listing.condition as keyof typeof CONDITIONS]?.label || listing.condition}
-                            </span>
-                        </div>
+                            <h1 className="text-4xl md:text-5xl font-display font-black text-surface-900 mb-4 tracking-tight leading-tight">
+                                {listing.title}
+                            </h1>
 
-                        {listing.seller && (
-                            <div className="glass-card p-4 flex items-center gap-4">
-                                <div className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-white/10 flex-shrink-0">
-                                    {listing.seller.avatar_url ? (
-                                        <Image
-                                            src={listing.seller.avatar_url}
-                                            alt={listing.seller.full_name || 'Seller'}
-                                            fill
-                                            className="object-cover"
-                                            sizes="48px"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-semibold">
-                                            {listing.seller.full_name?.charAt(0) || 'U'}
-                                        </div>
-                                    )}
+                            <div className="flex items-center gap-6">
+                                <span className="text-4xl font-black gradient-text">
+                                    {formatPrice(listing.price)}
+                                </span>
+                                <div className="h-8 w-px bg-surface-100" />
+                                <div className="flex items-center gap-4 text-xs font-bold text-surface-400 uppercase tracking-tighter">
+                                    <span className="flex items-center gap-1.5">
+                                        <Clock className="w-3.5 h-3.5" />
+                                        {formatRelativeTime(listing.created_at)}
+                                    </span>
+                                    <span className="flex items-center gap-1.5">
+                                        <Eye className="w-3.5 h-3.5" />
+                                        {listing.views_count || 0} Scouts
+                                    </span>
                                 </div>
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-1.5 mb-0.5">
-                                        <p className="text-white font-medium">{listing.seller.full_name || 'Unknown Seller'}</p>
-                                        {listing.seller.is_verified && (
-                                            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-blue-500/10 text-[10px] font-bold text-blue-400 border border-blue-500/20">
-                                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.64.304 1.24.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                                </svg>
-                                                Verified Student
+                            </div>
+                        </div>
+
+                        {/* Seller Card */}
+                        {listing.seller && (
+                            <div className="bg-white p-6 rounded-[2rem] shadow-soft border border-surface-100 flex items-center justify-between group hover:shadow-premium hover:-translate-y-1 transition-all">
+                                <div className="flex items-center gap-4">
+                                    <div className="relative w-14 h-14 rounded-2xl overflow-hidden shadow-soft shrink-0 border border-surface-50">
+                                        {listing.seller.avatar_url ? (
+                                            <Image
+                                                src={listing.seller.avatar_url}
+                                                alt={listing.seller.full_name || 'Seller'}
+                                                fill
+                                                className="object-cover"
+                                                sizes="56px"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full bg-gradient-primary flex items-center justify-center text-white font-black text-xl">
+                                                {listing.seller.full_name?.charAt(0) || 'U'}
                                             </div>
                                         )}
                                     </div>
-                                    {listing.college && (
-                                        <p className="text-sm text-dark-400 flex items-center gap-1">
-                                            <MapPin className="w-3 h-3" />
-                                            {listing.college.name}
-                                        </p>
-                                    )}
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-0.5">
+                                            <p className="text-surface-900 font-bold text-lg">{listing.seller.full_name || 'Sophomore Seller'}</p>
+                                            {listing.seller.is_verified && (
+                                                <div className="flex items-center gap-1 text-primary-500">
+                                                    <svg className="w-5 h-5 fill-current" viewBox="0 0 20 20">
+                                                        <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.64.304 1.24.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                                    </svg>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <p className="text-xs font-bold text-mint-600 uppercase tracking-widest">Master Student</p>
+                                    </div>
                                 </div>
+                                <ArrowRight className="w-6 h-6 text-surface-200 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
                             </div>
                         )}
 
-                        <div className="glass-card p-6">
-                            <h2 className="text-xl font-semibold text-white mb-3">Description</h2>
-                            <p className="text-dark-300 whitespace-pre-wrap">{listing.description}</p>
+                        <div className="bg-white p-8 rounded-[2rem] shadow-soft border border-surface-100">
+                            <h2 className="text-xs font-black text-primary-500 uppercase tracking-[0.2em] mb-4">Original Memo</h2>
+                            <p className="text-surface-600 font-medium leading-relaxed whitespace-pre-wrap">{listing.description}</p>
                         </div>
 
                         {!isOwnListing && (
                             <div className="flex gap-4">
-                                <button onClick={handleChat} className="flex-1 btn-primary py-4 text-lg justify-center gap-3">
+                                <button onClick={handleChat} className="flex-1 btn-primary py-5 text-lg font-black justify-center gap-3 rounded-[1.5rem] shadow-button">
                                     <MessageSquare className="w-6 h-6" />
-                                    Chat with Seller
+                                    Initiate Connection
                                 </button>
                                 <button
                                     onClick={toggleSave}
-                                    className={`w-16 rounded-2xl border-2 flex items-center justify-center transition-all ${isSaved ? 'bg-rose-500 border-rose-500 text-white' : 'border-white/10 text-dark-400 hover:border-white/30 hover:text-white'
+                                    className={`w-20 h-16 rounded-2xl border-2 flex items-center justify-center transition-all ${isSaved
+                                        ? 'bg-peach-50 border-peach-200 text-peach-500 shadow-lg shadow-peach-500/10'
+                                        : 'bg-white border-surface-100 text-surface-400 hover:border-peach-200 hover:bg-peach-50 hover:text-peach-400'
                                         }`}
                                 >
-                                    <Heart className={`w-6 h-6 ${isSaved ? 'fill-current' : ''}`} />
+                                    <Heart className={`w-7 h-7 ${isSaved ? 'fill-current' : ''}`} />
                                 </button>
-                                <button className="w-16 rounded-2xl border-2 border-white/10 flex items-center justify-center text-dark-400 hover:border-white/30 hover:text-white transition-all">
-                                    <Share2 className="w-6 h-6" />
+                                <button className="w-20 h-16 rounded-2xl border-2 border-surface-100 bg-white text-surface-400 hover:border-primary-200 hover:bg-primary-50 hover:text-primary-500 transition-all">
+                                    <Share2 className="w-7 h-7" />
                                 </button>
                             </div>
                         )}
 
                         {isOwnListing && (
-                            <div className="glass-card p-6 text-center">
-                                <User className="w-12 h-12 mx-auto mb-3 text-primary-500" />
-                                <p className="text-white font-medium mb-1">This is your listing</p>
-                                <p className="text-dark-400 text-sm">You can manage it from your dashboard</p>
-                                <Link href="/dashboard" className="btn-secondary mt-4 inline-block">
-                                    Go to Dashboard
+                            <div className="bg-primary-50 p-8 rounded-[2rem] border border-primary-100 text-center">
+                                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-soft">
+                                    <User className="w-8 h-8 text-primary-500" />
+                                </div>
+                                <p className="text-primary-900 font-black text-xl mb-1">Your Portfolio Piece</p>
+                                <p className="text-primary-600 font-medium text-sm mb-6">This listing is under your stewardship.</p>
+                                <Link href="/dashboard" className="btn-primary py-3 px-8 text-sm">
+                                    Manage from Dashboard
                                 </Link>
                             </div>
                         )}

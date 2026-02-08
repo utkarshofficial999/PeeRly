@@ -128,30 +128,30 @@ export default function Header() {
     return (
         <header className="fixed top-0 left-0 right-0 z-50">
             <div className="mx-0 md:mx-4 md:mt-4 mt-0">
-                <nav className="glass-card px-4 md:px-6 py-3 md:py-4 max-w-7xl mx-auto rounded-none md:rounded-2xl border-x-0 md:border">
+                <nav className="soft-glass px-4 md:px-6 py-3 md:py-3 max-w-7xl mx-auto rounded-none md:rounded-3xl shadow-soft md:border-white/40">
                     <div className="flex items-center justify-between">
                         {/* Logo */}
                         <Link href="/" className="flex items-center gap-2 group">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3">
+                            <div className="w-10 h-10 rounded-2xl bg-gradient-primary flex items-center justify-center transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3 shadow-button">
                                 <span className="text-xl font-bold text-white">P</span>
                             </div>
-                            <span className="text-xl font-display font-bold text-white">
-                                Pee<span className="text-primary-400">Rly</span>
+                            <span className="text-xl font-display font-bold text-surface-900">
+                                Peer<span className="text-primary-500">LY</span>
                             </span>
                         </Link>
 
                         {/* Desktop Navigation */}
-                        <div className="hidden md:flex items-center gap-1">
-                            <Link href="/browse" className="px-4 py-2 text-dark-300 hover:text-white rounded-lg hover:bg-white/5 transition-all">
+                        <div className="hidden lg:flex items-center gap-1">
+                            <Link href="/browse" className="nav-link">
                                 Browse
                             </Link>
-                            <Link href="/browse?category=textbooks" className="px-4 py-2 text-dark-300 hover:text-white rounded-lg hover:bg-white/5 transition-all">
+                            <Link href="/browse?category=textbooks" className="nav-link">
                                 Textbooks
                             </Link>
-                            <Link href="/browse?category=electronics" className="px-4 py-2 text-dark-300 hover:text-white rounded-lg hover:bg-white/5 transition-all">
+                            <Link href="/browse?category=electronics" className="nav-link">
                                 Electronics
                             </Link>
-                            <Link href="/how-it-works" className="px-4 py-2 text-dark-300 hover:text-white rounded-lg hover:bg-white/5 transition-all">
+                            <Link href="/how-it-works" className="nav-link">
                                 How It Works
                             </Link>
                         </div>
@@ -159,48 +159,48 @@ export default function Header() {
                         {/* Desktop Actions */}
                         <div className="hidden md:flex items-center gap-3">
                             {/* Search */}
-                            <button className="p-2.5 text-dark-300 hover:text-white rounded-xl hover:bg-white/5 transition-all">
+                            <button className="p-2.5 text-surface-600 hover:text-primary-600 rounded-xl hover:bg-primary-50 transition-all">
                                 <Search className="w-5 h-5" />
                             </button>
 
                             {isLoading ? (
-                                <div className="w-10 h-10 rounded-xl bg-dark-700 animate-pulse" />
+                                <div className="w-10 h-10 rounded-xl bg-surface-100 animate-pulse" />
                             ) : user ? (
                                 <>
                                     {/* Notifications */}
-                                    <button className="p-2.5 text-dark-300 hover:text-white rounded-xl hover:bg-white/5 transition-all relative">
+                                    <button className="p-2.5 text-surface-600 hover:text-primary-600 rounded-xl hover:bg-primary-50 transition-all relative">
                                         <Bell className="w-5 h-5" />
                                     </button>
                                     {/* Messages */}
-                                    <Link href="/messages" className="p-2.5 text-dark-300 hover:text-white rounded-xl hover:bg-white/5 transition-all relative">
+                                    <Link href="/messages" className="p-2.5 text-surface-600 hover:text-primary-600 rounded-xl hover:bg-primary-50 transition-all relative">
                                         <MessageSquare className="w-5 h-5" />
                                         {unreadCount > 0 && (
-                                            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-gradient-to-r from-rose-500 to-pink-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-lg shadow-rose-500/30 animate-pulse">
+                                            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-peach-400 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-lg shadow-peach-400/30">
                                                 {unreadCount > 9 ? '9+' : unreadCount}
                                             </span>
                                         )}
                                     </Link>
                                     {/* Sell Button */}
-                                    <Link href="/create" className="btn-primary py-2.5 px-4">
+                                    <Link href="/create" className="btn-primary py-2.5 px-6 rounded-2xl">
                                         <Plus className="w-4 h-4" />
-                                        Sell
+                                        Post
                                     </Link>
                                     {/* Profile Dropdown */}
                                     <div className="relative">
                                         <button
                                             onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                            className="w-10 h-10 rounded-xl overflow-hidden hover:opacity-90 transition-opacity ring-2 ring-white/10 hover:ring-primary-500/50"
+                                            className="w-11 h-11 rounded-2xl overflow-hidden hover:opacity-90 transition-opacity ring-2 ring-primary-500/10 hover:ring-primary-500 shadow-soft"
                                         >
                                             {profile?.avatar_url ? (
                                                 <NextImage
                                                     src={profile.avatar_url}
                                                     alt="Profile"
-                                                    width={40}
-                                                    height={40}
+                                                    width={44}
+                                                    height={44}
                                                     className="object-cover w-full h-full"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-semibold">
+                                                <div className="w-full h-full bg-gradient-primary flex items-center justify-center text-white font-semibold">
                                                     {profile?.full_name ? getInitials(profile.full_name) : 'U'}
                                                 </div>
                                             )}
@@ -213,22 +213,30 @@ export default function Header() {
                                                     className="fixed inset-0 z-40"
                                                     onClick={() => setIsProfileOpen(false)}
                                                 />
-                                                <div className="absolute right-0 top-full mt-2 w-48 py-2 glass-card z-50 animate-fade-in">
-                                                    <div className="px-4 py-2 border-b border-white/10">
-                                                        <p className="text-sm font-medium text-white truncate">{profile?.full_name}</p>
-                                                        <p className="text-xs text-dark-400 truncate">{user.email}</p>
+                                                <div className="absolute right-0 top-full mt-3 w-56 p-2 bg-white rounded-3xl shadow-premium z-50 animate-in fade-in slide-in-from-top-1">
+                                                    <div className="px-4 py-3 border-b border-surface-100 mb-1">
+                                                        <p className="text-sm font-black text-surface-900 truncate">{profile?.full_name}</p>
+                                                        <p className="text-xs font-bold text-surface-600 truncate mt-0.5">{user.email}</p>
                                                     </div>
                                                     <Link
                                                         href="/dashboard"
                                                         onClick={() => setIsProfileOpen(false)}
-                                                        className="flex items-center gap-2 px-4 py-2 text-dark-300 hover:text-white hover:bg-white/5 transition-all"
+                                                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-surface-700 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all"
                                                     >
-                                                        <User className="w-4 h-4" />
+                                                        <User className="w-4 h-4 text-primary-500" />
                                                         Dashboard
+                                                    </Link>
+                                                    <Link
+                                                        href="/settings"
+                                                        onClick={() => setIsProfileOpen(false)}
+                                                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-surface-700 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all"
+                                                    >
+                                                        <Plus className="w-4 h-4 text-primary-500" />
+                                                        Account Settings
                                                     </Link>
                                                     <button
                                                         onClick={handleSignOut}
-                                                        className="w-full flex items-center gap-2 px-4 py-2 text-red-400 hover:text-red-300 hover:bg-white/5 transition-all"
+                                                        className="w-full mt-1 flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-peach-500 hover:bg-peach-50 rounded-xl transition-all"
                                                     >
                                                         <LogOut className="w-4 h-4" />
                                                         Sign Out
@@ -240,12 +248,12 @@ export default function Header() {
                                 </>
                             ) : (
                                 <div className="flex items-center gap-3">
-                                    <a href="/login" className="btn-secondary py-2.5 px-5 cursor-pointer">
+                                    <Link href="/login" className="btn-secondary py-2.5 px-6 border-none hover:bg-primary-50 hover:text-primary-600">
                                         Log In
-                                    </a>
-                                    <a href="/signup" className="btn-primary py-2.5 px-5 cursor-pointer">
-                                        Sign Up
-                                    </a>
+                                    </Link>
+                                    <Link href="/signup" className="btn-primary py-2.5 px-6">
+                                        Join PeerLY
+                                    </Link>
                                 </div>
                             )}
                         </div>
@@ -253,7 +261,7 @@ export default function Header() {
                         {/* Mobile Menu Button */}
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            className="md:hidden p-2 text-dark-300 hover:text-white rounded-lg hover:bg-white/5 transition-all"
+                            className="lg:hidden p-2 text-surface-700 hover:text-primary-600 rounded-xl hover:bg-primary-50 transition-all"
                         >
                             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                         </button>
@@ -261,57 +269,57 @@ export default function Header() {
 
                     {/* Mobile Menu */}
                     {isMenuOpen && (
-                        <div className="md:hidden pt-4 mt-4 border-t border-white/10 animate-slide-down">
-                            <div className="flex flex-col gap-2">
-                                <Link href="/browse" className="px-4 py-3 text-dark-200 hover:text-white rounded-lg hover:bg-white/5 transition-all">
+                        <div className="lg:hidden pt-4 mt-4 border-t border-surface-100 animate-slide-down">
+                            <div className="flex flex-col gap-2 p-2">
+                                <Link href="/browse" className="nav-link !flex items-center py-3">
                                     Browse All
                                 </Link>
-                                <Link href="/browse?category=textbooks" className="px-4 py-3 text-dark-200 hover:text-white rounded-lg hover:bg-white/5 transition-all">
+                                <Link href="/browse?category=textbooks" className="nav-link !flex items-center py-3">
                                     Textbooks
                                 </Link>
-                                <Link href="/browse?category=electronics" className="px-4 py-3 text-dark-200 hover:text-white rounded-lg hover:bg-white/5 transition-all">
+                                <Link href="/browse?category=electronics" className="nav-link !flex items-center py-3">
                                     Electronics
                                 </Link>
-                                <Link href="/how-it-works" className="px-4 py-3 text-dark-200 hover:text-white rounded-lg hover:bg-white/5 transition-all">
+                                <Link href="/how-it-works" className="nav-link !flex items-center py-3">
                                     How It Works
                                 </Link>
-                                <hr className="border-white/10 my-2" />
+                                <hr className="border-surface-100 my-2" />
                                 {user ? (
                                     <>
                                         <Link href="/create" className="btn-primary justify-center">
                                             <Plus className="w-4 h-4" />
-                                            Sell Something
+                                            Post Listing
                                         </Link>
-                                        <Link href="/messages" className="btn-secondary justify-center relative">
-                                            <MessageSquare className="w-4 h-4" />
-                                            Messages
-                                            {unreadCount > 0 && (
-                                                <span className="ml-2 min-w-[20px] h-[20px] bg-gradient-to-r from-rose-500 to-pink-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
-                                                    {unreadCount > 9 ? '9+' : unreadCount}
-                                                </span>
-                                            )}
-                                        </Link>
-                                        <Link href="/dashboard" className="btn-secondary justify-center">
-                                            <User className="w-4 h-4" />
-                                            Dashboard
-                                        </Link>
+                                        <div className="grid grid-cols-2 gap-2 mt-2">
+                                            <Link href="/messages" className="btn-secondary justify-center py-3 text-sm px-4">
+                                                Messages
+                                                {unreadCount > 0 && (
+                                                    <span className="ml-1 bg-peach-400 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center">
+                                                        {unreadCount}
+                                                    </span>
+                                                )}
+                                            </Link>
+                                            <Link href="/dashboard" className="btn-secondary justify-center py-3 text-sm px-4">
+                                                Dashboard
+                                            </Link>
+                                        </div>
                                         <button
                                             onClick={handleSignOut}
-                                            className="btn-secondary justify-center text-red-400 border-red-400/20 hover:bg-red-500/10"
+                                            className="btn-secondary mt-2 justify-center text-peach-500 border-peach-100 hover:bg-peach-50"
                                         >
                                             <LogOut className="w-4 h-4" />
                                             Sign Out
                                         </button>
                                     </>
                                 ) : (
-                                    <>
-                                        <a href="/login" className="btn-secondary justify-center">
+                                    <div className="flex flex-col gap-3">
+                                        <Link href="/login" className="btn-secondary justify-center">
                                             Log In
-                                        </a>
-                                        <a href="/signup" className="btn-primary justify-center">
-                                            Sign Up Free
-                                        </a>
-                                    </>
+                                        </Link>
+                                        <Link href="/signup" className="btn-primary justify-center">
+                                            Get Started
+                                        </Link>
+                                    </div>
                                 )}
                             </div>
                         </div>

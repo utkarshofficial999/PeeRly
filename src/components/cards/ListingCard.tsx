@@ -39,15 +39,15 @@ export default function ListingCard({
     const initials = sellerName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
 
     return (
-        <Link href={`/listing/${id}`} className="listing-card group block">
+        <Link href={`/listing/${id}`} className="premium-card-hover group block overflow-hidden">
             {/* Image Container */}
-            <div className="relative aspect-square overflow-hidden bg-dark-800">
+            <div className="relative aspect-[4/3] overflow-hidden bg-surface-100">
                 <Image
                     src={imageUrl}
                     alt={title}
                     fill
-                    className="listing-card-image object-cover"
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 25vw"
                 />
 
                 {/* Save Button */}
@@ -58,81 +58,80 @@ export default function ListingCard({
                             e.stopPropagation()
                             onSave()
                         }}
-                        className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 ${isSaved
-                            ? 'bg-accent-500 text-white'
-                            : 'bg-black/40 backdrop-blur-sm text-white hover:bg-accent-500'
+                        className={`absolute top-4 right-4 w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300 ${isSaved
+                            ? 'bg-peach-400 text-white shadow-lg shadow-peach-400/30'
+                            : 'bg-white/80 backdrop-blur-md text-surface-400 hover:text-peach-400 shadow-soft'
                             }`}
                     >
-                        <Heart className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
+                        <Heart className={`w-5 h-5 ${isSaved ? 'fill-current' : ''}`} />
                     </button>
                 )}
 
                 {/* Condition Badge */}
-                <div className={`absolute bottom-3 left-3 px-2.5 py-1 rounded-full text-xs font-medium ${conditionInfo.bg} ${conditionInfo.color} backdrop-blur-sm`}>
-                    {conditionInfo.label}
+                <div className="absolute bottom-4 left-4">
+                    <span className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider backdrop-blur-md shadow-sm border ${conditionInfo.bg.replace('bg-', 'bg-').replace('-500', '-500/80')} ${conditionInfo.color.replace('text-', 'text-')} border-white/20`}>
+                        {conditionInfo.label}
+                    </span>
                 </div>
             </div>
 
             {/* Content */}
-            <div className="p-4">
+            <div className="p-5">
+                {/* College & Time */}
+                <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-bold text-primary-600 uppercase tracking-widest truncate max-w-[120px]">
+                        {collegeName || 'CAMPUS'}
+                    </span>
+                    <span className="text-[10px] font-black text-surface-600 uppercase tracking-tighter">
+                        {formatRelativeTime(createdAt)}
+                    </span>
+                </div>
+
                 {/* Title */}
-                <h3 className="font-semibold text-white truncate mb-1 group-hover:text-primary-400 transition-colors">
+                <h3 className="font-bold text-surface-900 text-lg leading-tight mb-2 line-clamp-2 group-hover:text-primary-600 transition-colors">
                     {title}
                 </h3>
 
                 {/* Price */}
-                <div className="text-xl font-bold gradient-text mb-3">
+                <div className="text-2xl font-black gradient-text mb-4">
                     {formatPrice(price)}
                 </div>
 
                 {/* Seller Info */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 min-w-0">
+                <div className="pt-4 border-t border-surface-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5 min-w-0">
                         {sellerAvatar ? (
-                            <div className="relative w-6 h-6 rounded-full overflow-hidden shrink-0">
+                            <div className="relative w-7 h-7 rounded-xl overflow-hidden shrink-0 border border-surface-100 shadow-sm">
                                 <Image
                                     src={sellerAvatar}
                                     alt={sellerName}
                                     fill
                                     className="object-cover"
-                                    sizes="24px"
+                                    sizes="28px"
                                 />
                             </div>
                         ) : (
-                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-[10px] font-semibold text-white">
+                            <div className="w-7 h-7 rounded-xl bg-gradient-primary flex items-center justify-center text-[10px] font-bold text-white shadow-soft">
                                 {initials}
                             </div>
                         )}
-                        <div className="flex flex-col min-w-0">
-                            <div className="flex items-center gap-1">
-                                <span className="text-sm text-white font-medium truncate">{sellerName}</span>
-                                {isVerified && (
-                                    <svg className="w-3.5 h-3.5 text-blue-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.64.304 1.24.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                )}
-                            </div>
+                        <div className="flex items-center gap-1 min-w-0">
+                            <span className="text-sm text-surface-900 font-black truncate">{sellerName}</span>
+                            {isVerified && (
+                                <svg className="w-3.5 h-3.5 text-primary-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.64.304 1.24.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                            )}
                         </div>
                     </div>
 
-                    {/* Meta */}
-                    <div className="flex items-center gap-3 text-xs text-dark-500">
-                        {viewsCount > 0 && (
-                            <span className="flex items-center gap-1">
-                                <Eye className="w-3 h-3" />
-                                {viewsCount}
-                            </span>
-                        )}
-                        <span>{formatRelativeTime(createdAt)}</span>
-                    </div>
+                    {viewsCount > 0 && (
+                        <div className="flex items-center gap-1.5 text-surface-500">
+                            <Eye className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-black">{viewsCount}</span>
+                        </div>
+                    )}
                 </div>
-
-                {/* College */}
-                {collegeName && (
-                    <div className="mt-2 text-xs text-dark-500 truncate">
-                        📍 {collegeName}
-                    </div>
-                )}
             </div>
         </Link>
     )

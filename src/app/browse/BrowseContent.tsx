@@ -254,21 +254,26 @@ export default function BrowseContent() {
     }
 
     return (
-        <div className="min-h-screen bg-dark-950">
+        <div className="min-h-screen bg-surface-50 relative overflow-hidden">
+            {/* Background Orbs */}
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-100/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+
             <Header />
 
-            <main className="pt-20 md:pt-28 pb-16 px-4">
-                <div className="max-w-7xl mx-auto">
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-display font-bold text-white mb-2">
-                            Browse Listings
+            <main className="pt-28 md:pt-36 pb-20 px-4">
+                <div className="container-custom">
+                    {/* Page Header */}
+                    <div className="mb-12">
+                        <h1 className="text-4xl md:text-5xl font-display font-black text-surface-900 mb-3 tracking-tight">
+                            Campus <span className="gradient-text">Marketplace</span>
                         </h1>
-                        <p className="text-dark-400">
-                            Discover great deals from students at your campus
+                        <p className="text-surface-400 font-medium text-lg">
+                            Curated treasures from students at your campus
                         </p>
                     </div>
 
-                    <div className="mb-6">
+                    {/* Search Controls */}
+                    <div className="mb-10">
                         <SearchBar
                             value={searchInput}
                             onChange={setSearchInput}
@@ -276,49 +281,50 @@ export default function BrowseContent() {
                         />
                     </div>
 
-                    <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-                        <p className="text-sm text-dark-400">
+                    <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+                        <p className="text-sm font-bold text-surface-400 tracking-wide uppercase">
                             {isLoading ? (
-                                'Loading...'
+                                'Syncing listings...'
                             ) : (
                                 <>
-                                    Showing <span className="text-white font-medium">{listings.length}</span> of{' '}
-                                    <span className="text-white font-medium">{totalCount}</span> results
+                                    Showing <span className="text-primary-600">{listings.length}</span> / <span className="text-surface-900">{totalCount}</span> artifacts
                                 </>
                             )}
                         </p>
 
                         <div className="flex items-center gap-4">
-                            <div className="relative">
+                            {/* Sort Dropdown */}
+                            <div className="relative group">
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
-                                    className="appearance-none bg-white/5 border border-white/10 rounded-xl px-4 py-2 pr-10 text-sm text-white cursor-pointer hover:border-white/20 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none"
+                                    className="appearance-none bg-white border border-surface-100 rounded-2xl px-5 py-2.5 pr-12 text-sm font-black text-surface-900 cursor-pointer hover:border-primary-300 focus:ring-4 focus:ring-primary-500/10 outline-none transition-all shadow-soft"
                                 >
                                     {sortOptions.map(option => (
-                                        <option key={option.value} value={option.value} className="bg-dark-800">
+                                        <option key={option.value} value={option.value} className="bg-white">
                                             {option.label}
                                         </option>
                                     ))}
                                 </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-400 pointer-events-none" />
+                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400 pointer-events-none transition-transform group-hover:translate-y-[-40%]" />
                             </div>
 
-                            <div className="flex items-center rounded-xl overflow-hidden border border-white/10">
+                            {/* View Switcher */}
+                            <div className="flex items-center bg-white p-1 rounded-2xl border border-surface-100 shadow-soft">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2.5 transition-colors ${viewMode === 'grid'
-                                        ? 'bg-primary-500 text-white'
-                                        : 'bg-white/5 text-dark-400 hover:text-white'
+                                    className={`p-2 rounded-xl transition-all ${viewMode === 'grid'
+                                        ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
+                                        : 'text-surface-600 hover:text-primary-500 hover:bg-primary-50'
                                         }`}
                                 >
                                     <Grid3X3 className="w-4 h-4" />
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2.5 transition-colors ${viewMode === 'list'
-                                        ? 'bg-primary-500 text-white'
-                                        : 'bg-white/5 text-dark-400 hover:text-white'
+                                    className={`p-2 rounded-xl transition-all ${viewMode === 'list'
+                                        ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
+                                        : 'text-surface-600 hover:text-primary-500 hover:bg-primary-50'
                                         }`}
                                 >
                                     <List className="w-4 h-4" />
@@ -327,7 +333,7 @@ export default function BrowseContent() {
                         </div>
                     </div>
 
-                    <div className="flex gap-8">
+                    <div className="flex gap-10">
                         <FilterSidebar
                             isOpen={isFilterOpen}
                             onClose={() => setIsFilterOpen(false)}
@@ -340,23 +346,30 @@ export default function BrowseContent() {
 
                         <div className="flex-1">
                             {isLoading ? (
-                                <div className="flex flex-col items-center justify-center py-20">
-                                    <Loader2 className="w-12 h-12 text-primary-500 animate-spin mb-4" />
-                                    <p className="text-dark-400">Fetching listings...</p>
+                                <div className="flex flex-col items-center justify-center py-32 bg-white rounded-[2.5rem] border border-surface-100 shadow-soft">
+                                    <div className="relative">
+                                        <div className="w-16 h-16 border-4 border-primary-100 border-t-primary-500 rounded-full animate-spin" />
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse" />
+                                        </div>
+                                    </div>
+                                    <p className="text-surface-700 font-black mt-6 tracking-widest uppercase text-[10px]">Summoning Feed...</p>
                                 </div>
                             ) : error ? (
-                                <div className="glass-card p-12 text-center">
-                                    <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-                                    <h3 className="text-xl font-semibold text-white mb-2">Something went wrong</h3>
-                                    <p className="text-red-400 mb-6">{error}</p>
-                                    <button onClick={() => fetchListings(false)} className="btn-primary">
-                                        Try Again
+                                <div className="bg-white p-16 rounded-[2.5rem] border border-surface-100 shadow-soft text-center">
+                                    <div className="w-20 h-20 bg-peach-50 text-peach-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                                        <AlertCircle className="w-10 h-10" />
+                                    </div>
+                                    <h3 className="text-2xl font-black text-surface-900 mb-2">Transmission Lost</h3>
+                                    <p className="text-surface-700 font-bold mb-8 max-w-sm mx-auto">{error}</p>
+                                    <button onClick={() => fetchListings(false)} className="btn-primary px-10">
+                                        Try Reconnecting
                                     </button>
                                 </div>
                             ) : listings.length > 0 ? (
                                 <>
-                                    <div className={`grid gap-4 ${viewMode === 'grid'
-                                        ? 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                                    <div className={`grid gap-8 ${viewMode === 'grid'
+                                        ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3'
                                         : 'grid-cols-1'
                                         }`}>
                                         {listings.map((listing) => (
@@ -379,16 +392,16 @@ export default function BrowseContent() {
                                     </div>
 
                                     {hasMore && (
-                                        <div className="mt-8 text-center">
+                                        <div className="mt-16 text-center">
                                             <button
                                                 onClick={() => fetchListings(true)}
                                                 disabled={isLoadingMore}
-                                                className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="btn-secondary px-12 py-4 rounded-2xl bg-white shadow-soft hover:shadow-premium hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 transition-all font-black text-surface-900"
                                             >
                                                 {isLoadingMore ? (
-                                                    <span className="flex items-center gap-2">
-                                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                                        Loading...
+                                                    <span className="flex items-center gap-3">
+                                                        <Loader2 className="w-5 h-5 animate-spin text-primary-500" />
+                                                        Loading More...
                                                     </span>
                                                 ) : (
                                                     'Load More Listings'
@@ -398,14 +411,14 @@ export default function BrowseContent() {
                                     )}
                                 </>
                             ) : (
-                                <div className="glass-card p-12 text-center">
-                                    <div className="text-6xl mb-4">🔍</div>
-                                    <h3 className="text-xl font-semibold text-white mb-2">No listings found</h3>
-                                    <p className="text-dark-400 mb-6">
-                                        Try adjusting your filters or search query
+                                <div className="bg-white p-20 rounded-[2.5rem] border border-surface-100 shadow-soft text-center">
+                                    <div className="text-7xl mb-8 grayscale opacity-50">🧭</div>
+                                    <h3 className="text-2xl font-black text-surface-900 mb-3 tracking-tight">Zero Artifacts Found</h3>
+                                    <p className="text-surface-700 font-bold mb-10 max-w-xs mx-auto">
+                                        Your search didn&apos;t match any listings. Try refining your filters.
                                     </p>
-                                    <button onClick={clearFilters} className="btn-secondary">
-                                        Clear Filters
+                                    <button onClick={clearFilters} className="btn-primary px-10">
+                                        Reset All Filters
                                     </button>
                                 </div>
                             )}
