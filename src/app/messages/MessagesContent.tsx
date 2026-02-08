@@ -334,7 +334,9 @@ export default function MessagesContent() {
                                     >
                                         <div className="relative shrink-0">
                                             {chat.other_party.avatar_url ? (
-                                                <Image src={chat.other_party.avatar_url} alt={chat.other_party.full_name} width={48} height={48} className="rounded-2xl" />
+                                                <div className="relative w-12 h-12 rounded-2xl overflow-hidden shadow-sm shrink-0">
+                                                    <Image src={chat.other_party.avatar_url} alt={chat.other_party.full_name} fill className="object-cover" sizes="48px" />
+                                                </div>
                                             ) : (
                                                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold shrink-0">
                                                     {chat.other_party.full_name[0].toUpperCase()}
@@ -371,9 +373,9 @@ export default function MessagesContent() {
                                         <button onClick={() => setSelectedConvId(null)} className="md:hidden p-2 -ml-2 text-dark-400">
                                             <ArrowLeft className="w-5 h-5" />
                                         </button>
-                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold">
+                                        <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold overflow-hidden shrink-0 shadow-sm">
                                             {currentConv.other_party.avatar_url ? (
-                                                <Image src={currentConv.other_party.avatar_url} alt={currentConv.other_party.full_name} width={40} height={40} className="rounded-xl" />
+                                                <Image src={currentConv.other_party.avatar_url} alt={currentConv.other_party.full_name} fill className="object-cover" sizes="40px" />
                                             ) : (
                                                 currentConv.other_party.full_name[0].toUpperCase()
                                             )}

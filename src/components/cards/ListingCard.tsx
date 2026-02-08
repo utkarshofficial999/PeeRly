@@ -87,13 +87,15 @@ export default function ListingCard({
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 min-w-0">
                         {sellerAvatar ? (
-                            <Image
-                                src={sellerAvatar}
-                                alt={sellerName}
-                                width={24}
-                                height={24}
-                                className="rounded-full"
-                            />
+                            <div className="relative w-6 h-6 rounded-full overflow-hidden shrink-0">
+                                <Image
+                                    src={sellerAvatar}
+                                    alt={sellerName}
+                                    fill
+                                    className="object-cover"
+                                    sizes="24px"
+                                />
+                            </div>
                         ) : (
                             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-[10px] font-semibold text-white">
                                 {initials}
