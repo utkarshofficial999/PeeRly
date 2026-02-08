@@ -37,7 +37,6 @@ export function createClient() {
                 autoRefreshToken: true,
                 detectSessionInUrl: true,
                 flowType: 'pkce',
-                storageKey: 'peerly-auth-token', // Use a dedicated key to avoid conflicts
             },
             global: {
                 headers: { 'x-client-info': 'peerly-web' },

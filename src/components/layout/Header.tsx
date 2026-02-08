@@ -111,8 +111,8 @@ export default function Header() {
 
     const handleSignOut = async () => {
         setIsProfileOpen(false)
+        setIsMenuOpen(false) // Also close mobile menu
         await signOut()
-        router.push('/')
         router.refresh()
     }
 
@@ -239,14 +239,14 @@ export default function Header() {
                                     </div>
                                 </>
                             ) : (
-                                <>
-                                    <Link href="/login" className="btn-secondary py-2.5 px-5">
+                                <div className="flex items-center gap-3">
+                                    <a href="/login" className="btn-secondary py-2.5 px-5 cursor-pointer">
                                         Log In
-                                    </Link>
-                                    <Link href="/signup" className="btn-primary py-2.5 px-5">
+                                    </a>
+                                    <a href="/signup" className="btn-primary py-2.5 px-5 cursor-pointer">
                                         Sign Up
-                                    </Link>
-                                </>
+                                    </a>
+                                </div>
                             )}
                         </div>
 
@@ -305,12 +305,12 @@ export default function Header() {
                                     </>
                                 ) : (
                                     <>
-                                        <Link href="/login" className="btn-secondary justify-center">
+                                        <a href="/login" className="btn-secondary justify-center">
                                             Log In
-                                        </Link>
-                                        <Link href="/signup" className="btn-primary justify-center">
+                                        </a>
+                                        <a href="/signup" className="btn-primary justify-center">
                                             Sign Up Free
-                                        </Link>
+                                        </a>
                                     </>
                                 )}
                             </div>

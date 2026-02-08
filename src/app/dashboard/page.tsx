@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import Header from '@/components/layout/Header'
 import { Plus, Package, Heart, MessageSquare, Settings, ChevronRight, TrendingUp, Eye, DollarSign } from 'lucide-react'
@@ -17,12 +18,21 @@ interface DashboardStats {
 
 export default function DashboardPage() {
     const { user, profile, isLoading } = useAuth()
+    const router = useRouter() // Use router for redirection
     const [stats, setStats] = useState<DashboardStats>({
         activeListings: 0,
         totalViews: 0,
         savedItems: 0,
         messages: 0,
     })
+
+    // Redirect if not logged in after loading
+    useEffect(() => {
+        if (!isLoading && !user) {
+            console.log('🔐 Dashboard: No user session, redirecting to login')
+            window.location.href = '/login?redirectTo=/dashboard'
+        }
+    }, [user, isLoading])
     const [recentListings, setRecentListings] = useState<any[]>([])
     const supabase = createClient()
 

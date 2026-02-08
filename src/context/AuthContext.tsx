@@ -22,9 +22,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null)
     const [profile, setProfile] = useState<Profile | null>(null)
     const [session, setSession] = useState<Session | null>(null)
-    // Start as NOT loading so pages can fetch data immediately as guest
-    // If auth finishes later, the state will update automatically
-    const [isLoading, setIsLoading] = useState(false)
+    // Start as LOADING so we don't flash guest content while checking session
+    const [isLoading, setIsLoading] = useState(true)
 
     const supabase = useMemo(() => createClient(), [])
 
@@ -219,10 +218,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Sign out
     const signOut = async () => {
-        await supabase.auth.signOut()
-        setUser(null)
-        setProfile(null)
-        setSession(null)
+        try {
+            console.log('🔐 AuthContext: Signing out...')
+            // Try to sign out normally
+            await supabase.auth.signOut()
+        } catch (error) {
+            console.error('🔐 AuthContext: Sign out error, forcing cleanup:', error)
+        } finally {
+            // Force reset state
+            setUser(null)
+            setProfile(null)
+            setSession(null)
+
+            if (typeof window !== 'undefined') {
+                // Hard reset: nuke all cookies to be sure
+                const cookies = document.cookie.split(';')
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i]
+                    const eqPos = cookie.indexOf('=')
+                    const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim()
+                    // Clear both standard Supabase and custom cookies
+                    if (name.includes('sb-') || name.includes('peerly') || name.includes('auth')) {
+                        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;'
+                        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=' + window.location.hostname + ';'
+                    }
+                }
+
+                // Force a redirect with a 'signOut' flag to bypass middleware cache/redirects
+                window.location.href = '/?signOut=true'
+            }
+        }
     }
 
     return (
