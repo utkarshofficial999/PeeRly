@@ -196,37 +196,6 @@ export default function HomePage() {
                     </div>
                 </section>
 
-                {/* Categories Section */}
-                <section className="py-20 px-4">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-12">
-                            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-                                Browse by Category
-                            </h2>
-                            <p className="text-dark-400 max-w-2xl mx-auto">
-                                Find exactly what you need or discover great deals across categories
-                            </p>
-                        </div>
-
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                            {categories.map((category, index) => (
-                                <Link
-                                    key={category.name}
-                                    href={`/browse?category=${category.name.toLowerCase()}`}
-                                    className="glass-card-hover p-6 text-center group"
-                                >
-                                    <div className={`w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${category.color} p-3.5 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
-                                        <category.icon className="w-full h-full text-white" />
-                                    </div>
-                                    <h3 className="font-semibold text-white mb-1">{category.name}</h3>
-                                    {category.count && (
-                                        <p className="text-sm text-dark-400">{category.count} items</p>
-                                    )}
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
-                </section>
 
                 {/* Fresh on Campus Section */}
                 <section className="py-20 px-4 bg-dark-900/40">
