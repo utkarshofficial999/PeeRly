@@ -60,6 +60,19 @@ export default function BrowseContent() {
     })
 
     const initialLoadRef = useRef(false)
+    const abortControllerRef = useRef<AbortController | null>(null)
+    const isMountedRef = useRef(true)
+
+    // Handle mount/unmount
+    useEffect(() => {
+        isMountedRef.current = true
+        return () => {
+            isMountedRef.current = false
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort()
+            }
+        }
+    }, [])
 
     // Load categories and colleges once on mount
     useEffect(() => {
@@ -86,6 +99,15 @@ export default function BrowseContent() {
 
     // Fetch listings
     const fetchListings = useCallback(async (loadMore = false) => {
+        // Cancel any existing request
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort()
+        }
+
+        // Create new AbortController
+        const controller = new AbortController()
+        abortControllerRef.current = controller
+
         const currentOffset = loadMore ? offset : 0
 
         if (loadMore) {
@@ -94,6 +116,17 @@ export default function BrowseContent() {
             setIsLoading(true)
             setError(null)
         }
+
+        // Hard timeout: 10 seconds
+        const timeoutId = setTimeout(() => {
+            if (isMountedRef.current && (isLoading || isLoadingMore)) {
+                controller.abort()
+                setError('Request timed out. Please try again.')
+                setIsLoading(false)
+                setIsLoadingMore(false)
+                console.log('Fetch timed out after 10s')
+            }
+        }, 10000)
 
         try {
             let query = supabase
@@ -111,6 +144,7 @@ export default function BrowseContent() {
                 `, { count: 'exact' })
                 .eq('is_active', true)
                 .eq('is_sold', false)
+                .abortSignal(controller.signal)
 
             // Apply filters
             if (filters.category) {
@@ -139,6 +173,8 @@ export default function BrowseContent() {
 
             if (fetchError) throw fetchError
 
+            if (!isMountedRef.current) return
+
             if (loadMore) {
                 setListings(prev => [...prev, ...(data || [])])
                 setOffset(currentOffset + 20)
@@ -151,19 +187,27 @@ export default function BrowseContent() {
             setHasMore((count || 0) > currentOffset + 20)
 
         } catch (err: any) {
-            // Ignore abort errors (normal in React Strict Mode)
+            if (!isMountedRef.current) return
+
+            // Ignore abort errors (normal in React Strict Mode or on new request)
             if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
-                console.log('Fetch aborted (normal in dev mode)')
+                console.log('Fetch aborted')
                 return
             }
             console.error('Fetch error:', err)
             setError(err.message || 'Failed to load listings')
             if (!loadMore) setListings([])
         } finally {
-            setIsLoading(false)
-            setIsLoadingMore(false)
+            clearTimeout(timeoutId)
+            if (isMountedRef.current) {
+                setIsLoading(false)
+                setIsLoadingMore(false)
+                if (abortControllerRef.current === controller) {
+                    abortControllerRef.current = null
+                }
+            }
         }
-    }, [supabase, filters, searchQuery, sortBy, offset, categories, colleges])
+    }, [supabase, filters, searchQuery, sortBy, offset, categories, colleges, isLoading, isLoadingMore])
 
     // Initial load and filter changes
     useEffect(() => {

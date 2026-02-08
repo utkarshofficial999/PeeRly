@@ -1,13 +1,16 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 import { Suspense } from 'react'
-import dynamic from 'next/dynamic'
+import nextDynamic from 'next/dynamic'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import { Loader2 } from 'lucide-react'
 
 // Dynamically import the content to avoid SSR issues with useSearchParams
-const BrowseContent = dynamic(() => import('./BrowseContent'), { ssr: false })
+const BrowseContent = nextDynamic(() => import('./BrowseContent'), { ssr: false })
 
 function LoadingFallback() {
     return (

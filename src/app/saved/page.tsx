@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import { Heart, ShoppingBag, ArrowRight, Trash2 } from 'lucide-react'
@@ -13,23 +13,44 @@ export default function SavedItemsPage() {
     const { user } = useAuth()
     const [savedItems, setSavedItems] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
-    const supabase = createClient()
+    const supabase = useMemo(() => createClient(), [])
+    const abortControllerRef = useRef<AbortController | null>(null)
 
     const fetchSavedItems = useCallback(async () => {
-        setIsLoading(true)
-        // Fetch saved_listings joined with listings
-        const { data, error } = await supabase
-            .from('saved_listings')
-            .select(`
-                listing_id,
-                listings (*)
-            `)
-            .eq('user_id', user?.id)
+        if (!user) return
+        if (abortControllerRef.current) abortControllerRef.current.abort()
 
-        if (data) {
-            setSavedItems(data.map((item: any) => item.listings))
+        const controller = new AbortController()
+        abortControllerRef.current = controller
+
+        setIsLoading(true)
+        const timeoutId = setTimeout(() => {
+            controller.abort()
+            setIsLoading(false)
+            console.log('Saved items fetch timed out')
+        }, 10000)
+
+        try {
+            // Fetch saved_listings joined with listings
+            const { data, error } = await supabase
+                .from('saved_listings')
+                .select(`
+                    listing_id,
+                    listings (*)
+                `)
+                .eq('user_id', user.id)
+                .abortSignal(controller.signal)
+
+            if (data) {
+                setSavedItems(data.map((item: any) => item.listings))
+            }
+        } catch (err: any) {
+            if (err?.name === 'AbortError') return
+            console.error('Error fetching saved items:', err)
+        } finally {
+            clearTimeout(timeoutId)
+            setIsLoading(false)
         }
-        setIsLoading(false)
     }, [user, supabase])
 
     useEffect(() => {

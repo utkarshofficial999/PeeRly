@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import { Plus, Package, Edit2, Trash2, Eye, LayoutGrid, List } from 'lucide-react'
@@ -13,18 +13,39 @@ export default function MyListingsPage() {
     const { user, isLoading: authLoading } = useAuth()
     const [listings, setListings] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
-    const supabase = createClient()
+    const supabase = useMemo(() => createClient(), [])
+    const abortControllerRef = useRef<AbortController | null>(null)
 
     const fetchMyListings = useCallback(async () => {
-        setIsLoading(true)
-        const { data, error } = await supabase
-            .from('listings')
-            .select('*')
-            .eq('seller_id', user?.id)
-            .order('created_at', { ascending: false })
+        if (!user) return
+        if (abortControllerRef.current) abortControllerRef.current.abort()
 
-        if (data) setListings(data)
-        setIsLoading(false)
+        const controller = new AbortController()
+        abortControllerRef.current = controller
+
+        setIsLoading(true)
+        const timeoutId = setTimeout(() => {
+            controller.abort()
+            setIsLoading(false)
+            console.log('My listings fetch timed out')
+        }, 10000)
+
+        try {
+            const { data, error } = await supabase
+                .from('listings')
+                .select('*')
+                .eq('seller_id', user.id)
+                .order('created_at', { ascending: false })
+                .abortSignal(controller.signal)
+
+            if (data) setListings(data)
+        } catch (err: any) {
+            if (err?.name === 'AbortError') return
+            console.error('Error fetching my listings:', err)
+        } finally {
+            clearTimeout(timeoutId)
+            setIsLoading(false)
+        }
     }, [user, supabase])
 
     useEffect(() => {

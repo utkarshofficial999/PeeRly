@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import { Search, Send, MapPin, ShieldAlert, MoreVertical, Phone, Loader2, ArrowLeft } from 'lucide-react'
@@ -39,7 +39,7 @@ interface Message {
 }
 
 export default function MessagesContent() {
-    const supabase = createClient()
+    const supabase = useMemo(() => createClient(), [])
     const { user, isLoading: authLoading } = useAuth()
     const searchParams = useSearchParams()
     const initialConvId = searchParams.get('conv')
@@ -60,6 +60,14 @@ export default function MessagesContent() {
     const fetchConversations = useCallback(async () => {
         if (!user) return
         setIsLoadingConvs(true)
+
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => {
+            controller.abort()
+            setIsLoadingConvs(false)
+            console.log('Conversations fetch timed out')
+        }, 10000)
+
         try {
             const { data, error } = await supabase
                 .from('conversations')
@@ -72,6 +80,7 @@ export default function MessagesContent() {
                 .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
                 .order('updated_at', { ascending: false })
                 .limit(50)
+                .abortSignal(controller.signal)
 
             if (error) throw error
 
@@ -108,6 +117,7 @@ export default function MessagesContent() {
             if (err?.name === 'AbortError' || err?.message?.includes('aborted')) return
             console.error('Error fetching conversations:', err)
         } finally {
+            clearTimeout(timeoutId)
             setIsLoadingConvs(false)
         }
     }, [user, supabase])
