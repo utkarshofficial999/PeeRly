@@ -184,20 +184,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const signOut = async () => {
         try {
             console.log('🔐 AuthContext: Signing out...')
-            const { error } = await supabase.auth.signOut()
-            if (error) throw error
+            // Try to sign out normally
+            await supabase.auth.signOut()
         } catch (error) {
             console.error('🔐 AuthContext: Sign out error, forcing cleanup:', error)
         } finally {
-            // Force reset state regardless of network error
+            // Force reset state
             setUser(null)
             setProfile(null)
             setSession(null)
 
-            // Critical: Force refresh to clear any cached data/locks
             if (typeof window !== 'undefined') {
-                localStorage.removeItem('peerly-auth-token') // Clear dedicated storage key
-                window.location.href = '/' // Hard redirect to home to clear all state
+                // Hard reset: nuke all cookies to be sure
+                const cookies = document.cookie.split(';')
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i]
+                    const eqPos = cookie.indexOf('=')
+                    const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim()
+                    if (name.includes('sb-') || name.includes('peerly')) {
+                        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;'
+                        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=' + window.location.hostname + ';'
+                    }
+                }
+
+                localStorage.removeItem('peerly-auth-token')
+                // Force a redirect with a 'signOut' flag to bypass middleware cache/redirects
+                window.location.href = '/?signOut=true'
             }
         }
     }
