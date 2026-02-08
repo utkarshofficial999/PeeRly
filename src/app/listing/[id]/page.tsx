@@ -305,7 +305,7 @@ export default function ListingDetailPage() {
     return (
         <div className="min-h-screen bg-dark-950 flex flex-col">
             <Header />
-            <main className="flex-1 container-custom py-8">
+            <main className="flex-1 container-custom pt-24 md:pt-28 pb-12">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Left: Images */}
                     <div className="space-y-4">

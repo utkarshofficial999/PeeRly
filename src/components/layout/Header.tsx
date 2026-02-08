@@ -127,8 +127,8 @@ export default function Header() {
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50">
-            <div className="mx-4 mt-4">
-                <nav className="glass-card px-6 py-4 max-w-7xl mx-auto">
+            <div className="mx-0 md:mx-4 md:mt-4 mt-0">
+                <nav className="glass-card px-4 md:px-6 py-3 md:py-4 max-w-7xl mx-auto rounded-none md:rounded-2xl border-x-0 md:border">
                     <div className="flex items-center justify-between">
                         {/* Logo */}
                         <Link href="/" className="flex items-center gap-2 group">

@@ -210,7 +210,7 @@ export default function CreateListingPage() {
         <div className="min-h-screen bg-dark-950">
             <Header />
 
-            <main className="pt-28 pb-16 px-4">
+            <main className="pt-20 md:pt-28 pb-16 px-4">
                 <div className="max-w-2xl mx-auto">
                     {/* Progress Steps */}
                     <div className="flex items-center justify-between mb-8">
@@ -239,7 +239,7 @@ export default function CreateListingPage() {
                         </div>
                     )}
 
-                    <div className="glass-card p-8">
+                    <div className="glass-card p-4 md:p-8">
                         {/* Step 1: Category */}
                         {step === 1 && (
                             <div className="animate-fade-in">
@@ -248,7 +248,7 @@ export default function CreateListingPage() {
                                 </h2>
                                 <p className="text-dark-400 mb-8">Select a category for your item</p>
 
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-3">
                                     {categories.map((cat) => (
                                         <button
                                             key={cat.id}

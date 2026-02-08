@@ -129,7 +129,7 @@ export default function HomePage() {
 
             <main>
                 {/* Hero Section */}
-                <section className="relative pt-32 pb-20 px-4">
+                <section className="relative pt-24 md:pt-32 pb-20 px-4">
                     <div className="max-w-7xl mx-auto">
                         <div className="text-center max-w-4xl mx-auto">
                             {/* Badge */}

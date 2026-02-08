@@ -257,7 +257,7 @@ export default function BrowseContent() {
         <div className="min-h-screen bg-dark-950">
             <Header />
 
-            <main className="pt-28 pb-16 px-4">
+            <main className="pt-20 md:pt-28 pb-16 px-4">
                 <div className="max-w-7xl mx-auto">
                     <div className="mb-8">
                         <h1 className="text-3xl font-display font-bold text-white mb-2">

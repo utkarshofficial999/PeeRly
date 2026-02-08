@@ -307,8 +307,8 @@ export default function MessagesContent() {
         <div className="min-h-screen bg-dark-950 flex flex-col">
             <Header />
 
-            <main className="flex-1 pt-24 pb-4 px-4 overflow-hidden flex items-stretch">
-                <div className="max-w-7xl mx-auto w-full flex glass-card overflow-hidden">
+            <main className="flex-1 pt-[72px] md:pt-24 md:pb-4 md:px-4 overflow-hidden flex items-stretch h-[calc(100dvh-72px)] md:h-[calc(100dvh-96px)]">
+                <div className="max-w-7xl mx-auto w-full flex glass-card overflow-hidden md:rounded-2xl rounded-none border-x-0 md:border">
                     {/* Chat Sidebar */}
                     <div className={`w-full md:w-80 border-r border-white/5 flex flex-col ${selectedConvId ? 'hidden md:flex' : 'flex'}`}>
                         <div className="p-4 border-b border-white/5">
@@ -383,17 +383,17 @@ export default function MessagesContent() {
                                             <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Online</p>
                                         </div>
                                     </div>
-                                    <Link href={`/listing/${currentConv.listing_id}`} className="text-xs font-bold text-primary-400 bg-primary-500/10 px-3 py-1.5 rounded-lg hover:bg-primary-500/20 transition-all">
+                                    <Link href={`/listing/${currentConv.listing_id}`} className="text-[10px] md:text-xs font-bold text-primary-400 bg-primary-500/10 px-2 md:px-3 py-1 md:py-1.5 rounded-lg hover:bg-primary-500/20 transition-all shrink-0">
                                         View Listing
                                     </Link>
                                 </div>
 
                                 {/* Messages Area */}
                                 <div className="flex-1 p-6 overflow-y-auto space-y-4">
-                                    <div className="bg-red-500/5 border border-red-500/10 p-4 rounded-2xl flex items-start gap-3 mb-8">
-                                        <ShieldAlert className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                                        <p className="text-xs text-red-200/60 italic leading-relaxed">
-                                            ⚠️ Safety First: Never share OTPs or personal financial details. Meet in public campus areas for the exchange.
+                                    <div className="bg-red-500/5 border border-red-500/10 p-3 md:p-4 rounded-2xl flex items-start gap-3 mb-4 md:mb-8">
+                                        <ShieldAlert className="w-4 h-4 md:w-5 md:h-5 text-red-500 shrink-0 mt-0.5" />
+                                        <p className="text-[10px] md:text-xs text-red-200/60 italic leading-relaxed">
+                                            ⚠️ Safety: Never share OTPs or financial details. Meet in public.
                                         </p>
                                     </div>
 
@@ -404,7 +404,7 @@ export default function MessagesContent() {
                                             const isMe = msg.sender_id === user?.id
                                             return (
                                                 <div key={msg.id} className={`flex gap-3 max-w-[80%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`}>
-                                                    <div className={`p-4 rounded-2xl text-sm leading-relaxed ${isMe
+                                                    <div className={`p-3 md:p-4 rounded-2xl text-xs md:text-sm leading-relaxed ${isMe
                                                         ? 'bg-primary-500 text-white rounded-tr-none shadow-lg shadow-primary-500/20'
                                                         : 'bg-white/5 border border-white/5 text-dark-200 rounded-tl-none'
                                                         }`}>

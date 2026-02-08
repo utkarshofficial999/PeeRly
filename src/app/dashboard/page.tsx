@@ -121,7 +121,7 @@ export default function DashboardPage() {
         <div className="min-h-screen bg-dark-950">
             <Header />
 
-            <main className="pt-32 pb-16 px-4">
+            <main className="pt-24 md:pt-32 pb-16 px-4">
                 <div className="max-w-6xl mx-auto">
                     {/* Welcome Section */}
                     <div className="mb-8">
