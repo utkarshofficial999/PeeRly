@@ -54,8 +54,20 @@ export async function middleware(request: NextRequest) {
         }
     )
 
-    // Refresh session if expired
-    const { data: { session } } = await supabase.auth.getSession()
+    // Refresh session if expired with a hard timeout to prevent hangs
+    // If it takes more than 3 seconds, we give up and let the client handle it
+    let session = null;
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        session = currentSession;
+
+        clearTimeout(timeoutId);
+    } catch (err) {
+        console.error('Middleware: Session check timed out or failed');
+    }
 
     // Protected routes
     const protectedRoutes = ['/dashboard', '/create', '/messages', '/settings']
