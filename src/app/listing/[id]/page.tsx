@@ -370,8 +370,20 @@ export default function ListingDetailPage() {
 
                         {listing.seller && (
                             <div className="glass-card p-4 flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-semibold">
-                                    {listing.seller.full_name?.charAt(0) || 'U'}
+                                <div className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-white/10 flex-shrink-0">
+                                    {listing.seller.avatar_url ? (
+                                        <Image
+                                            src={listing.seller.avatar_url}
+                                            alt={listing.seller.full_name || 'Seller'}
+                                            fill
+                                            className="object-cover"
+                                            sizes="48px"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-semibold">
+                                            {listing.seller.full_name?.charAt(0) || 'U'}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex-1">
                                     <p className="text-white font-medium">{listing.seller.full_name || 'Unknown Seller'}</p>
