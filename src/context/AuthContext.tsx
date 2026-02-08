@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Subscription for subsequent changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event, currentSession) => {
+            async (event: string, currentSession: any) => {
                 if (!mounted) return;
 
                 console.log(`🔐 AuthContext: Event [${event}]`);
@@ -182,10 +182,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Sign out
     const signOut = async () => {
-        await supabase.auth.signOut()
-        setUser(null)
-        setProfile(null)
-        setSession(null)
+        try {
+            console.log('🔐 AuthContext: Signing out...')
+            const { error } = await supabase.auth.signOut()
+            if (error) throw error
+        } catch (error) {
+            console.error('🔐 AuthContext: Sign out error, forcing cleanup:', error)
+        } finally {
+            // Force reset state regardless of network error
+            setUser(null)
+            setProfile(null)
+            setSession(null)
+
+            // Critical: Force refresh to clear any cached data/locks
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem('peerly-auth-token') // Clear dedicated storage key
+                window.location.href = '/' // Hard redirect to home to clear all state
+            }
+        }
     }
 
     return (

@@ -111,9 +111,8 @@ export default function Header() {
 
     const handleSignOut = async () => {
         setIsProfileOpen(false)
+        setIsMenuOpen(false)
         await signOut()
-        router.push('/')
-        router.refresh()
     }
 
     const getInitials = (name: string) => {
