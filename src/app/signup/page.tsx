@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Mail, Lock, Eye, EyeOff, ArrowRight, User, Check, AlertCircle } from 'lucide-react'
@@ -9,7 +9,7 @@ import Header from '@/components/layout/Header'
 
 export default function SignupPage() {
     const router = useRouter()
-    const { signUp } = useAuth()
+    const { signUp, user } = useAuth()
 
     const [showPassword, setShowPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
@@ -20,6 +20,15 @@ export default function SignupPage() {
         password: '',
         agreeTerms: false,
     })
+
+    // Proactive redirect: if we detect a session during signup (some providers auto-login)
+    useEffect(() => {
+        if (user && !isLoading) {
+            console.log('探 SignUp: User detected, redirecting to dashboard')
+            router.push('/dashboard')
+            router.refresh()
+        }
+    }, [user, isLoading, router])
 
     const passwordRequirements = [
         { label: 'At least 8 characters', met: formData.password.length >= 8 },
@@ -50,8 +59,13 @@ export default function SignupPage() {
             const { error } = await signUp(formData.email, formData.password, formData.fullName)
 
             if (error) {
+                // If user exists, it means signup actually worked but returned a fetch error
+                if (user) return;
+
                 if (error.message.includes('already registered')) {
                     setError('This email is already registered. Try logging in instead.')
+                } else if (error.message.includes('fetch')) {
+                    setError('Network connection error. Please try again.')
                 } else {
                     setError(error.message)
                 }
@@ -61,7 +75,9 @@ export default function SignupPage() {
             // Redirect to login with success message
             router.push('/login?message=Check your email to verify your account')
         } catch (err) {
-            setError('Something went wrong. Please try again.')
+            if (!user) {
+                setError('Something went wrong. Please try again.')
+            }
         } finally {
             setIsLoading(false)
         }

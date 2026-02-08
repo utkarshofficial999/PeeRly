@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react'
@@ -10,7 +10,7 @@ import Header from '@/components/layout/Header'
 function LoginContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
-    const { signIn } = useAuth()
+    const { signIn, user } = useAuth()
 
     const [showPassword, setShowPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
@@ -22,6 +22,17 @@ function LoginContent() {
 
     const redirectTo = searchParams.get('redirectTo') || '/dashboard'
 
+    // Proactive redirect: if AuthContext reveals we are logged in, just go.
+    // This handles the case where signIn returns an error (like 'Failed to fetch')
+    // but the session was actually established successfully.
+    useEffect(() => {
+        if (user && !isLoading) {
+            console.log('探 Login: User detected, redirecting to', redirectTo)
+            router.push(redirectTo)
+            router.refresh()
+        }
+    }, [user, isLoading, redirectTo, router])
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError('')
@@ -31,21 +42,28 @@ function LoginContent() {
             const { error } = await signIn(formData.email, formData.password)
 
             if (error) {
+                // If we are already logged in (user exists), ignore the error and wait for useEffect redirect
+                if (user) return;
+
                 if (error.message.includes('Invalid login')) {
                     setError('Invalid email or password')
                 } else if (error.message.includes('Email not confirmed')) {
                     setError('Please verify your email before logging in')
+                } else if (error.message.includes('fetch')) {
+                    setError('Network connection error. Please try again.')
                 } else {
                     setError(error.message)
                 }
                 return
             }
 
-            // Redirect on success
+            // Normal successful redirect
             router.push(redirectTo)
             router.refresh()
         } catch (err) {
-            setError('Something went wrong. Please try again.')
+            if (!user) {
+                setError('Something went wrong. Please try again.')
+            }
         } finally {
             setIsLoading(false)
         }
