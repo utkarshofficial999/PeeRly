@@ -14,7 +14,7 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
 
     useEffect(() => {
         if (!isLoading) {
-            if (user?.email === SUPER_ADMIN_EMAIL) {
+            if (user?.email?.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase()) {
                 setIsAuthorized(true)
             } else {
                 setIsAuthorized(false)

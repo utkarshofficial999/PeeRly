@@ -93,7 +93,7 @@ export async function middleware(request: NextRequest) {
 
     // Special Admin Protection (Hardcoded Email)
     if (request.nextUrl.pathname.startsWith('/admin')) {
-        if (!session || session.user.email !== 'utkarsh@abes.ac.in') {
+        if (!session || session.user.email?.toLowerCase() !== 'utkarsh@abes.ac.in') {
             return NextResponse.redirect(new URL('/', request.url))
         }
     }

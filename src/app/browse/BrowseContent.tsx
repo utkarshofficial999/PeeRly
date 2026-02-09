@@ -258,7 +258,7 @@ export default function BrowseContent() {
             {/* Background Orbs */}
             <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-100/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
 
-            <Header />
+            {/* Header was here */}
 
             <main className="pt-28 md:pt-36 pb-20 px-4">
                 <div className="container-custom">
@@ -427,7 +427,7 @@ export default function BrowseContent() {
                 </div>
             </main>
 
-            <Footer />
+            {/* Footer was here */}
         </div>
     )
 }
