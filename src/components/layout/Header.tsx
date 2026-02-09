@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { Menu, X, Search, Plus, User, Bell, MessageSquare, LogOut } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { createClient } from '@/lib/supabase/client'
+import Logo from '@/components/ui/Logo'
 
 export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -131,13 +132,8 @@ export default function Header() {
                 <nav className="soft-glass px-4 md:px-6 py-3 md:py-3 max-w-7xl mx-auto rounded-none md:rounded-3xl shadow-soft md:border-white/40">
                     <div className="flex items-center justify-between">
                         {/* Logo */}
-                        <Link href="/" className="flex items-center gap-2 group">
-                            <div className="w-10 h-10 rounded-2xl bg-gradient-primary flex items-center justify-center transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3 shadow-button">
-                                <span className="text-xl font-bold text-white">P</span>
-                            </div>
-                            <span className="text-xl font-display font-bold text-surface-900">
-                                Peer<span className="text-primary-500">LY</span>
-                            </span>
+                        <Link href="/" className="flex items-center group">
+                            <Logo className="transition-transform duration-300 group-hover:scale-105" />
                         </Link>
 
                         {/* Desktop Navigation */}

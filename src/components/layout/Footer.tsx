@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Logo from '@/components/ui/Logo'
 import {
     Facebook,
     Twitter,
@@ -50,13 +51,8 @@ export default function Footer() {
                 <div className="grid grid-cols-2 lg:grid-cols-6 gap-12 mb-16">
                     {/* Brand */}
                     <div className="col-span-2">
-                        <Link href="/" className="flex items-center gap-2.5 mb-6 group">
-                            <div className="w-11 h-11 rounded-[1.2rem] bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg group-hover:rotate-6 transition-transform">
-                                <span className="text-2xl font-black text-white">P</span>
-                            </div>
-                            <span className="text-2xl font-display font-black text-surface-900 tracking-tight">
-                                Peer<span className="gradient-text">LY</span>
-                            </span>
+                        <Link href="/" className="flex items-center mb-6 group">
+                            <Logo className="transition-transform duration-300 group-hover:scale-105" />
                         </Link>
                         <p className="text-surface-400 font-medium text-base mb-8 max-w-xs leading-relaxed">
                             The definitive student-to-student marketplace. Building a safer, more connected campus economy.
