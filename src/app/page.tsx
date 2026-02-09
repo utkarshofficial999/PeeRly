@@ -51,12 +51,6 @@ const features = [
     },
 ]
 
-const stats = [
-    { value: '10K+', label: 'Active Students' },
-    { value: '₹50L+', label: 'Worth Traded' },
-    { value: '15+', label: 'Colleges' },
-    { value: '4.9★', label: 'User Rating' },
-]
 
 const testimonials = [
     {
@@ -153,34 +147,11 @@ export default function HomePage() {
                                 </Link>
                             </div>
 
-                            {/* Skills/Tags Feed */}
-                            <div className="mt-16 flex flex-wrap justify-center gap-3 animate-in fade-in stagger-3">
-                                {['Notes', 'Projects', 'Electronics', 'Books', 'Services', 'Skills'].map((tag) => (
-                                    <span key={tag} className="skill-chip-primary px-5 py-2">
-                                        {tag}
-                                    </span>
-                                ))}
-                            </div>
                         </div>
                     </div>
                 </section>
 
 
-                {/* Stats Section */}
-                <section className="py-20">
-                    <div className="container-custom">
-                        <div className="bg-surface-50 rounded-[3rem] p-12 border border-surface-100 grid grid-cols-2 md:grid-cols-4 gap-12">
-                            {stats.map((stat, index) => (
-                                <div key={index} className="text-center group">
-                                    <div className="text-4xl md:text-5xl font-display font-black text-surface-900 mb-2 transition-transform group-hover:scale-110">
-                                        {stat.value}
-                                    </div>
-                                    <div className="text-xs font-bold text-primary-500 uppercase tracking-widest">{stat.label}</div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
 
                 {/* Fresh Feed */}
                 <section className="py-24 overflow-hidden">
