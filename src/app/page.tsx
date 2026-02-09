@@ -280,7 +280,7 @@ export default function HomePage() {
                                         <feature.icon className={`w-7 h-7 ${feature.color}`} />
                                     </div>
                                     <h3 className="text-xl font-bold mb-3 tracking-tight">{feature.title}</h3>
-                                    <p className="text-surface-400 leading-relaxed text-sm">{feature.description}</p>
+                                    <p className="text-surface-300 leading-relaxed text-sm font-medium">{feature.description}</p>
                                 </div>
                             ))}
                         </div>

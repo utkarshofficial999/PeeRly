@@ -267,7 +267,7 @@ export default function BrowseContent() {
                         <h1 className="text-4xl md:text-5xl font-display font-black text-surface-900 mb-3 tracking-tight">
                             Campus <span className="gradient-text">Marketplace</span>
                         </h1>
-                        <p className="text-surface-400 font-medium text-lg">
+                        <p className="text-surface-600 font-bold text-lg">
                             Curated treasures from students at your campus
                         </p>
                     </div>
@@ -282,7 +282,7 @@ export default function BrowseContent() {
                     </div>
 
                     <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
-                        <p className="text-sm font-bold text-surface-400 tracking-wide uppercase">
+                        <p className="text-sm font-black text-surface-600 tracking-wide uppercase">
                             {isLoading ? (
                                 'Syncing listings...'
                             ) : (
@@ -315,7 +315,7 @@ export default function BrowseContent() {
                                     onClick={() => setViewMode('grid')}
                                     className={`p-2 rounded-xl transition-all ${viewMode === 'grid'
                                         ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
-                                        : 'text-surface-600 hover:text-primary-500 hover:bg-primary-50'
+                                        : 'text-surface-700 hover:text-primary-600 hover:bg-primary-50'
                                         }`}
                                 >
                                     <Grid3X3 className="w-4 h-4" />
@@ -324,7 +324,7 @@ export default function BrowseContent() {
                                     onClick={() => setViewMode('list')}
                                     className={`p-2 rounded-xl transition-all ${viewMode === 'list'
                                         ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
-                                        : 'text-surface-600 hover:text-primary-500 hover:bg-primary-50'
+                                        : 'text-surface-700 hover:text-primary-600 hover:bg-primary-50'
                                         }`}
                                 >
                                     <List className="w-4 h-4" />
@@ -353,7 +353,7 @@ export default function BrowseContent() {
                                             <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse" />
                                         </div>
                                     </div>
-                                    <p className="text-surface-700 font-black mt-6 tracking-widest uppercase text-[10px]">Summoning Feed...</p>
+                                    <p className="text-surface-600 font-black mt-6 tracking-widest uppercase text-[10px]">Summoning Feed...</p>
                                 </div>
                             ) : error ? (
                                 <div className="bg-white p-16 rounded-[2.5rem] border border-surface-100 shadow-soft text-center">
@@ -361,7 +361,7 @@ export default function BrowseContent() {
                                         <AlertCircle className="w-10 h-10" />
                                     </div>
                                     <h3 className="text-2xl font-black text-surface-900 mb-2">Transmission Lost</h3>
-                                    <p className="text-surface-700 font-bold mb-8 max-w-sm mx-auto">{error}</p>
+                                    <p className="text-surface-600 font-black mb-8 max-w-sm mx-auto">{error}</p>
                                     <button onClick={() => fetchListings(false)} className="btn-primary px-10">
                                         Try Reconnecting
                                     </button>
@@ -414,7 +414,7 @@ export default function BrowseContent() {
                                 <div className="bg-white p-20 rounded-[2.5rem] border border-surface-100 shadow-soft text-center">
                                     <div className="text-7xl mb-8 grayscale opacity-50">🧭</div>
                                     <h3 className="text-2xl font-black text-surface-900 mb-3 tracking-tight">Zero Artifacts Found</h3>
-                                    <p className="text-surface-700 font-bold mb-10 max-w-xs mx-auto">
+                                    <p className="text-surface-600 font-black mb-10 max-w-xs mx-auto">
                                         Your search didn&apos;t match any listings. Try refining your filters.
                                     </p>
                                     <button onClick={clearFilters} className="btn-primary px-10">

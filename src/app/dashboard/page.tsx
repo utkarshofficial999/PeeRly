@@ -96,8 +96,8 @@ export default function DashboardPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-dark-950 flex items-center justify-center">
-                <div className="w-12 h-12 border-4 border-primary-500/30 border-t-primary-500 rounded-full animate-spin" />
+            <div className="min-h-screen bg-surface-50 flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-primary-500/30 border-t-primary-600 rounded-full animate-spin" />
             </div>
         )
     }
@@ -112,37 +112,37 @@ export default function DashboardPage() {
 
 
     return (
-        <div className="min-h-screen bg-dark-950">
+        <div className="min-h-screen bg-surface-50">
             <Header />
 
-            <main className="pt-24 md:pt-32 pb-16 px-4">
+            <main className="pt-20 md:pt-28 pb-16 px-4">
                 <div className="max-w-6xl mx-auto">
                     {/* Welcome Section */}
                     <div className="mb-8">
-                        <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">
+                        <h1 className="text-3xl md:text-4xl font-black text-surface-900 mb-2">
                             Welcome back, {profile?.full_name?.split(' ')[0] || 'there'}! 👋
                         </h1>
                     </div>
 
                     {/* Quick Actions */}
-                    <div className="glass-card p-6 mb-8">
-                        <h2 className="text-lg font-semibold text-white mb-4">Quick Actions</h2>
+                    <div className="premium-card p-6 mb-8">
+                        <h2 className="text-lg font-black text-surface-900 mb-4">Quick Actions</h2>
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                             {quickActions.map((action, index) => (
                                 <Link
                                     key={index}
                                     href={action.href}
-                                    className="relative flex flex-col items-center gap-2 p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 transition-all group"
+                                    className="relative flex flex-col items-center gap-2 p-4 rounded-xl bg-surface-50 hover:bg-white border border-surface-200 hover:border-primary-300 hover:shadow-soft transition-all group"
                                 >
-                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${action.color === 'primary' ? 'bg-primary-500/20 text-primary-400' :
-                                        action.color === 'accent' ? 'bg-accent-500/20 text-accent-400' :
-                                            action.color === 'rose' ? 'bg-rose-500/20 text-rose-400' :
-                                                action.color === 'blue' ? 'bg-blue-500/20 text-blue-400' :
-                                                    'bg-dark-700 text-dark-300'
+                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${action.color === 'primary' ? 'bg-primary-50 text-primary-600' :
+                                        action.color === 'accent' ? 'bg-accent-50 text-accent-600' :
+                                            action.color === 'rose' ? 'bg-rose-50 text-rose-600' :
+                                                action.color === 'blue' ? 'bg-blue-50 text-blue-600' :
+                                                    'bg-surface-200 text-surface-600'
                                         }`}>
                                         <action.icon className="w-5 h-5" />
                                     </div>
-                                    <span className="text-sm text-dark-300 group-hover:text-white transition-colors">
+                                    <span className="text-sm text-surface-900 font-black group-hover:text-primary-600 transition-colors">
                                         {action.label}
                                     </span>
                                     {action.badge && action.badge > 0 && (
@@ -156,10 +156,10 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Recent Listings */}
-                    <div className="glass-card p-6">
+                    <div className="premium-card p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-semibold text-white">Your Recent Listings</h2>
-                            <Link href="/my-listings" className="text-primary-400 hover:text-primary-300 text-sm flex items-center gap-1">
+                            <h2 className="text-lg font-black text-surface-900">Your Recent Listings</h2>
+                            <Link href="/my-listings" className="text-primary-600 hover:text-primary-700 text-sm font-black flex items-center gap-1">
                                 View All <ChevronRight className="w-4 h-4" />
                             </Link>
                         </div>
@@ -170,9 +170,9 @@ export default function DashboardPage() {
                                     <Link
                                         key={listing.id}
                                         href={`/listing/${listing.id}`}
-                                        className="flex items-center gap-4 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all"
+                                        className="flex items-center gap-4 p-3 rounded-xl bg-surface-50 hover:bg-white border border-surface-100 hover:border-surface-200 hover:shadow-soft transition-all"
                                     >
-                                        <div className="w-16 h-16 rounded-lg bg-dark-700 overflow-hidden flex-shrink-0 relative">
+                                        <div className="w-16 h-16 rounded-lg bg-surface-200 overflow-hidden flex-shrink-0 relative">
                                             {listing.images?.[0] && (
                                                 <Image
                                                     src={listing.images[0]}
@@ -183,17 +183,17 @@ export default function DashboardPage() {
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <h3 className="text-white font-medium truncate">{listing.title}</h3>
-                                            <p className="text-primary-400 font-semibold">₹{listing.price}</p>
+                                            <h3 className="text-surface-900 font-black truncate">{listing.title}</h3>
+                                            <p className="text-primary-600 font-black">₹{listing.price}</p>
                                         </div>
-                                        <div className="flex items-center gap-4 text-sm text-dark-400">
+                                        <div className="flex items-center gap-4 text-sm text-surface-500 font-bold">
                                             <span className="flex items-center gap-1">
                                                 <Eye className="w-4 h-4" />
                                                 {listing.views_count || 0}
                                             </span>
-                                            <span className={`px-2 py-1 rounded-full text-xs ${listing.is_sold ? 'bg-emerald-500/20 text-emerald-400' :
-                                                listing.is_active ? 'bg-primary-500/20 text-primary-400' :
-                                                    'bg-dark-700 text-dark-400'
+                                            <span className={`px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${listing.is_sold ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                                                listing.is_active ? 'bg-primary-50 text-primary-600 border border-primary-100' :
+                                                    'bg-surface-200 text-surface-600'
                                                 }`}>
                                                 {listing.is_sold ? 'Sold' : listing.is_active ? 'Active' : 'Inactive'}
                                             </span>
@@ -203,9 +203,9 @@ export default function DashboardPage() {
                             </div>
                         ) : (
                             <div className="text-center py-12">
-                                <Package className="w-12 h-12 text-dark-600 mx-auto mb-4" />
-                                <h3 className="text-lg font-medium text-white mb-2">No listings yet</h3>
-                                <p className="text-dark-400 mb-4">Start selling to see your listings here</p>
+                                <Package className="w-12 h-12 text-surface-200 mx-auto mb-4" />
+                                <h3 className="text-lg font-black text-surface-900 mb-2">No listings yet</h3>
+                                <p className="text-surface-600 font-bold mb-4">Start selling to see your listings here</p>
                                 <Link href="/create" className="btn-primary inline-flex">
                                     <Plus className="w-4 h-4" />
                                     Create Your First Listing

@@ -9,7 +9,7 @@ import Header from '@/components/layout/Header'
 
 export default function SignupPage() {
     const router = useRouter()
-    const { signUp, user } = useAuth()
+    const { signUp, user, isLoading: authLoading } = useAuth()
 
     const [showPassword, setShowPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
@@ -23,12 +23,12 @@ export default function SignupPage() {
 
     // Proactive redirect: if we detect a session during signup (some providers auto-login)
     useEffect(() => {
-        if (user && !isLoading) {
-            console.log('探 SignUp: User detected, redirecting to dashboard')
+        if (user && !authLoading && !isLoading) {
+            console.log('SignUp: User detected, redirecting to dashboard')
             router.push('/dashboard')
             router.refresh()
         }
-    }, [user, isLoading, router])
+    }, [user, authLoading, isLoading, router])
 
     const passwordRequirements = [
         { label: 'At least 8 characters', met: formData.password.length >= 8 },
@@ -84,30 +84,30 @@ export default function SignupPage() {
     }
 
     return (
-        <div className="min-h-screen bg-dark-950 relative overflow-hidden">
+        <div className="min-h-screen bg-surface-50 relative overflow-hidden">
             {/* Background Decorations */}
             <div className="glow-orb-accent w-[500px] h-[500px] -top-48 -left-48 opacity-20" />
             <div className="glow-orb-primary w-[400px] h-[400px] bottom-0 -right-32 opacity-20" />
 
             <Header />
 
-            <main className="pt-32 pb-16 px-4">
+            <main className="pt-24 md:pt-32 pb-16 px-4">
                 <div className="max-w-md mx-auto">
                     {/* Card */}
-                    <div className="glass-card p-8">
+                    <div className="premium-card p-8">
                         {/* Header */}
                         <div className="text-center mb-8">
-                            <h1 className="text-3xl font-display font-bold text-white mb-2">
+                            <h1 className="text-3xl font-black text-surface-900 mb-2">
                                 Create Account
                             </h1>
-                            <p className="text-dark-400">
+                            <p className="text-surface-700 font-bold">
                                 Join your campus marketplace
                             </p>
                         </div>
 
                         {/* Error Message */}
                         {error && (
-                            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2">
+                            <div className="mb-6 p-4 rounded-xl bg-red-50 text-red-600 border border-red-100 text-sm font-bold flex items-center gap-2">
                                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                                 {error}
                             </div>
@@ -117,11 +117,11 @@ export default function SignupPage() {
                         <form onSubmit={handleSubmit} className="space-y-5">
                             {/* Full Name */}
                             <div>
-                                <label htmlFor="fullName" className="block text-sm font-medium text-dark-300 mb-2">
+                                <label htmlFor="fullName" className="block text-sm font-black text-surface-700 mb-2">
                                     Full Name
                                 </label>
                                 <div className="relative">
-                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500" />
+                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400" />
                                     <input
                                         id="fullName"
                                         type="text"
@@ -136,11 +136,11 @@ export default function SignupPage() {
 
                             {/* Email */}
                             <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-dark-300 mb-2">
+                                <label htmlFor="email" className="block text-sm font-black text-surface-700 mb-2">
                                     Email Address
                                 </label>
                                 <div className="relative">
-                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500" />
+                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400" />
                                     <input
                                         id="email"
                                         type="email"
@@ -152,7 +152,7 @@ export default function SignupPage() {
                                     />
                                 </div>
                                 {formData.email && (
-                                    <p className={`mt-2 text-xs flex items-center gap-1 ${isCollegeEmail ? 'text-emerald-400' : 'text-amber-400'}`}>
+                                    <p className={`mt-2 text-xs flex items-center gap-1 font-bold ${isCollegeEmail ? 'text-emerald-600' : 'text-amber-600'}`}>
                                         {isCollegeEmail ? (
                                             <>
                                                 <Check className="w-3 h-3" />
@@ -167,11 +167,11 @@ export default function SignupPage() {
 
                             {/* Password */}
                             <div>
-                                <label htmlFor="password" className="block text-sm font-medium text-dark-300 mb-2">
+                                <label htmlFor="password" className="block text-sm font-black text-surface-700 mb-2">
                                     Password
                                 </label>
                                 <div className="relative">
-                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500" />
+                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400" />
                                     <input
                                         id="password"
                                         type={showPassword ? 'text' : 'password'}
@@ -184,7 +184,7 @@ export default function SignupPage() {
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-dark-500 hover:text-dark-300 transition-colors"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-600 transition-colors"
                                     >
                                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                     </button>
@@ -194,8 +194,8 @@ export default function SignupPage() {
                                 {formData.password && (
                                     <div className="mt-3 space-y-1.5">
                                         {passwordRequirements.map((req, index) => (
-                                            <div key={index} className={`flex items-center gap-2 text-xs ${req.met ? 'text-emerald-400' : 'text-dark-500'}`}>
-                                                <div className={`w-4 h-4 rounded-full flex items-center justify-center ${req.met ? 'bg-emerald-500/20' : 'bg-dark-700'}`}>
+                                            <div key={index} className={`flex items-center gap-2 text-xs font-bold ${req.met ? 'text-emerald-600' : 'text-surface-400'}`}>
+                                                <div className={`w-4 h-4 rounded-full flex items-center justify-center ${req.met ? 'bg-emerald-50' : 'bg-surface-100'}`}>
                                                     {req.met && <Check className="w-3 h-3" />}
                                                 </div>
                                                 {req.label}
@@ -211,13 +211,13 @@ export default function SignupPage() {
                                     type="checkbox"
                                     checked={formData.agreeTerms}
                                     onChange={(e) => setFormData(prev => ({ ...prev, agreeTerms: e.target.checked }))}
-                                    className="w-5 h-5 mt-0.5 text-primary-500 bg-dark-800 border-dark-600 rounded focus:ring-primary-500 focus:ring-2 cursor-pointer"
+                                    className="w-5 h-5 mt-0.5 text-primary-600 bg-surface-50 border-surface-200 rounded focus:ring-primary-500 focus:ring-2 cursor-pointer"
                                 />
-                                <span className="text-sm text-dark-400">
+                                <span className="text-sm text-surface-600 font-bold">
                                     I agree to the{' '}
-                                    <Link href="/terms" className="text-primary-400 hover:underline">Terms of Service</Link>
+                                    <Link href="/terms" className="text-primary-600 hover:underline font-black">Terms of Service</Link>
                                     {' '}and{' '}
-                                    <Link href="/privacy" className="text-primary-400 hover:underline">Privacy Policy</Link>
+                                    <Link href="/privacy" className="text-primary-600 hover:underline font-black">Privacy Policy</Link>
                                 </span>
                             </label>
 
@@ -241,17 +241,17 @@ export default function SignupPage() {
                         {/* Divider */}
                         <div className="relative my-8">
                             <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-white/10" />
+                                <div className="w-full border-t border-surface-200" />
                             </div>
                             <div className="relative flex justify-center">
-                                <span className="bg-dark-900 px-4 text-sm text-dark-500">or</span>
+                                <span className="bg-white px-4 text-xs font-black uppercase tracking-widest text-surface-400">or</span>
                             </div>
                         </div>
 
                         {/* Login Link */}
-                        <p className="text-center text-dark-400">
+                        <p className="text-center text-surface-700 font-bold">
                             Already have an account?{' '}
-                            <Link href="/login" className="text-primary-400 hover:text-primary-300 font-medium transition-colors">
+                            <Link href="/login" className="text-primary-600 hover:text-primary-700 font-black transition-colors underline underline-offset-4 decoration-primary-200 hover:decoration-primary-500">
                                 Log in
                             </Link>
                         </p>

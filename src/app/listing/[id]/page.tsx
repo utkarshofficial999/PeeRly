@@ -271,7 +271,7 @@ export default function ListingDetailPage() {
                                 <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse" />
                             </div>
                         </div>
-                        <p className="text-surface-400 font-bold tracking-widest uppercase text-xs">Summoning Details...</p>
+                        <p className="text-surface-600 font-black tracking-widest uppercase text-xs">Summoning Details...</p>
                     </div>
                 </main>
                 <Footer />
@@ -289,7 +289,7 @@ export default function ListingDetailPage() {
                             <AlertCircle className="w-10 h-10" />
                         </div>
                         <h1 className="text-3xl font-black text-surface-900 mb-2">Artifact Missing</h1>
-                        <p className="text-surface-400 font-medium mb-8 leading-relaxed">
+                        <p className="text-surface-600 font-bold mb-8 leading-relaxed">
                             {errorMsg || 'This listing might have been moved to the campus archives.'}
                         </p>
                         <Link href="/browse" className="btn-primary w-full py-4 rounded-2xl">
@@ -312,7 +312,7 @@ export default function ListingDetailPage() {
             <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-100/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
 
             <Header />
-            <main className="flex-1 container-custom pt-32 md:pt-40 pb-20">
+            <main className="flex-1 container-custom pt-24 md:pt-32 pb-20">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                     {/* Left: Images */}
                     <div className="space-y-6">
@@ -329,7 +329,7 @@ export default function ListingDetailPage() {
                             ) : (
                                 <div className="w-full h-full flex flex-col items-center justify-center bg-surface-50">
                                     <div className="text-6xl mb-4">📸</div>
-                                    <p className="text-surface-400 font-bold uppercase tracking-widest text-xs">No Visual Evidence</p>
+                                    <p className="text-surface-600 font-black uppercase tracking-widest text-xs">No Visual Evidence</p>
                                 </div>
                             )}
                         </div>
@@ -365,7 +365,7 @@ export default function ListingDetailPage() {
                                 </span>
                             </div>
 
-                            <h1 className="text-4xl md:text-5xl font-display font-black text-surface-900 mb-4 tracking-tight leading-tight">
+                            <h1 className="text-4xl md:text-5xl font-black text-surface-900 mb-4 tracking-tight leading-tight">
                                 {listing.title}
                             </h1>
 
@@ -374,7 +374,7 @@ export default function ListingDetailPage() {
                                     {formatPrice(listing.price)}
                                 </span>
                                 <div className="h-8 w-px bg-surface-100" />
-                                <div className="flex items-center gap-4 text-xs font-bold text-surface-400 uppercase tracking-tighter">
+                                <div className="flex items-center gap-4 text-xs font-bold text-surface-500 uppercase tracking-tighter">
                                     <span className="flex items-center gap-1.5">
                                         <Clock className="w-3.5 h-3.5" />
                                         {formatRelativeTime(listing.created_at)}
@@ -425,8 +425,8 @@ export default function ListingDetailPage() {
                         )}
 
                         <div className="bg-white p-8 rounded-[2rem] shadow-soft border border-surface-100">
-                            <h2 className="text-xs font-black text-primary-500 uppercase tracking-[0.2em] mb-4">Original Memo</h2>
-                            <p className="text-surface-600 font-medium leading-relaxed whitespace-pre-wrap">{listing.description}</p>
+                            <h2 className="text-xs font-black text-primary-600 uppercase tracking-[0.2em] mb-4">Original Memo</h2>
+                            <p className="text-surface-800 font-bold leading-relaxed whitespace-pre-wrap">{listing.description}</p>
                         </div>
 
                         {!isOwnListing && (

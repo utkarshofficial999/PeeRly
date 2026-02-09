@@ -75,15 +75,15 @@ export default function MyListingsPage() {
     }, [user, fetchMyListings])
 
     return (
-        <div className="min-h-screen bg-dark-950">
+        <div className="min-h-screen bg-surface-50">
             <Header />
 
-            <main className="pt-32 pb-20 px-4">
+            <main className="pt-24 md:pt-32 pb-20 px-4">
                 <div className="max-w-6xl mx-auto">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
                         <div>
-                            <h1 className="text-3xl font-display font-bold text-white mb-2">My Listings</h1>
-                            <p className="text-dark-400">Manage items you&apos;ve posted for sale or rent.</p>
+                            <h1 className="text-3xl font-black text-surface-900 mb-2">My Listings</h1>
+                            <p className="text-surface-700 font-bold">Manage items you&apos;ve posted for sale or rent.</p>
                         </div>
                         <Link href="/create" className="btn-primary px-6 py-3">
                             <Plus className="w-5 h-5" />
@@ -94,14 +94,14 @@ export default function MyListingsPage() {
                     {isLoading ? (
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {[1, 2, 3].map(i => (
-                                <div key={i} className="glass-card h-64 animate-pulse bg-white/5" />
+                                <div key={i} className="premium-card h-64 animate-pulse" />
                             ))}
                         </div>
                     ) : listings.length > 0 ? (
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {listings.map((item) => (
-                                <div key={item.id} className="glass-card overflow-hidden group">
-                                    <div className="aspect-video bg-dark-800 relative">
+                                <div key={item.id} className="premium-card overflow-hidden group hover:shadow-premium hover:-translate-y-1 transition-all">
+                                    <div className="aspect-video bg-surface-200 relative">
                                         {item.images?.[0] && (
                                             <Image
                                                 src={item.images[0]}
@@ -111,29 +111,29 @@ export default function MyListingsPage() {
                                             />
                                         )}
                                         <div className="absolute top-4 right-4 flex gap-2">
-                                            <button className="p-2 rounded-lg bg-dark-900/80 text-white backdrop-blur-md hover:bg-primary-500 transition-colors">
+                                            <button className="p-2 rounded-lg bg-white/90 text-surface-900 backdrop-blur-md shadow-soft hover:bg-primary-600 hover:text-white transition-all">
                                                 <Edit2 className="w-4 h-4" />
                                             </button>
-                                            <button className="p-2 rounded-lg bg-dark-900/80 text-red-400 backdrop-blur-md hover:bg-red-500 hover:text-white transition-colors">
+                                            <button className="p-2 rounded-lg bg-white/90 text-red-500 backdrop-blur-md shadow-soft hover:bg-red-600 hover:text-white transition-all">
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>
                                     </div>
                                     <div className="p-6">
                                         <div className="flex items-center justify-between mb-2">
-                                            <h3 className="text-xl font-bold text-white truncate">{item.title}</h3>
-                                            <span className="text-primary-400 font-bold">₹{item.price}</span>
+                                            <h3 className="text-xl font-black text-surface-900 truncate">{item.title}</h3>
+                                            <span className="text-primary-600 font-black">₹{item.price}</span>
                                         </div>
-                                        <div className="flex items-center gap-4 text-sm text-dark-400 mb-6">
+                                        <div className="flex items-center gap-4 text-sm text-surface-700 font-bold mb-6">
                                             <span className="flex items-center gap-1">
-                                                <Eye className="w-4 h-4" />
+                                                <Eye className="w-4 h-4 text-surface-400" />
                                                 {item.views_count || 0} views
                                             </span>
-                                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${item.is_active ? 'bg-emerald-500/10 text-emerald-400' : 'bg-dark-700 text-dark-400'}`}>
+                                            <span className={`px-3 py-0.5 rounded-full text-[10px] uppercase font-black tracking-wider ${item.is_active ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-surface-200 text-surface-700'}`}>
                                                 {item.is_active ? 'Active' : 'Draft'}
                                             </span>
                                         </div>
-                                        <Link href={`/listing/${item.id}`} className="text-center block w-full py-3 rounded-xl bg-white/5 text-white font-bold hover:bg-white/10 transition-colors">
+                                        <Link href={`/listing/${item.id}`} className="text-center block w-full py-3 rounded-xl bg-surface-50 text-surface-900 font-black border border-surface-100 hover:bg-white hover:shadow-soft transition-all">
                                             View Stats
                                         </Link>
                                     </div>
@@ -141,12 +141,12 @@ export default function MyListingsPage() {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-20 glass-card">
-                            <div className="w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center mx-auto mb-6">
-                                <Package className="w-10 h-10 text-dark-500" />
+                        <div className="text-center py-20 premium-card">
+                            <div className="w-20 h-20 rounded-3xl bg-surface-50 border border-surface-100 flex items-center justify-center mx-auto mb-6">
+                                <Package className="w-10 h-10 text-surface-400" />
                             </div>
-                            <h2 className="text-2xl font-bold text-white mb-2">No listings yet</h2>
-                            <p className="text-dark-400 mb-8 max-w-sm mx-auto">
+                            <h2 className="text-2xl font-black text-surface-900 mb-2">No listings yet</h2>
+                            <p className="text-surface-600 font-bold mb-8 max-w-sm mx-auto">
                                 You haven&apos;t posted any items yet. Start selling to see your listings here.
                             </p>
                             <Link href="/create" className="btn-primary px-8 py-3 mx-auto flex items-center gap-2">

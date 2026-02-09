@@ -42,17 +42,17 @@ export default function HowItWorks() {
     ]
 
     return (
-        <div className="min-h-screen bg-dark-950">
+        <div className="min-h-screen bg-surface-50">
             <Header />
 
-            <main className="pt-32 pb-20 px-4">
+            <main className="pt-24 md:pt-32 pb-20 px-4">
                 <div className="max-w-4xl mx-auto">
                     {/* Header */}
                     <div className="text-center mb-16 animate-fade-in">
-                        <h1 className="text-4xl md:text-5xl font-display font-bold text-white mb-6">
+                        <h1 className="text-4xl md:text-5xl font-display font-black text-surface-900 mb-6">
                             How <span className="gradient-text">PeeRly</span> Works
                         </h1>
-                        <p className="text-xl text-dark-300">
+                        <p className="text-xl text-surface-600 font-bold">
                             Buy. Sell. Connect. All within your campus limits.
                         </p>
                     </div>
@@ -62,7 +62,7 @@ export default function HowItWorks() {
                         {steps.map((step, index) => (
                             <div
                                 key={index}
-                                className="glass-card p-8 flex flex-col md:flex-row gap-8 items-start animate-slide-up"
+                                className="premium-card p-8 flex flex-col md:flex-row gap-8 items-start animate-slide-up"
                                 style={{ animationDelay: `${index * 100}ms` }}
                             >
                                 <div className={`w-16 h-16 rounded-2xl ${step.bgColor} flex items-center justify-center shrink-0`}>
@@ -70,10 +70,10 @@ export default function HowItWorks() {
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-3 mb-2">
-                                        <span className="text-sm font-mono font-bold text-primary-500">{step.number}</span>
-                                        <h2 className="text-2xl font-bold text-white">{step.title}</h2>
+                                        <span className="text-sm font-display font-black text-primary-600 uppercase tracking-widest">{step.number}</span>
+                                        <h2 className="text-2xl font-black text-surface-900">{step.title}</h2>
                                     </div>
-                                    <p className="text-dark-300 leading-relaxed text-lg">
+                                    <p className="text-surface-600 leading-relaxed text-lg font-medium">
                                         {step.description}
                                     </p>
                                 </div>
@@ -82,13 +82,13 @@ export default function HowItWorks() {
                     </div>
 
                     {/* Safety Badge */}
-                    <div className="mt-16 glass-card p-8 border-emerald-500/20 bg-emerald-500/5 text-center animate-fade-in">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-400 mb-4">
+                    <div className="mt-16 premium-card p-8 border-emerald-500/20 bg-emerald-500/5 text-center animate-fade-in">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-600 mb-4">
                             <Shield className="w-5 h-5" />
-                            <span className="font-semibold">Safety First</span>
+                            <span className="font-bold">Safety First</span>
                         </div>
-                        <h3 className="text-2xl font-bold text-white mb-4">Help Us Keep PeeRly Safe</h3>
-                        <p className="text-dark-300 mb-6">
+                        <h3 className="text-2xl font-black text-surface-900 mb-4">Help Us Keep PeeRly Safe</h3>
+                        <p className="text-surface-600 font-medium mb-6">
                             Always rate your experience after a trade. If you encounter any issues, report them immediately so we can keep our community trusted and secure.
                         </p>
                         <Link href="/safety" className="text-emerald-400 hover:text-emerald-300 font-medium flex items-center justify-center gap-2 transition-colors">

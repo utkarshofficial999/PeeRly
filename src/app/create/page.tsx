@@ -207,25 +207,25 @@ export default function CreateListingPage() {
     }
 
     return (
-        <div className="min-h-screen bg-dark-950">
+        <div className="min-h-screen bg-surface-50">
             <Header />
 
-            <main className="pt-20 md:pt-28 pb-16 px-4">
+            <main className="pt-24 md:pt-32 pb-16 px-4">
                 <div className="max-w-2xl mx-auto">
                     {/* Progress Steps */}
                     <div className="flex items-center justify-between mb-8">
                         {[1, 2, 3, 4].map((s) => (
                             <div key={s} className="flex items-center">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${s < step
-                                    ? 'bg-primary-500 text-white'
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black transition-all ${s < step
+                                    ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/20'
                                     : s === step
-                                        ? 'bg-primary-500/20 text-primary-400 border-2 border-primary-500'
-                                        : 'bg-dark-800 text-dark-500'
+                                        ? 'bg-primary-50 text-primary-600 border-2 border-primary-600'
+                                        : 'bg-surface-200 text-surface-400'
                                     }`}>
                                     {s < step ? <Check className="w-5 h-5" /> : s}
                                 </div>
                                 {s < 4 && (
-                                    <div className={`w-16 sm:w-24 h-1 mx-2 rounded ${s < step ? 'bg-primary-500' : 'bg-dark-800'
+                                    <div className={`w-16 sm:w-24 h-1 mx-2 rounded ${s < step ? 'bg-primary-600' : 'bg-surface-200'
                                         }`} />
                                 )}
                             </div>
@@ -239,27 +239,27 @@ export default function CreateListingPage() {
                         </div>
                     )}
 
-                    <div className="glass-card p-4 md:p-8">
+                    <div className="premium-card p-4 md:p-8">
                         {/* Step 1: Category */}
                         {step === 1 && (
                             <div className="animate-fade-in">
-                                <h2 className="text-2xl font-display font-bold text-white mb-2">
+                                <h2 className="text-2xl font-black text-surface-900 mb-2">
                                     What are you selling?
                                 </h2>
-                                <p className="text-dark-400 mb-8">Select a category for your item</p>
+                                <p className="text-surface-700 mb-8 font-bold">Select a category for your item</p>
 
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-3">
                                     {categories.map((cat) => (
                                         <button
                                             key={cat.id}
                                             onClick={() => setFormData(prev => ({ ...prev, category: cat.slug }))}
-                                            className={`p-4 rounded-xl border transition-all text-center ${formData.category === cat.slug
-                                                ? 'bg-primary-500/20 border-primary-500 text-white'
-                                                : 'bg-white/5 border-white/10 text-dark-300 hover:border-white/30'
+                                            className={`p-4 rounded-2xl border transition-all text-center ${formData.category === cat.slug
+                                                ? 'bg-primary-50 border-primary-500 text-primary-600 shadow-sm'
+                                                : 'bg-surface-50 border-surface-200 text-surface-700 hover:border-primary-300 hover:bg-white'
                                                 }`}
                                         >
                                             <span className="text-2xl mb-2 block">{cat.icon}</span>
-                                            <span className="text-sm font-medium">{cat.name}</span>
+                                            <span className="text-sm font-black">{cat.name}</span>
                                         </button>
                                     ))}
                                 </div>
@@ -270,16 +270,16 @@ export default function CreateListingPage() {
                         {step === 2 && (
                             <div className="animate-fade-in space-y-6">
                                 <div>
-                                    <h2 className="text-2xl font-display font-bold text-white mb-2">
+                                    <h2 className="text-2xl font-black text-surface-900 mb-2">
                                         Item Details
                                     </h2>
-                                    <p className="text-dark-400">Tell buyers about your item</p>
+                                    <p className="text-surface-700 font-bold">Tell buyers about your item</p>
                                 </div>
 
                                 {/* Title */}
                                 <div>
-                                    <label className="block text-sm font-medium text-dark-300 mb-2">
-                                        Title <span className="text-red-400">*</span>
+                                    <label className="block text-sm font-black text-surface-700 mb-2">
+                                        Title <span className="text-peach-500">*</span>
                                     </label>
                                     <input
                                         type="text"
@@ -289,12 +289,12 @@ export default function CreateListingPage() {
                                         maxLength={100}
                                         className="input-field"
                                     />
-                                    <p className="mt-1 text-xs text-dark-500">{formData.title.length}/100 characters</p>
+                                    <p className="mt-1 text-xs text-surface-400 font-bold">{formData.title.length}/100 characters</p>
                                 </div>
 
                                 {/* Description */}
                                 <div>
-                                    <label className="block text-sm font-medium text-dark-300 mb-2">
+                                    <label className="block text-sm font-black text-surface-700 mb-2">
                                         Description
                                     </label>
                                     <textarea
@@ -305,16 +305,16 @@ export default function CreateListingPage() {
                                         maxLength={500}
                                         className="input-field resize-none"
                                     />
-                                    <p className="mt-1 text-xs text-dark-500">{formData.description.length}/500 characters</p>
+                                    <p className="mt-1 text-xs text-surface-400 font-bold">{formData.description.length}/500 characters</p>
                                 </div>
 
                                 {/* Price */}
                                 <div>
-                                    <label className="block text-sm font-medium text-dark-300 mb-2">
-                                        Price <span className="text-red-400">*</span>
+                                    <label className="block text-sm font-black text-surface-700 mb-2">
+                                        Price <span className="text-peach-500">*</span>
                                     </label>
                                     <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-400 font-medium">₹</span>
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-surface-900 font-black">₹</span>
                                         <input
                                             type="number"
                                             value={formData.price}
@@ -328,16 +328,16 @@ export default function CreateListingPage() {
 
                                 {/* Condition */}
                                 <div>
-                                    <label className="block text-sm font-medium text-dark-300 mb-3">
-                                        Condition <span className="text-red-400">*</span>
+                                    <label className="block text-sm font-black text-surface-700 mb-3">
+                                        Condition <span className="text-peach-500">*</span>
                                     </label>
                                     <div className="space-y-2">
                                         {conditions.map((cond) => (
                                             <label
                                                 key={cond.value}
                                                 className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${formData.condition === cond.value
-                                                    ? 'bg-primary-500/20 border-primary-500'
-                                                    : 'bg-white/5 border-white/10 hover:border-white/30'
+                                                    ? 'bg-primary-50 border-primary-600 shadow-sm'
+                                                    : 'bg-surface-50 border-surface-200 hover:border-surface-300'
                                                     }`}
                                             >
                                                 <input
@@ -349,8 +349,8 @@ export default function CreateListingPage() {
                                                     className="mt-0.5"
                                                 />
                                                 <div>
-                                                    <p className="font-medium text-white">{cond.label}</p>
-                                                    <p className="text-sm text-dark-400">{cond.description}</p>
+                                                    <p className="font-black text-surface-900">{cond.label}</p>
+                                                    <p className="text-sm text-surface-700 font-bold">{cond.description}</p>
                                                 </div>
                                             </label>
                                         ))}
@@ -359,7 +359,7 @@ export default function CreateListingPage() {
 
                                 {/* Location */}
                                 <div>
-                                    <label className="block text-sm font-medium text-dark-300 mb-2">
+                                    <label className="block text-sm font-black text-surface-700 mb-2">
                                         Meeting Location
                                     </label>
                                     <input
@@ -376,15 +376,15 @@ export default function CreateListingPage() {
                         {/* Step 3: Images */}
                         {step === 3 && (
                             <div className="animate-fade-in">
-                                <h2 className="text-2xl font-display font-bold text-white mb-2">
+                                <h2 className="text-2xl font-black text-surface-900 mb-2">
                                     Add Photos
                                 </h2>
-                                <p className="text-dark-400 mb-8">Add up to 5 photos. First photo will be the cover.</p>
+                                <p className="text-surface-700 mb-8 font-bold">Add up to 5 photos. First photo will be the cover.</p>
 
                                 <div className="grid grid-cols-3 gap-3">
                                     {/* Image Previews */}
                                     {imagePreviews.map((preview, index) => (
-                                        <div key={index} className="relative aspect-square rounded-xl overflow-hidden bg-dark-800">
+                                        <div key={index} className="relative aspect-square rounded-xl overflow-hidden bg-surface-100 border border-surface-200">
                                             <Image src={preview} alt="Preview" fill className="object-cover" />
                                             <button
                                                 onClick={() => removeImage(index)}
@@ -404,10 +404,10 @@ export default function CreateListingPage() {
                                     {images.length < 5 && (
                                         <button
                                             onClick={() => fileInputRef.current?.click()}
-                                            className="aspect-square rounded-xl border-2 border-dashed border-white/20 hover:border-primary-500/50 flex flex-col items-center justify-center text-dark-400 hover:text-primary-400 transition-all"
+                                            className="aspect-square rounded-2xl border-2 border-dashed border-surface-200 hover:border-primary-500/50 flex flex-col items-center justify-center text-surface-400 hover:text-primary-600 transition-all bg-surface-50 hover:bg-primary-50/30"
                                         >
                                             <Plus className="w-8 h-8 mb-2" />
-                                            <span className="text-sm">Add Photo</span>
+                                            <span className="text-sm font-black tracking-tighter uppercase">Add Photo</span>
                                         </button>
                                     )}
                                 </div>
@@ -421,7 +421,7 @@ export default function CreateListingPage() {
                                     className="hidden"
                                 />
 
-                                <p className="mt-4 text-sm text-dark-500">
+                                <p className="mt-4 text-sm text-surface-500 font-bold">
                                     Tip: Good photos get 3x more views. Use good lighting and show the item clearly.
                                 </p>
                             </div>
@@ -430,13 +430,13 @@ export default function CreateListingPage() {
                         {/* Step 4: Preview */}
                         {step === 4 && (
                             <div className="animate-fade-in">
-                                <h2 className="text-2xl font-display font-bold text-white mb-2">
+                                <h2 className="text-2xl font-black text-surface-900 mb-2">
                                     Review Your Listing
                                 </h2>
-                                <p className="text-dark-400 mb-8">Make sure everything looks good before posting</p>
+                                <p className="text-surface-700 mb-8 font-bold">Make sure everything looks good before posting</p>
 
                                 {/* Preview Card */}
-                                <div className="bg-dark-800/50 rounded-xl overflow-hidden">
+                                <div className="bg-surface-50 border border-surface-100 rounded-2xl overflow-hidden shadow-soft">
                                     {imagePreviews[0] && (
                                         <div className="w-full aspect-video relative">
                                             <Image src={imagePreviews[0]} alt="Preview" fill className="object-cover" />
@@ -446,17 +446,17 @@ export default function CreateListingPage() {
                                         <div className="badge-primary mb-3">
                                             {categories.find(c => c.slug === formData.category)?.name}
                                         </div>
-                                        <h3 className="text-xl font-semibold text-white mb-2">{formData.title}</h3>
-                                        <p className="text-3xl font-bold gradient-text mb-4">₹{formData.price}</p>
+                                        <h3 className="text-xl font-black text-surface-900 mb-2">{formData.title}</h3>
+                                        <p className="text-3xl font-black text-primary-600 mb-4">₹{formData.price}</p>
                                         {formData.description && (
-                                            <p className="text-dark-300 mb-4">{formData.description}</p>
+                                            <p className="text-surface-700 font-medium mb-4">{formData.description}</p>
                                         )}
-                                        <div className="flex flex-wrap gap-3 text-sm text-dark-400">
-                                            <span className="px-3 py-1 bg-white/5 rounded-full">
+                                        <div className="flex flex-wrap gap-3 text-sm text-surface-600">
+                                            <span className="px-4 py-1.5 bg-surface-100 rounded-full font-bold border border-surface-200">
                                                 {conditions.find(c => c.value === formData.condition)?.label}
                                             </span>
                                             {formData.location && (
-                                                <span className="px-3 py-1 bg-white/5 rounded-full">
+                                                <span className="px-4 py-1.5 bg-surface-100 rounded-full font-bold border border-surface-200">
                                                     📍 {formData.location}
                                                 </span>
                                             )}
@@ -467,7 +467,7 @@ export default function CreateListingPage() {
                         )}
 
                         {/* Navigation Buttons */}
-                        <div className="flex items-center justify-between mt-8 pt-6 border-t border-white/10">
+                        <div className="flex items-center justify-between mt-8 pt-6 border-t border-surface-100">
                             {step > 1 ? (
                                 <button
                                     onClick={() => setStep(step - 1)}

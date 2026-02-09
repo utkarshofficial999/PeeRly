@@ -126,7 +126,7 @@ export default function ListingCard({
                     </div>
 
                     {viewsCount > 0 && (
-                        <div className="flex items-center gap-1.5 text-surface-500">
+                        <div className="flex items-center gap-1.5 text-surface-700">
                             <Eye className="w-3.5 h-3.5" />
                             <span className="text-[10px] font-black">{viewsCount}</span>
                         </div>

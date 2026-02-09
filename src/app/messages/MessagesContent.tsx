@@ -279,7 +279,7 @@ export default function MessagesContent() {
 
     if (authLoading) {
         return (
-            <div className="min-h-screen bg-dark-950 flex items-center justify-center">
+            <div className="min-h-screen bg-surface-50 flex items-center justify-center">
                 <Loader2 className="w-12 h-12 text-primary-500 animate-spin" />
             </div>
         )
@@ -287,12 +287,12 @@ export default function MessagesContent() {
 
     if (!user) {
         return (
-            <div className="min-h-screen bg-dark-950 flex flex-col items-center justify-center p-8 text-center">
-                <div className="w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center mb-6">
+            <div className="min-h-screen bg-surface-50 flex flex-col items-center justify-center p-8 text-center">
+                <div className="w-20 h-20 rounded-3xl bg-surface-100 flex items-center justify-center mb-6">
                     <ShieldAlert className="w-10 h-10 text-primary-500" />
                 </div>
-                <h1 className="text-3xl font-bold text-white mb-4">You need to be logged in</h1>
-                <p className="text-dark-400 mb-8 max-w-sm">Please log in to your account to view your messages and chat with others.</p>
+                <h1 className="text-3xl font-black text-surface-900 mb-4">You need to be logged in</h1>
+                <p className="text-surface-600 mb-8 max-w-sm">Please log in to your account to view your messages and chat with others.</p>
                 <div className="flex gap-4">
                     <Link href="/login" className="btn-primary px-8">Log In</Link>
                     <Link href="/" className="btn-secondary px-8">Home</Link>
@@ -304,21 +304,21 @@ export default function MessagesContent() {
     const currentConv = conversations.find(c => c.id === selectedConvId)
 
     return (
-        <div className="min-h-screen bg-dark-950 flex flex-col">
+        <div className="min-h-screen bg-surface-50 flex flex-col">
             <Header />
 
-            <main className="flex-1 pt-[72px] md:pt-24 md:pb-4 md:px-4 overflow-hidden flex items-stretch h-[calc(100dvh-72px)] md:h-[calc(100dvh-96px)]">
-                <div className="max-w-7xl mx-auto w-full flex glass-card overflow-hidden md:rounded-2xl rounded-none border-x-0 md:border">
+            <main className="flex-1 pt-20 md:pt-28 md:pb-4 md:px-4 overflow-hidden flex items-stretch h-[calc(100dvh-5rem)] md:h-[calc(100dvh-7rem)]">
+                <div className="max-w-7xl mx-auto w-full flex premium-card overflow-hidden md:rounded-2xl rounded-none border-x-0 md:border">
                     {/* Chat Sidebar */}
-                    <div className={`w-full md:w-80 border-r border-white/5 flex flex-col ${selectedConvId ? 'hidden md:flex' : 'flex'}`}>
-                        <div className="p-4 border-b border-white/5">
-                            <h1 className="text-xl font-bold text-white mb-4">Messages</h1>
+                    <div className={`w-full md:w-80 border-r border-surface-100 flex flex-col ${selectedConvId ? 'hidden md:flex' : 'flex'}`}>
+                        <div className="p-4 border-b border-surface-100">
+                            <h1 className="text-xl font-black text-surface-900 mb-4">Messages</h1>
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-500" />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
                                 <input
                                     type="text"
                                     placeholder="Search chats..."
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-sm text-white focus:border-primary-500 transition-colors outline-none"
+                                    className="w-full bg-surface-50 border border-surface-200 rounded-xl pl-10 pr-4 py-2 text-sm text-surface-900 focus:border-primary-500 transition-colors outline-none"
                                 />
                             </div>
                         </div>
@@ -330,7 +330,7 @@ export default function MessagesContent() {
                                     <button
                                         key={chat.id}
                                         onClick={() => setSelectedConvId(chat.id)}
-                                        className={`w-full p-4 flex gap-3 items-center hover:bg-white/5 transition-colors border-b border-white/5 ${selectedConvId === chat.id ? 'bg-white/5' : ''} ${chat.unread_count > 0 ? 'bg-primary-500/5' : ''}`}
+                                        className={`w-full p-4 flex gap-3 items-center hover:bg-primary-50/50 transition-colors border-b border-surface-100 ${selectedConvId === chat.id ? 'bg-primary-50' : ''} ${chat.unread_count > 0 ? 'bg-primary-100/30' : ''}`}
                                     >
                                         <div className="relative shrink-0">
                                             {chat.other_party.avatar_url ? (
@@ -350,30 +350,30 @@ export default function MessagesContent() {
                                         </div>
                                         <div className="flex-1 min-w-0 text-left">
                                             <div className="flex justify-between items-start mb-0.5">
-                                                <span className={`font-bold truncate ${chat.unread_count > 0 ? 'text-white' : 'text-white'}`}>{chat.other_party.full_name}</span>
-                                                <span className="text-[10px] text-dark-500 uppercase font-bold shrink-0">{formatRelativeTime(chat.updated_at)}</span>
+                                                <span className={`font-black truncate ${chat.unread_count > 0 ? 'text-surface-900' : 'text-surface-900'}`}>{chat.other_party.full_name}</span>
+                                                <span className="text-[10px] text-surface-500 uppercase font-bold shrink-0">{formatRelativeTime(chat.updated_at)}</span>
                                             </div>
-                                            <p className={`text-xs truncate ${chat.unread_count > 0 ? 'text-primary-400 font-medium' : 'text-dark-400'}`}>{chat.listing?.title || 'Chat'}</p>
+                                            <p className={`text-xs truncate ${chat.unread_count > 0 ? 'text-primary-600 font-bold' : 'text-surface-600'}`}>{chat.listing?.title || 'Chat'}</p>
                                         </div>
                                     </button>
                                 ))
                             ) : (
-                                <div className="p-8 text-center text-dark-400 text-sm">No conversations yet.</div>
+                                <div className="p-8 text-center text-surface-400 text-sm font-bold">No conversations yet.</div>
                             )}
                         </div>
                     </div>
 
                     {/* Chat Window */}
-                    <div className={`flex-1 flex flex-col bg-dark-900/20 ${!selectedConvId ? 'hidden md:flex' : 'flex'}`}>
+                    <div className={`flex-1 flex flex-col bg-white ${!selectedConvId ? 'hidden md:flex' : 'flex'}`}>
                         {selectedConvId && currentConv ? (
                             <>
                                 {/* Chat Header */}
-                                <div className="p-4 border-b border-white/5 flex justify-between items-center bg-dark-900/40">
+                                <div className="p-4 border-b border-surface-100 flex justify-between items-center bg-white">
                                     <div className="flex items-center gap-3">
-                                        <button onClick={() => setSelectedConvId(null)} className="md:hidden p-2 -ml-2 text-dark-400">
+                                        <button onClick={() => setSelectedConvId(null)} className="md:hidden p-2 -ml-2 text-surface-400">
                                             <ArrowLeft className="w-5 h-5" />
                                         </button>
-                                        <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold overflow-hidden shrink-0 shadow-sm">
+                                        <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-indigo-600 flex items-center justify-center text-white font-bold overflow-hidden shrink-0 shadow-sm">
                                             {currentConv.other_party.avatar_url ? (
                                                 <Image src={currentConv.other_party.avatar_url} alt={currentConv.other_party.full_name} fill className="object-cover" sizes="40px" />
                                             ) : (
@@ -381,8 +381,8 @@ export default function MessagesContent() {
                                             )}
                                         </div>
                                         <div>
-                                            <h2 className="text-white font-bold leading-none mb-1">{currentConv.other_party.full_name}</h2>
-                                            <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Online</p>
+                                            <h2 className="text-surface-900 font-black leading-none mb-1">{currentConv.other_party.full_name}</h2>
+                                            <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">Online</p>
                                         </div>
                                     </div>
                                     <Link href={`/listing/${currentConv.listing_id}`} className="text-[10px] md:text-xs font-bold text-primary-400 bg-primary-500/10 px-2 md:px-3 py-1 md:py-1.5 rounded-lg hover:bg-primary-500/20 transition-all shrink-0">
@@ -392,9 +392,9 @@ export default function MessagesContent() {
 
                                 {/* Messages Area */}
                                 <div className="flex-1 p-6 overflow-y-auto space-y-4">
-                                    <div className="bg-red-500/5 border border-red-500/10 p-3 md:p-4 rounded-2xl flex items-start gap-3 mb-4 md:mb-8">
+                                    <div className="bg-red-50 border border-red-100 p-3 md:p-4 rounded-2xl flex items-start gap-3 mb-4 md:mb-8">
                                         <ShieldAlert className="w-4 h-4 md:w-5 md:h-5 text-red-500 shrink-0 mt-0.5" />
-                                        <p className="text-[10px] md:text-xs text-red-200/60 italic leading-relaxed">
+                                        <p className="text-[10px] md:text-xs text-red-800 font-bold italic leading-relaxed">
                                             ⚠️ Safety: Never share OTPs or financial details. Meet in public.
                                         </p>
                                     </div>
@@ -407,8 +407,8 @@ export default function MessagesContent() {
                                             return (
                                                 <div key={msg.id} className={`flex gap-3 max-w-[80%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`}>
                                                     <div className={`p-3 md:p-4 rounded-2xl text-xs md:text-sm leading-relaxed ${isMe
-                                                        ? 'bg-primary-500 text-white rounded-tr-none shadow-lg shadow-primary-500/20'
-                                                        : 'bg-white/5 border border-white/5 text-dark-200 rounded-tl-none'
+                                                        ? 'bg-primary-600 text-white rounded-tr-none shadow-lg shadow-primary-500/20'
+                                                        : 'bg-surface-100 border border-surface-200 text-surface-800 rounded-tl-none'
                                                         }`}>
                                                         {msg.content}
                                                         <div className={`text-[9px] mt-1 font-bold uppercase opacity-50 ${isMe ? 'text-right' : ''}`}>
@@ -423,14 +423,14 @@ export default function MessagesContent() {
                                 </div>
 
                                 {/* Input Area */}
-                                <div className="p-4 border-t border-white/5 bg-dark-900/40">
+                                <div className="p-4 border-t border-surface-100 bg-white">
                                     <form onSubmit={handleSendMessage} className="flex gap-3">
                                         <input
                                             type="text"
                                             value={newMessage}
                                             onChange={(e) => setNewMessage(e.target.value)}
                                             placeholder="Write a message..."
-                                            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white focus:border-primary-500 transition-colors outline-none"
+                                            className="flex-1 bg-surface-50 border border-surface-200 rounded-xl px-4 py-2 text-surface-900 focus:border-primary-500 transition-colors outline-none"
                                         />
                                         <button
                                             disabled={isSending || !newMessage.trim()}
@@ -442,12 +442,12 @@ export default function MessagesContent() {
                                 </div>
                             </>
                         ) : (
-                            <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-                                <div className="w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center mb-6">
-                                    <Send className="w-10 h-10 text-dark-600" />
+                            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-surface-50">
+                                <div className="w-20 h-20 rounded-3xl bg-surface-100 flex items-center justify-center mb-6">
+                                    <Send className="w-10 h-10 text-surface-300" />
                                 </div>
-                                <h2 className="text-2xl font-bold text-white mb-2">Your private space to chat</h2>
-                                <p className="text-dark-400 max-w-sm">Select a conversation from the left to start chatting with buyers and sellers.</p>
+                                <h2 className="text-2xl font-black text-surface-900 mb-2">Your private space to chat</h2>
+                                <p className="text-surface-600 max-w-sm font-medium">Select a conversation from the left to start chatting with buyers and sellers.</p>
                             </div>
                         )}
                     </div>
