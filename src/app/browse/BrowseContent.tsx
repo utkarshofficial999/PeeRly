@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
 import SearchBar from '@/components/ui/SearchBar'
 import FilterSidebar from '@/components/ui/FilterSidebar'
 import ListingCard from '@/components/cards/ListingCard'
