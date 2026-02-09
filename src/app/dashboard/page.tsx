@@ -197,10 +197,15 @@ export default function DashboardPage() {
                                                 {listing.views_count || 0}
                                             </span>
                                             <span className={`px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${listing.is_sold ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
-                                                listing.is_active ? 'bg-primary-50 text-primary-600 border border-primary-100' :
-                                                    'bg-surface-200 text-surface-600'
+                                                listing.approval_status === 'pending' ? 'bg-amber-50 text-amber-600 border border-amber-100' :
+                                                    listing.approval_status === 'rejected' ? 'bg-red-50 text-red-600 border border-red-100' :
+                                                        listing.is_active ? 'bg-primary-50 text-primary-600 border border-primary-100' :
+                                                            'bg-surface-200 text-surface-600'
                                                 }`}>
-                                                {listing.is_sold ? 'Sold' : listing.is_active ? 'Active' : 'Inactive'}
+                                                {listing.is_sold ? 'Sold' :
+                                                    listing.approval_status === 'pending' ? 'Pending Approval' :
+                                                        listing.approval_status === 'rejected' ? 'Rejected' :
+                                                            listing.is_active ? 'Active' : 'Inactive'}
                                             </span>
                                         </div>
                                     </Link>

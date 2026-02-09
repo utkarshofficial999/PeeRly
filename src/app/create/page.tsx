@@ -171,7 +171,8 @@ export default function CreateListingPage() {
                 images: uploadedImageUrls,
                 college_id: profile.college_id,
                 location: formData.location,
-                is_active: true
+                is_active: false,
+                approval_status: 'pending'
             }
 
             console.log('Listing details:', listingData)
