@@ -304,11 +304,11 @@ export default function MessagesContent() {
     const currentConv = conversations.find(c => c.id === selectedConvId)
 
     return (
-        <div className="min-h-screen bg-surface-50 flex flex-col">
+        <div className="h-screen bg-surface-50 flex flex-col overflow-hidden">
             <Header />
 
-            <main className="flex-1 pt-20 md:pt-28 md:pb-4 md:px-4 overflow-hidden flex items-stretch h-[calc(100dvh-5rem)] md:h-[calc(100dvh-7rem)]">
-                <div className="max-w-7xl mx-auto w-full flex premium-card overflow-hidden md:rounded-2xl rounded-none border-x-0 md:border">
+            <main className="flex-1 pt-20 md:pt-28 md:pb-4 md:px-4 overflow-hidden flex items-stretch h-dvh">
+                <div className="max-w-7xl mx-auto w-full flex h-full premium-card overflow-hidden md:rounded-2xl rounded-none border-x-0 md:border">
                     {/* Chat Sidebar */}
                     <div className={`w-full md:w-80 border-r border-surface-100 flex flex-col ${selectedConvId ? 'hidden md:flex' : 'flex'}`}>
                         <div className="p-4 border-b border-surface-100">
@@ -391,8 +391,8 @@ export default function MessagesContent() {
                                 </div>
 
                                 {/* Messages Area */}
-                                <div className="flex-1 p-6 overflow-y-auto space-y-4">
-                                    <div className="bg-red-50 border border-red-100 p-3 md:p-4 rounded-2xl flex items-start gap-3 mb-4 md:mb-8">
+                                <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-4">
+                                    <div className="bg-red-50 border border-red-100 p-3 md:p-3 rounded-2xl flex items-start gap-3 mb-2 md:mb-4">
                                         <ShieldAlert className="w-4 h-4 md:w-5 md:h-5 text-red-500 shrink-0 mt-0.5" />
                                         <p className="text-[10px] md:text-xs text-red-800 font-bold italic leading-relaxed">
                                             ⚠️ Safety: Never share OTPs or financial details. Meet in public.

@@ -46,17 +46,14 @@ export default function ListingDetailPage() {
             return
         }
 
-        // Guard: Already fetched THIS ID successfully
-        if (lastFetchedIdRef.current === id && listing !== null) {
-            console.log('✅ Already have data for this ID, skipping fetch')
-            return
-        }
-
-        // Guard: Currently loading (prevent double-fetch from Strict Mode)
+        // Guard: Currently loading
         if (status === 'loading') {
             console.log('⏳ Already loading, skipping')
             return
         }
+
+        // We removed the lastFetchedIdRef guard to ensure that every time a user 
+        // lands on this page, the view count increments and profile data is fresh.
 
         let cancelled = false
 

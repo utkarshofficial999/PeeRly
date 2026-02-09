@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Heart, Eye } from 'lucide-react'
@@ -37,6 +38,7 @@ export default function ListingCard({
     const conditionInfo = CONDITIONS[condition]
     const imageUrl = images[0] || '/placeholder-product.jpg'
     const initials = sellerName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    const [imgError, setImgError] = useState(false)
 
     return (
         <Link href={`/listing/${id}`} className="premium-card-hover group block overflow-hidden">
@@ -100,7 +102,7 @@ export default function ListingCard({
                 {/* Seller Info */}
                 <div className="pt-4 border-t border-surface-100 flex items-center justify-between">
                     <div className="flex items-center gap-2.5 min-w-0">
-                        {sellerAvatar ? (
+                        {sellerAvatar && !imgError ? (
                             <div className="relative w-7 h-7 rounded-xl overflow-hidden shrink-0 border border-surface-100 shadow-sm">
                                 <Image
                                     src={sellerAvatar}
@@ -108,6 +110,7 @@ export default function ListingCard({
                                     fill
                                     className="object-cover"
                                     sizes="28px"
+                                    onError={() => setImgError(true)}
                                 />
                             </div>
                         ) : (
