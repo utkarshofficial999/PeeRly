@@ -34,8 +34,11 @@ function LoadingFallback() {
 
 export default function BrowsePage() {
     return (
-        <Suspense fallback={<LoadingFallback />}>
-            <BrowseContent />
-        </Suspense>
+        <>
+            <Suspense fallback={<LoadingFallback />}>
+                <BrowseContent />
+            </Suspense>
+            <Footer />
+        </>
     )
 }

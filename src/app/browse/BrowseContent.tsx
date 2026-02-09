@@ -5,8 +5,10 @@ import { useSearchParams } from 'next/navigation'
 import SearchBar from '@/components/ui/SearchBar'
 import FilterSidebar from '@/components/ui/FilterSidebar'
 import ListingCard from '@/components/cards/ListingCard'
-import { Grid3X3, List, ChevronDown, Loader2, AlertCircle } from 'lucide-react'
+import { Grid3X3, List, ChevronDown, Loader2, AlertCircle, User as UserIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/context/AuthContext'
+import Link from 'next/link'
 
 interface Listing {
     id: string
@@ -46,6 +48,7 @@ export default function BrowseContent() {
     const [isFilterOpen, setIsFilterOpen] = useState(false)
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
     const [sortBy, setSortBy] = useState('newest')
+    const { user, profile } = useAuth()
     const [hasMore, setHasMore] = useState(false)
     const [offset, setOffset] = useState(0)
 
@@ -256,9 +259,61 @@ export default function BrowseContent() {
             {/* Background Orbs */}
             <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-100/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
 
-            {/* Header was here */}
+            {/* Sub-Nav Bar: Categories & Profile */}
+            <nav className="fixed top-0 left-0 right-0 z-50 soft-glass border-b border-surface-100 animate-in fade-in duration-500">
+                <div className="container-custom px-4 md:px-6 py-3 flex items-center justify-between gap-6">
+                    {/* Categories Scroller */}
+                    <div className="flex-1 overflow-x-auto no-scrollbar">
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={clearFilters}
+                                className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border ${!filters.category
+                                    ? 'bg-primary-500 text-white border-primary-500 shadow-lg shadow-primary-500/20'
+                                    : 'bg-white text-surface-500 border-surface-100 hover:border-primary-200 hover:text-primary-600'
+                                    }`}
+                            >
+                                All Feed
+                            </button>
+                            {categories.map(cat => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => handleFilterChange('category', cat.slug)}
+                                    className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border ${filters.category === cat.slug
+                                        ? 'bg-primary-500 text-white border-primary-500 shadow-lg shadow-primary-500/20'
+                                        : 'bg-white text-surface-500 border-surface-100 hover:border-primary-200 hover:text-primary-600'
+                                        }`}
+                                >
+                                    {cat.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
 
-            <main className="pt-28 md:pt-36 pb-20 px-4">
+                    {/* Quick Access Actions */}
+                    <div className="flex items-center gap-3">
+                        <Link href="/create" className="hidden sm:flex items-center gap-2 px-4 py-1.5 bg-primary-50 text-primary-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary-100 transition-all">
+                            Post Asset
+                        </Link>
+                        {user ? (
+                            <Link href="/dashboard" className="w-10 h-10 rounded-xl overflow-hidden ring-2 ring-primary-500/10 hover:ring-primary-500 transition-all shadow-soft group bg-white flex items-center justify-center">
+                                {profile?.avatar_url ? (
+                                    <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full bg-gradient-primary flex items-center justify-center text-white text-[10px] font-black">
+                                        {profile?.full_name?.charAt(0) || 'U'}
+                                    </div>
+                                )}
+                            </Link>
+                        ) : (
+                            <Link href="/login" className="p-2.5 text-surface-600 hover:text-primary-600 rounded-xl hover:bg-primary-50 transition-all">
+                                <UserIcon className="w-5 h-5" />
+                            </Link>
+                        )}
+                    </div>
+                </div>
+            </nav>
+
+            <main className="pt-20 md:pt-24 pb-20 px-4">
                 <div className="container-custom">
                     {/* Page Header */}
                     <div className="mb-12">
