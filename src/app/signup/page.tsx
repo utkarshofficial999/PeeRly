@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Mail, Lock, Eye, EyeOff, ArrowRight, User, Check, AlertCircle } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, ArrowRight, User, Check, AlertCircle, Camera, X, Loader2 } from 'lucide-react'
+import NextImage from 'next/image'
+import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/context/AuthContext'
 import Header from '@/components/layout/Header'
 import Logo from '@/components/ui/Logo'
@@ -21,6 +23,9 @@ export default function SignupPage() {
         password: '',
         agreeTerms: false,
     })
+    const [selectedImage, setSelectedImage] = useState<File | null>(null)
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+    const supabase = createClient()
 
     // Proactive redirect: if we detect a session during signup (some providers auto-login)
     useEffect(() => {
@@ -39,6 +44,20 @@ export default function SignupPage() {
 
     const isPasswordValid = passwordRequirements.every(req => req.met)
     const isCollegeEmail = formData.email.includes('.edu') || formData.email.includes('.ac.in')
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                setError('File size too large. Please upload an image smaller than 5MB.')
+                return
+            }
+            setSelectedImage(file)
+            const url = URL.createObjectURL(file)
+            setPreviewUrl(url)
+            setError('')
+        }
+    }
 
     const handleGoogleSignIn = async () => {
         setError('')
@@ -61,6 +80,11 @@ export default function SignupPage() {
             return
         }
 
+        if (!selectedImage) {
+            setError('Please upload your college ID card for verification')
+            return
+        }
+
         if (!formData.agreeTerms) {
             setError('Please agree to the terms and conditions')
             return
@@ -69,12 +93,10 @@ export default function SignupPage() {
         setIsLoading(true)
 
         try {
-            const { error } = await signUp(formData.email, formData.password, formData.fullName)
+            const { data, error } = await signUp(formData.email, formData.password, formData.fullName)
 
             if (error) {
-                // If user exists, it means signup actually worked but returned a fetch error
                 if (user) return;
-
                 if (error.message.includes('already registered')) {
                     setError('This email is already registered. Try logging in instead.')
                 } else if (error.message.includes('fetch')) {
@@ -83,6 +105,27 @@ export default function SignupPage() {
                     setError(error.message)
                 }
                 return
+            }
+
+            // If we have a user (either from data or context), upload the ID card
+            const newUser = data?.user || user
+            if (newUser && selectedImage) {
+                const fileExt = selectedImage.name.split('.').pop()
+                const fileName = `${newUser.id}/${Date.now()}.${fileExt}`
+
+                const { error: uploadError } = await supabase.storage
+                    .from('id_cards')
+                    .upload(fileName, selectedImage)
+
+                if (!uploadError) {
+                    await supabase
+                        .from('profiles')
+                        .update({
+                            id_card_url: fileName,
+                            verification_status: 'pending'
+                        })
+                        .eq('id', newUser.id)
+                }
             }
 
             // Redirect to login with success message
@@ -219,6 +262,45 @@ export default function SignupPage() {
                                         ))}
                                     </div>
                                 )}
+                            </div>
+
+                            {/* ID Card Upload */}
+                            <div className="space-y-4">
+                                <label className="block text-sm font-black text-surface-700">
+                                    College ID Card (Required)
+                                </label>
+                                {!previewUrl ? (
+                                    <div
+                                        onClick={() => document.getElementById('id-upload')?.click()}
+                                        className="w-full h-40 rounded-2xl border-2 border-dashed border-surface-200 bg-surface-50 flex flex-col items-center justify-center gap-2 hover:border-primary-300 hover:bg-primary-50 transition-all cursor-pointer group"
+                                    >
+                                        <Camera className="w-8 h-8 text-surface-400 group-hover:text-primary-500 transition-colors" />
+                                        <p className="text-xs font-black text-surface-500 group-hover:text-primary-600 transition-colors uppercase tracking-widest">Tap to upload ID photo</p>
+                                    </div>
+                                ) : (
+                                    <div className="relative w-full h-40 rounded-2xl overflow-hidden border-2 border-white shadow-soft group">
+                                        <NextImage
+                                            src={previewUrl}
+                                            alt="ID Preview"
+                                            fill
+                                            className="object-cover"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => { setSelectedImage(null); setPreviewUrl(null); }}
+                                            className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                )}
+                                <input
+                                    id="id-upload"
+                                    type="file"
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                />
                             </div>
 
                             {/* Terms Checkbox */}

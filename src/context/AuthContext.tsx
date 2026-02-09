@@ -10,7 +10,7 @@ interface AuthContextType {
     profile: Profile | null
     session: Session | null
     isLoading: boolean
-    signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>
+    signUp: (email: string, password: string, fullName: string) => Promise<{ data: any; error: Error | null }>
     signIn: (email: string, password: string) => Promise<{ error: Error | null }>
     signInWithGoogle: () => Promise<{ error: Error | null }>
     signOut: () => Promise<void>
@@ -126,7 +126,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Sign up with email and password
     const signUp = async (email: string, password: string, fullName: string) => {
-        // No manual AbortController here to avoid internal auth locking issues
         try {
             console.log('🔐 AuthContext: Starting sign up for', email)
             const { data, error } = await supabase.auth.signUp({
@@ -145,9 +144,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 throw error
             }
             console.log('🔐 AuthContext: Sign up successful')
-            return { error: null }
+            return { data, error: null }
         } catch (error: any) {
-            return { error: new Error(error.message) }
+            return { data: null, error: new Error(error.message) }
         }
     }
 
