@@ -3,12 +3,6 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
-    BookOpen,
-    Laptop,
-    Bike,
-    Sofa,
-    Shirt,
-    MoreHorizontal,
     ArrowRight,
     Shield,
     Users,
@@ -24,14 +18,6 @@ import Footer from '@/components/layout/Footer'
 import ListingCard from '@/components/cards/ListingCard'
 import { createClient } from '@/lib/supabase/client'
 
-const categories = [
-    { name: 'Textbooks', icon: BookOpen, color: 'from-blue-500 to-cyan-500', count: 234 },
-    { name: 'Electronics', icon: Laptop, color: 'from-purple-500 to-pink-500', count: 156 },
-    { name: 'Cycles', icon: Bike, color: 'from-green-500 to-emerald-500', count: 89 },
-    { name: 'Furniture', icon: Sofa, color: 'from-orange-500 to-amber-500', count: 67 },
-    { name: 'Clothing', icon: Shirt, color: 'from-rose-500 to-red-500', count: 123 },
-    { name: 'More', icon: MoreHorizontal, color: 'from-slate-500 to-slate-600', count: null },
-]
 
 const features = [
     {
@@ -174,26 +160,6 @@ export default function HomePage() {
                     </div>
                 </section>
 
-                {/* Categories Grid */}
-                <section className="py-24 bg-white border-y border-surface-100">
-                    <div className="container-custom">
-                        <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
-                            {categories.map((cat, i) => (
-                                <Link
-                                    key={cat.name}
-                                    href={`/browse?category=${cat.name.toLowerCase()}`}
-                                    className="flex flex-col items-center gap-3 p-6 rounded-3xl transition-all hover:bg-surface-50 group hover:-translate-y-2 stagger-1"
-                                    style={{ animationDelay: `${i * 0.1}s` }}
-                                >
-                                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-white shadow-lg transition-transform group-hover:rotate-6`}>
-                                        <cat.icon className="w-8 h-8" />
-                                    </div>
-                                    <span className="text-sm font-black text-surface-900 group-hover:text-primary-600 transition-colors">{cat.name}</span>
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
-                </section>
 
                 {/* Stats Section */}
                 <section className="py-20">
