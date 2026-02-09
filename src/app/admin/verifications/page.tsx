@@ -40,11 +40,35 @@ export default function VerificationsPage() {
     const [showRejectionModal, setShowRejectionModal] = useState(false)
     const [isActionLoading, setIsActionLoading] = useState(false)
 
+    const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
+
     const supabase = createClient()
 
     useEffect(() => {
         fetchPendingUsers()
     }, [])
+
+    // Generate signed URL for ID card
+    useEffect(() => {
+        const getSignedUrl = async () => {
+            if (showPreview && selectedUser?.id_card_url) {
+                try {
+                    const { data, error } = await supabase.storage
+                        .from('id_cards')
+                        .createSignedUrl(selectedUser.id_card_url, 3600) // 1 hour expiry
+
+                    if (error) throw error
+                    setImagePreviewUrl(data.signedUrl)
+                } catch (err) {
+                    console.error('Failed to get signed URL:', err)
+                    setImagePreviewUrl(null)
+                }
+            } else {
+                setImagePreviewUrl(null)
+            }
+        }
+        getSignedUrl()
+    }, [showPreview, selectedUser, supabase])
 
     const fetchPendingUsers = async () => {
         setIsLoading(true)
@@ -306,16 +330,21 @@ export default function VerificationsPage() {
                                     </div>
                                 </div>
                                 <div className="flex-1 relative bg-white rounded-[2rem] border-4 border-white shadow-soft overflow-hidden">
-                                    {/* placeholder for ID image */}
                                     {selectedUser.id_card_url ? (
                                         <div className="relative w-full h-full">
-                                            <div className="absolute inset-0 flex items-center justify-center bg-surface-50 z-0">
-                                                <Loader2 className="w-8 h-8 text-primary-200 animate-spin" />
-                                            </div>
-                                            {/* In a real app, you'd use the Supabase URL or a presigned URL */}
-                                            <div className="w-full h-full bg-surface-200 flex items-center justify-center italic text-surface-400 font-bold p-10 text-center">
-                                                [ Secure ID Card Preview: {selectedUser.id_card_url} ]
-                                            </div>
+                                            {!imagePreviewUrl ? (
+                                                <div className="absolute inset-0 flex items-center justify-center bg-surface-50">
+                                                    <Loader2 className="w-8 h-8 text-primary-200 animate-spin" />
+                                                </div>
+                                            ) : (
+                                                <NextImage
+                                                    src={imagePreviewUrl}
+                                                    alt="Student ID Card"
+                                                    fill
+                                                    className="object-contain"
+                                                    priority
+                                                />
+                                            )}
                                         </div>
                                     ) : (
                                         <div className="w-full h-full bg-surface-100 flex items-center justify-center">

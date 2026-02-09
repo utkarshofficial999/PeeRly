@@ -199,9 +199,12 @@ export default function ListingApprovalsPage() {
                             {/* Listing Image */}
                             <div className="aspect-[4/3] relative bg-surface-100 overflow-hidden">
                                 {listing.images && listing.images.length > 0 ? (
-                                    <div className="w-full h-full bg-surface-200 flex items-center justify-center font-bold text-surface-400">
-                                        [ Listing Image Placeholder ]
-                                    </div>
+                                    <NextImage
+                                        src={listing.images[0]}
+                                        alt={listing.title}
+                                        fill
+                                        className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                    />
                                 ) : (
                                     <div className="w-full h-full flex flex-col items-center justify-center text-surface-400 gap-2">
                                         <ImageIcon className="w-8 h-8 opacity-20" />
@@ -287,16 +290,19 @@ export default function ListingApprovalsPage() {
                                 </div>
 
                                 <div className="flex-1 relative bg-white rounded-[2.5rem] border-4 border-white shadow-soft overflow-hidden group">
-                                    <div className="w-full h-full flex flex-col items-center justify-center text-surface-200">
-                                        <ImageIcon className="w-20 h-20 mb-4 opacity-10" />
-                                        <p className="text-xs font-black uppercase tracking-[0.2em] text-surface-300">Detailed View Placeholder</p>
-                                        <p className="text-[10px] font-bold text-surface-300 mt-2 italic px-10 text-center">In a full implementation, you would see the item gallery and EXIF metadata here.</p>
-                                    </div>
-                                    <div className="absolute top-6 left-6 flex flex-col gap-2">
-                                        <span className="bg-white/90 backdrop-blur-md text-surface-900 px-4 py-2 rounded-2xl text-xl font-black shadow-lg border border-white/40">
-                                            ₹{selectedListing.price}
-                                        </span>
-                                    </div>
+                                    {selectedListing.images && selectedListing.images.length > 0 ? (
+                                        <NextImage
+                                            src={selectedListing.images[0]}
+                                            alt={selectedListing.title}
+                                            fill
+                                            className="object-contain"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex flex-col items-center justify-center text-surface-200">
+                                            <ImageIcon className="w-20 h-20 mb-4 opacity-10" />
+                                            <p className="text-xs font-black uppercase tracking-[0.2em] text-surface-300">No images provided</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -385,8 +391,8 @@ export default function ListingApprovalsPage() {
                                         key={tag}
                                         onClick={() => setRejectionReason(tag)}
                                         className={`px-3 py-1.5 rounded-lg text-[10px] font-black border transition-all ${rejectionReason === tag
-                                                ? 'bg-red-500 border-red-500 text-white shadow-lg'
-                                                : 'bg-surface-50 border-surface-200 text-surface-600 hover:border-red-300'
+                                            ? 'bg-red-500 border-red-500 text-white shadow-lg'
+                                            : 'bg-surface-50 border-surface-200 text-surface-600 hover:border-red-300'
                                             }`}
                                     >
                                         {tag}

@@ -6,8 +6,9 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import Header from '@/components/layout/Header'
-import { Plus, Package, Heart, MessageSquare, Settings, ChevronRight, TrendingUp, Eye, DollarSign } from 'lucide-react'
+import { Plus, Package, Heart, MessageSquare, Settings, ChevronRight, TrendingUp, Eye, DollarSign, ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { SUPER_ADMIN_EMAIL } from '@/lib/constants'
 
 interface DashboardStats {
     activeListings: number
@@ -105,6 +106,9 @@ export default function DashboardPage() {
     const quickActions = [
         { label: 'Sell Item', icon: Plus, href: '/create', color: 'primary' },
         { label: 'My Listings', icon: Package, href: '/my-listings', color: 'accent' },
+        ...(user?.email?.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase() ? [
+            { label: 'Admin Console', icon: ShieldCheck, href: '/admin', color: 'sapphire' }
+        ] : []),
         { label: 'Saved', icon: Heart, href: '/saved', color: 'rose' },
         { label: 'Messages', icon: MessageSquare, href: '/messages', color: 'blue', badge: stats.messages },
         { label: 'Settings', icon: Settings, href: '/settings', color: 'gray' },
@@ -138,7 +142,8 @@ export default function DashboardPage() {
                                         action.color === 'accent' ? 'bg-accent-50 text-accent-600' :
                                             action.color === 'rose' ? 'bg-rose-50 text-rose-600' :
                                                 action.color === 'blue' ? 'bg-blue-50 text-blue-600' :
-                                                    'bg-surface-200 text-surface-600'
+                                                    action.color === 'sapphire' ? 'bg-indigo-50 text-indigo-600' :
+                                                        'bg-surface-200 text-surface-600'
                                         }`}>
                                         <action.icon className="w-5 h-5" />
                                     </div>

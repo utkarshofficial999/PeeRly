@@ -4,10 +4,11 @@ import Link from 'next/link'
 import NextImage from 'next/image'
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Menu, X, Search, Plus, User, Bell, MessageSquare, LogOut } from 'lucide-react'
+import { Menu, X, Search, Plus, User, Bell, MessageSquare, LogOut, ShieldCheck } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/ui/Logo'
+import { SUPER_ADMIN_EMAIL } from '@/lib/constants'
 
 export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -181,6 +182,12 @@ export default function Header() {
                                         <Plus className="w-4 h-4" />
                                         Post
                                     </Link>
+                                    {/* Admin Link (Desktop) */}
+                                    {user.email?.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase() && (
+                                        <Link href="/admin" className="p-2.5 text-primary-600 hover:bg-primary-50 rounded-xl transition-all" title="Admin Panel">
+                                            <ShieldCheck className="w-5 h-5" />
+                                        </Link>
+                                    )}
                                     {/* Profile Dropdown */}
                                     <div className="relative">
                                         <button
@@ -222,6 +229,16 @@ export default function Header() {
                                                         <User className="w-4 h-4 text-primary-500" />
                                                         Dashboard
                                                     </Link>
+                                                    {user.email?.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase() && (
+                                                        <Link
+                                                            href="/admin"
+                                                            onClick={() => setIsProfileOpen(false)}
+                                                            className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-primary-600 hover:bg-primary-50 rounded-xl transition-all"
+                                                        >
+                                                            <ShieldCheck className="w-4 h-4" />
+                                                            Admin Panel
+                                                        </Link>
+                                                    )}
                                                     <Link
                                                         href="/settings"
                                                         onClick={() => setIsProfileOpen(false)}
