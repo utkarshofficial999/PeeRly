@@ -35,6 +35,8 @@ export default function UserManagementPage() {
     const [users, setUsers] = useState<UserSummary[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
+    const [filterStatus, setFilterStatus] = useState('All Users')
+    const [actionLoading, setActionLoading] = useState<string | null>(null)
 
     const supabase = createClient()
 
@@ -78,11 +80,57 @@ export default function UserManagementPage() {
         }
     }
 
-    const filteredUsers = users.filter(u =>
-        u.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        u.college_name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    const handleAction = async (userId: string, action: 'approve' | 'block') => {
+        setActionLoading(userId)
+        try {
+            const status = action === 'approve' ? 'approved' : 'rejected'
+            const is_verified = action === 'approve'
+
+            const { error: updateError } = await supabase
+                .from('profiles')
+                .update({
+                    verification_status: status,
+                    is_verified: is_verified
+                })
+                .eq('id', userId)
+
+            if (updateError) throw updateError
+
+            // Log the action
+            const adminUser = (await supabase.auth.getUser()).data.user
+            await supabase.from('audit_logs').insert({
+                admin_id: adminUser?.id,
+                action: `${action}_user`,
+                target_type: 'user',
+                target_id: userId,
+                details: {
+                    user_email: users.find(u => u.id === userId)?.email,
+                    timestamp: new Date().toISOString()
+                }
+            })
+
+            setUsers(prev => prev.map(u =>
+                u.id === userId ? { ...u, verification_status: status, is_verified } : u
+            ))
+        } catch (err) {
+            console.error(`Failed to ${action} user:`, err)
+            alert(`Error: Could not ${action} user.`)
+        } finally {
+            setActionLoading(null)
+        }
+    }
+
+    const filteredUsers = users.filter(u => {
+        const matchesSearch = u.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            u.college_name.toLowerCase().includes(searchTerm.toLowerCase())
+
+        if (filterStatus === 'All Users') return matchesSearch
+        if (filterStatus === 'Verified') return matchesSearch && u.is_verified
+        if (filterStatus === 'Pending') return matchesSearch && u.verification_status === 'pending'
+        if (filterStatus === 'Suspended') return matchesSearch && u.verification_status === 'rejected'
+        return matchesSearch
+    })
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -112,9 +160,10 @@ export default function UserManagementPage() {
                 {['All Users', 'Verified', 'Pending', 'Suspended'].map(filter => (
                     <button
                         key={filter}
-                        className={`px-5 py-2.5 rounded-2xl text-xs font-black transition-all border ${filter === 'All Users'
-                                ? 'bg-primary-500 text-white border-primary-500 shadow-lg shadow-primary-500/20'
-                                : 'bg-white text-surface-600 border-surface-200 hover:border-primary-300'
+                        onClick={() => setFilterStatus(filter)}
+                        className={`px-5 py-2.5 rounded-2xl text-xs font-black transition-all border ${filterStatus === filter
+                            ? 'bg-primary-500 text-white border-primary-500 shadow-lg shadow-primary-500/20'
+                            : 'bg-white text-surface-600 border-surface-200 hover:border-primary-300'
                             }`}
                     >
                         {filter}
@@ -197,10 +246,20 @@ export default function UserManagementPage() {
                                     </td>
                                     <td className="px-8 py-5 text-right">
                                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button className="p-2.5 bg-white border border-surface-200 rounded-xl text-surface-600 hover:text-primary-600 hover:border-primary-200 transition-all shadow-sm">
-                                                <UserCheck className="w-4 h-4" />
+                                            <button
+                                                onClick={() => handleAction(user.id, 'approve')}
+                                                disabled={actionLoading === user.id || user.verification_status === 'approved'}
+                                                className="p-2.5 bg-white border border-surface-200 rounded-xl text-surface-600 hover:text-primary-600 hover:border-primary-200 transition-all shadow-sm disabled:opacity-30"
+                                                title="Approve Student"
+                                            >
+                                                {actionLoading === user.id ? <Loader2 className="w-4 h-4 animate-spin text-primary-500" /> : <UserCheck className="w-4 h-4" />}
                                             </button>
-                                            <button className="p-2.5 bg-white border border-surface-200 rounded-xl text-surface-600 hover:text-red-600 hover:border-red-200 transition-all shadow-sm">
+                                            <button
+                                                onClick={() => handleAction(user.id, 'block')}
+                                                disabled={actionLoading === user.id || user.verification_status === 'rejected'}
+                                                className="p-2.5 bg-white border border-surface-200 rounded-xl text-surface-600 hover:text-red-600 hover:border-red-200 transition-all shadow-sm disabled:opacity-30"
+                                                title="Reject/Block Student"
+                                            >
                                                 <UserX className="w-4 h-4" />
                                             </button>
                                             <button className="p-2.5 bg-white border border-surface-200 rounded-xl text-surface-600 hover:bg-surface-50 transition-all">

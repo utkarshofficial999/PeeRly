@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -25,16 +26,40 @@ import AdminGuard from '@/components/auth/AdminGuard'
 
 const sidebarLinks = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-    { name: 'ID Verifications', href: '/admin/verifications', icon: ShieldCheck, badge: '5' },
-    { name: 'Listing Approvals', href: '/admin/listings', icon: ClipboardList, badge: '12' },
+    { name: 'ID Verifications', href: '/admin/verifications', icon: ShieldCheck, type: 'id_verification' },
+    { name: 'Listing Approvals', href: '/admin/listings', icon: ClipboardList, type: 'listing_approval' },
     { name: 'User Management', href: '/admin/users', icon: Users },
-    { name: 'Audit Logs', href: '/admin/logs', icon: History },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname()
     const { signOut } = useAuth()
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+
+    const [stats, setStats] = useState({ pendingIDs: 0, pendingListings: 0 })
+    const supabase = createClient()
+
+    useEffect(() => {
+        const fetchCounts = async () => {
+            const [ids, listings] = await Promise.all([
+                supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('verification_status', 'pending'),
+                supabase.from('listings').select('*', { count: 'exact', head: true }).eq('approval_status', 'pending')
+            ])
+            setStats({
+                pendingIDs: ids.count || 0,
+                pendingListings: listings.count || 0
+            })
+        }
+        fetchCounts()
+
+        // Realtime subscription for updates
+        const channel = supabase.channel('admin_counts')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, fetchCounts)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'listings' }, fetchCounts)
+            .subscribe()
+
+        return () => { supabase.removeChannel(channel) }
+    }, [supabase])
 
     return (
         <AdminGuard>
@@ -67,23 +92,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             </p>
                             {sidebarLinks.map((link) => {
                                 const isActive = pathname === link.href
+                                const badgeCount = link.type === 'id_verification' ? stats.pendingIDs : link.type === 'listing_approval' ? stats.pendingListings : 0
                                 return (
                                     <Link
                                         key={link.name}
                                         href={link.href}
                                         className={`flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200 group ${isActive
-                                                ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20'
-                                                : 'text-surface-600 hover:bg-surface-50 hover:text-surface-900'
+                                            ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20'
+                                            : 'text-surface-600 hover:bg-surface-50 hover:text-surface-900'
                                             }`}
                                     >
                                         <div className="flex items-center gap-3">
                                             <link.icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-surface-400 group-hover:text-primary-500'}`} />
                                             <span className="text-sm font-bold">{link.name}</span>
                                         </div>
-                                        {link.badge && (
+                                        {badgeCount > 0 && (
                                             <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-primary-50 text-primary-600'
                                                 }`}>
-                                                {link.badge}
+                                                {badgeCount}
                                             </span>
                                         )}
                                     </Link>
