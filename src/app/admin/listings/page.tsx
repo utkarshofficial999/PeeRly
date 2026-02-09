@@ -43,6 +43,7 @@ export default function ListingApprovalsPage() {
     const [showRejectionModal, setShowRejectionModal] = useState(false)
     const [rejectionReason, setRejectionReason] = useState('')
     const [isActionLoading, setIsActionLoading] = useState(false)
+    const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
     const supabase = createClient()
 
@@ -52,7 +53,9 @@ export default function ListingApprovalsPage() {
 
     const fetchPendingListings = async () => {
         setIsLoading(true)
+        setErrorMsg(null)
         try {
+            // First attempt with full joins
             const { data, error } = await supabase
                 .from('listings')
                 .select(`
@@ -62,29 +65,60 @@ export default function ListingApprovalsPage() {
                     created_at, 
                     images, 
                     description,
+                    approval_status,
+                    seller_id,
                     categories(name),
                     profiles(full_name, is_verified)
                 `)
                 .eq('approval_status', 'pending')
                 .order('created_at', { ascending: true })
 
-            if (error) throw error
+            if (error) {
+                console.error('Initial fetch failed, trying fallback...', error)
 
-            const formatted = data.map((l: any) => ({
-                id: l.id,
-                title: l.title,
-                price: l.price,
-                category_name: l.categories?.name || 'Other',
-                seller_name: l.profiles?.full_name || 'Student',
-                seller_is_verified: l.profiles?.is_verified || false,
-                created_at: l.created_at,
-                images: l.images || [],
-                description: l.description || ''
-            }))
+                // Fallback: simpler select without joins
+                const { data: simpleData, error: simpleError } = await supabase
+                    .from('listings')
+                    .select('*')
+                    .eq('approval_status', 'pending')
+                    .order('created_at', { ascending: true })
 
-            setListings(formatted)
-        } catch (err) {
+                if (simpleError) throw simpleError
+
+                if (simpleData) {
+                    const formatted = simpleData.map((l: any) => ({
+                        id: l.id,
+                        title: l.title,
+                        price: l.price,
+                        category_name: 'Item',
+                        seller_name: 'Student Seller',
+                        seller_is_verified: false,
+                        created_at: l.created_at,
+                        images: l.images || [],
+                        description: l.description || ''
+                    }))
+                    setListings(formatted)
+                    return
+                }
+            }
+
+            if (data) {
+                const formatted = data.map((l: any) => ({
+                    id: l.id,
+                    title: l.title,
+                    price: l.price,
+                    category_name: l.categories?.name || 'Other',
+                    seller_name: l.profiles?.full_name || 'Student',
+                    seller_is_verified: l.profiles?.is_verified || false,
+                    created_at: l.created_at,
+                    images: l.images || [],
+                    description: l.description || ''
+                }))
+                setListings(formatted)
+            }
+        } catch (err: any) {
             console.error('Failed to fetch pending listings:', err)
+            setErrorMsg(err.message || 'Failed to load moderation queue')
         } finally {
             setIsLoading(false)
         }
@@ -166,6 +200,12 @@ export default function ListingApprovalsPage() {
                     <h1 className="text-3xl font-black text-surface-900 tracking-tight">Listing Approvals</h1>
                     <p className="text-surface-500 font-bold mt-1">Review marketplace submissions before they go live</p>
                 </div>
+                {errorMsg && (
+                    <div className="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-xs font-bold border border-red-100 flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4" />
+                        {errorMsg}
+                    </div>
+                )}
                 <div className="flex items-center gap-2">
                     <span className="bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border border-indigo-200">
                         {listings.length} Pending Approvals

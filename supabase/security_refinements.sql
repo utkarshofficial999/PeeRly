@@ -14,6 +14,21 @@ FOR INSERT WITH CHECK (
   )
 );
 
+-- 1b. Admin Listing Access
+-- Allow super admin to see all listings (including pending/inactive)
+DROP POLICY IF EXISTS "Super admin can view all listings" ON listings;
+CREATE POLICY "Super admin can view all listings" ON listings
+FOR SELECT USING (
+  auth.jwt() ->> 'email' = 'utkarsh@abes.ac.in'
+);
+
+-- Allow super admin to update any listing (to approve/reject)
+DROP POLICY IF EXISTS "Super admin can update all listings" ON listings;
+CREATE POLICY "Super admin can update all listings" ON listings
+FOR UPDATE USING (
+  auth.jwt() ->> 'email' = 'utkarsh@abes.ac.in'
+);
+
 -- 2. Allow Super Admin to view all ID Cards regardless of folder name
 -- (Updating the previous policy from setup_admin.sql)
 DROP POLICY IF EXISTS "Only admin and owner can view ID card" ON storage.objects;
