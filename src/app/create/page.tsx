@@ -99,6 +99,13 @@ export default function CreateListingPage() {
             return
         }
 
+        // Mandatory Verification Check
+        if (profile.verification_status !== 'approved') {
+            setError(`Your account is not verified for selling. Status: ${profile.verification_status}`)
+            setTimeout(() => router.push('/verify'), 2000)
+            return
+        }
+
         setIsLoading(true)
         setError(null)
         console.log('Starting listing submission...')

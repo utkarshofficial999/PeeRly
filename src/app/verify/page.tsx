@@ -15,7 +15,8 @@ import {
     FileCheck,
     Lock,
     ArrowRight,
-    X
+    X,
+    XCircle
 } from 'lucide-react'
 import NextImage from 'next/image'
 import { createClient } from '@/lib/supabase/client'
@@ -286,7 +287,7 @@ export default function VerificationPage() {
                             </div>
                         )}
 
-                        {step === 2 && (
+                        {step === 2 && profile?.verification_status === 'pending' && (
                             <div className="text-center py-10 animate-in zoom-in-95">
                                 <div className="w-32 h-32 relative mx-auto mb-10">
                                     <div className="absolute inset-0 bg-primary-500/10 rounded-full animate-ping" />
@@ -307,6 +308,38 @@ export default function VerificationPage() {
                                         <p className="text-xs font-bold text-surface-500">You will receive an email once approved.</p>
                                     </div>
                                 </div>
+                            </div>
+                        )}
+
+                        {profile?.verification_status === 'rejected' && step !== 1 && (
+                            <div className="text-center py-10 animate-in zoom-in-95">
+                                <div className="w-32 h-32 relative mx-auto mb-10">
+                                    <div className="relative w-32 h-32 bg-red-50 rounded-full flex items-center justify-center shadow-premium border-4 border-white">
+                                        <XCircle className="w-16 h-16 text-red-500" />
+                                    </div>
+                                </div>
+                                <h2 className="text-3xl font-black text-surface-900 mb-2 tracking-tight">Verification Rejected</h2>
+                                <p className="text-surface-600 font-bold max-w-sm mx-auto mb-6 leading-relaxed">
+                                    Unfortunately, your student identity could not be verified.
+                                </p>
+
+                                {profile.rejection_reason && (
+                                    <div className="bg-red-50 rounded-[2.5rem] p-8 border-2 border-red-100 max-w-md mx-auto mb-10 relative overflow-hidden group">
+                                        <div className="absolute -top-4 -right-4 w-24 h-24 text-red-100/50 rotate-12 group-hover:scale-110 transition-transform">
+                                            <AlertCircle className="w-full h-full" />
+                                        </div>
+                                        <p className="text-[10px] font-black text-red-400 uppercase tracking-widest mb-3">Reason for Rejection</p>
+                                        <p className="text-lg font-black text-red-600 leading-tight">"{profile.rejection_reason}"</p>
+                                    </div>
+                                )}
+
+                                <button
+                                    onClick={() => setStep(1)}
+                                    className="btn-primary py-4 px-10 rounded-2xl font-black flex items-center gap-3 mx-auto shadow-lg shadow-primary-500/20 active:scale-95 transition-all"
+                                >
+                                    Try Again
+                                    <ArrowRight className="w-5 h-5" />
+                                </button>
                             </div>
                         )}
                     </div>
