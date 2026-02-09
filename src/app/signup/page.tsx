@@ -147,13 +147,10 @@ export default function SignupPage() {
 
             <Header />
 
-            <main className="pt-24 md:pt-32 pb-16 px-4">
+            <main className="pt-20 md:pt-24 pb-16 px-4">
                 <div className="max-w-md mx-auto">
                     {/* Card */}
                     <div className="premium-card p-8">
-                        <div className="flex justify-center mb-6">
-                            <Logo className="scale-110" />
-                        </div>
                         {/* Header */}
                         <div className="text-center mb-8">
                             <h1 className="text-3xl font-black text-surface-900 mb-2">
