@@ -189,7 +189,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 options: {
                     queryParams: {
                         access_type: 'offline',
-                        prompt: 'consensus',
+                        prompt: 'select_account',
                     },
                     redirectTo: `${window.location.origin}/auth/callback`,
                 },
