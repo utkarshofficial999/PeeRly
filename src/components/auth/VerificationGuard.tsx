@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { Loader2 } from 'lucide-react'
 
-const EXCLUDED_PATHS = ['/verify', '/login', '/signup', '/', '/auth/callback', '/admin']
+const EXCLUDED_PATHS = ['/verify', '/login', '/signup', '/', '/auth/callback', '/admin', '/browse', '/settings']
 
 export default function VerificationGuard({ children }: { children: React.ReactNode }) {
     const { user, profile, isLoading } = useAuth()

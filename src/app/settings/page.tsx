@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import { User, Bell, Shield, LogOut, Camera, Save, Upload, X } from 'lucide-react'
@@ -12,9 +12,36 @@ export default function SettingsPage() {
     const { profile, user, signOut, refreshProfile } = useAuth()
     const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'privacy'>('profile')
     const [isUploading, setIsUploading] = useState(false)
+    const [isSaving, setIsSaving] = useState(false)
     const [uploadProgress, setUploadProgress] = useState(0)
+    const [colleges, setColleges] = useState<any[]>([])
+    const [formData, setFormData] = useState({
+        full_name: profile?.full_name || '',
+        phone: profile?.phone || '',
+        college_id: profile?.college_id || ''
+    })
     const fileInputRef = useRef<HTMLInputElement>(null)
     const supabase = createClient()
+
+    // Fetch colleges
+    useEffect(() => {
+        const fetchColleges = async () => {
+            const { data } = await supabase.from('colleges').select('*').eq('is_active', true)
+            if (data) setColleges(data)
+        }
+        fetchColleges()
+    }, [supabase])
+
+    // Update formData when profile loads
+    useEffect(() => {
+        if (profile) {
+            setFormData({
+                full_name: profile.full_name || '',
+                phone: profile.phone || '',
+                college_id: profile.college_id || ''
+            })
+        }
+    }, [profile])
 
     const tabs = [
         { id: 'profile', label: 'Profile Settings', icon: User },
@@ -145,6 +172,30 @@ export default function SettingsPage() {
         }
     }
 
+    const handleSaveChanges = async () => {
+        if (!user) return
+        setIsSaving(true)
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    full_name: formData.full_name,
+                    phone: formData.phone,
+                    college_id: formData.college_id || null
+                })
+                .eq('id', user.id)
+
+            if (error) throw error
+            await refreshProfile()
+            alert('Profile updated successfully! ✨')
+        } catch (err: any) {
+            console.error('Update error:', err)
+            alert(`Failed to save changes: ${err.message}`)
+        } finally {
+            setIsSaving(false)
+        }
+    }
+
     return (
         <div className="min-h-screen bg-dark-950">
             <Header />
@@ -256,7 +307,8 @@ export default function SettingsPage() {
                                                     <label className="text-sm font-medium text-dark-300">Full Name</label>
                                                     <input
                                                         type="text"
-                                                        defaultValue={profile?.full_name}
+                                                        value={formData.full_name}
+                                                        onChange={(e) => setFormData(p => ({ ...p, full_name: e.target.value }))}
                                                         className="input-field"
                                                         placeholder="Your full name"
                                                     />
@@ -266,7 +318,7 @@ export default function SettingsPage() {
                                                     <input
                                                         type="email"
                                                         defaultValue={user?.email}
-                                                        className="input-field"
+                                                        className="input-field opacity-60"
                                                         disabled
                                                     />
                                                 </div>
@@ -274,25 +326,38 @@ export default function SettingsPage() {
                                                     <label className="text-sm font-medium text-dark-300">Phone Number</label>
                                                     <input
                                                         type="tel"
-                                                        defaultValue={profile?.phone || ''}
+                                                        value={formData.phone}
+                                                        onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value }))}
                                                         className="input-field"
                                                         placeholder="+1 234 567 8900"
                                                     />
                                                 </div>
                                                 <div className="space-y-2">
                                                     <label className="text-sm font-medium text-dark-300">College</label>
-                                                    <input
-                                                        type="text"
-                                                        className="input-field"
-                                                        placeholder="Select your college"
-                                                        disabled
-                                                    />
+                                                    <select
+                                                        value={formData.college_id}
+                                                        onChange={(e) => setFormData(p => ({ ...p, college_id: e.target.value }))}
+                                                        className="input-field cursor-pointer"
+                                                    >
+                                                        <option value="">Select your college</option>
+                                                        {colleges.map(c => (
+                                                            <option key={c.id} value={c.id}>{c.name}</option>
+                                                        ))}
+                                                    </select>
                                                 </div>
                                             </div>
 
-                                            <button className="mt-6 btn-primary flex items-center gap-2">
-                                                <Save className="w-5 h-5" />
-                                                Save Changes
+                                            <button
+                                                onClick={handleSaveChanges}
+                                                disabled={isSaving}
+                                                className="mt-6 btn-primary flex items-center gap-2"
+                                            >
+                                                {isSaving ? (
+                                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                ) : (
+                                                    <Save className="w-5 h-5" />
+                                                )}
+                                                {isSaving ? 'Saving...' : 'Save Changes'}
                                             </button>
                                         </div>
                                     </div>

@@ -29,6 +29,8 @@ export default function VerificationPage() {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
     const [hasConsent, setHasConsent] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [colleges, setColleges] = useState<any[]>([])
+    const [selectedCollegeId, setSelectedCollegeId] = useState<string>('')
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const supabase = createClient()
@@ -44,7 +46,20 @@ export default function VerificationPage() {
         } else if (profile?.verification_status === 'pending' && profile?.id_card_url) {
             setStep(2)
         }
+
+        // Pre-fill college ID if profile has it
+        if (profile?.college_id) {
+            setSelectedCollegeId(profile.college_id)
+        }
     }, [user, profile, authLoading, router])
+
+    useEffect(() => {
+        const fetchColleges = async () => {
+            const { data } = await supabase.from('colleges').select('*').eq('is_active', true)
+            if (data) setColleges(data)
+        }
+        fetchColleges()
+    }, [supabase])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -88,7 +103,8 @@ export default function VerificationPage() {
                 .from('profiles')
                 .update({
                     id_card_url: filePath,
-                    verification_status: 'pending'
+                    verification_status: 'pending',
+                    college_id: selectedCollegeId || profile?.college_id
                 })
                 .eq('id', user.id)
 
@@ -154,42 +170,61 @@ export default function VerificationPage() {
                                 </div>
 
                                 <div className="space-y-6">
-                                    {/* Upload Area */}
-                                    {!previewUrl ? (
-                                        <button
-                                            onClick={() => fileInputRef.current?.click()}
-                                            className="w-full aspect-video md:aspect-[21/9] rounded-[2.5rem] border-4 border-dashed border-surface-200 bg-surface-50 flex flex-col items-center justify-center gap-4 hover:border-primary-300 hover:bg-primary-50 group transition-all"
-                                        >
-                                            <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-soft group-hover:scale-110 transition-transform">
-                                                <Camera className="w-8 h-8 text-primary-500" />
-                                            </div>
-                                            <div className="text-center">
-                                                <p className="text-lg font-black text-surface-900">Upload College ID Photo</p>
-                                                <p className="text-sm font-bold text-surface-500">Tap to browse or take a photo</p>
-                                            </div>
-                                            <span className="mt-4 text-[10px] font-black uppercase tracking-widest text-surface-400 bg-white px-3 py-1 rounded-full border border-surface-100 shadow-sm">
-                                                Max size: 5MB (JPG, PNG)
-                                            </span>
-                                        </button>
-                                    ) : (
-                                        <div className="relative w-full aspect-video md:aspect-[21/9] rounded-[2.5rem] overflow-hidden border-4 border-white shadow-premium group">
-                                            <NextImage
-                                                src={previewUrl}
-                                                alt="ID Preview"
-                                                fill
-                                                className="object-cover"
-                                            />
-                                            <div className="absolute inset-0 bg-surface-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                                                <p className="text-white font-black text-lg">Identity Card Selected</p>
-                                            </div>
-                                            <button
-                                                onClick={() => { setSelectedImage(null); setPreviewUrl(null); }}
-                                                className="absolute top-6 right-6 p-2 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white rounded-full transition-all hover:scale-110"
+                                    {/* College Selection (Required if not set) */}
+                                    {!profile?.college_id && (
+                                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+                                            <label className="text-sm font-black text-surface-700 flex items-center gap-2">
+                                                1. Select Your Institution
+                                            </label>
+                                            <select
+                                                value={selectedCollegeId}
+                                                onChange={(e) => setSelectedCollegeId(e.target.value)}
+                                                className="input-field cursor-pointer"
+                                                required
                                             >
-                                                <X className="w-5 h-5" />
-                                            </button>
+                                                <option value="">Choose a college...</option>
+                                                {colleges.map(college => (
+                                                    <option key={college.id} value={college.id}>{college.name}</option>
+                                                ))}
+                                            </select>
                                         </div>
                                     )}
+
+                                    {/* Upload Area */}
+                                    <div className="space-y-3">
+                                        <label className="text-sm font-black text-surface-700 flex items-center gap-2">
+                                            {!profile?.college_id ? '2.' : ''} Upload College ID Card
+                                        </label>
+                                        {!previewUrl ? (
+                                            <button
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="w-full aspect-video md:aspect-[21/9] rounded-[2.5rem] border-4 border-dashed border-surface-200 bg-surface-50 flex flex-col items-center justify-center gap-4 hover:border-primary-300 hover:bg-primary-50 group transition-all"
+                                            >
+                                                <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-soft group-hover:scale-110 transition-transform">
+                                                    <Camera className="w-8 h-8 text-primary-500" />
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="text-lg font-black text-surface-900">Upload ID Photo</p>
+                                                    <p className="text-sm font-bold text-surface-500">Tap to browse or take a photo</p>
+                                                </div>
+                                            </button>
+                                        ) : (
+                                            <div className="relative w-full aspect-video md:aspect-[21/9] rounded-[2.5rem] overflow-hidden border-4 border-white shadow-premium group">
+                                                <NextImage
+                                                    src={previewUrl}
+                                                    alt="ID Preview"
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                                <button
+                                                    onClick={() => { setSelectedImage(null); setPreviewUrl(null); }}
+                                                    className="absolute top-6 right-6 p-2 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white rounded-full transition-all hover:scale-110"
+                                                >
+                                                    <X className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
 
                                     <input
                                         type="file"
@@ -226,9 +261,9 @@ export default function VerificationPage() {
                                     )}
 
                                     <button
-                                        disabled={!selectedImage || !hasConsent || isUploading}
+                                        disabled={(!profile?.college_id && !selectedCollegeId) || !selectedImage || !hasConsent || isUploading}
                                         onClick={handleUpload}
-                                        className="btn-primary w-full py-5 rounded-[2rem] text-lg font-black shadow-button flex items-center justify-center gap-3 group"
+                                        className="btn-primary w-full py-5 rounded-[2rem] text-lg font-black shadow-button flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed transition-all group"
                                     >
                                         {isUploading ? (
                                             <>
