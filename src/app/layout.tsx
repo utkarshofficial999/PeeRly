@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { AuthProvider } from '@/context/AuthContext'
+import VerificationGuard from '@/components/auth/VerificationGuard'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -24,7 +25,9 @@ export default function RootLayout({
         <html lang="en">
             <body className="min-h-screen bg-surface-50 antialiased selection:bg-primary-500/10 selection:text-primary-600">
                 <AuthProvider>
-                    {children}
+                    <VerificationGuard>
+                        {children}
+                    </VerificationGuard>
                 </AuthProvider>
             </body>
         </html>

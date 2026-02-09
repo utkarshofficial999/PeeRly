@@ -74,7 +74,7 @@ export async function middleware(request: NextRequest) {
     }
 
     // Protected routes
-    const protectedRoutes = ['/dashboard', '/create', '/messages', '/settings']
+    const protectedRoutes = ['/dashboard', '/create', '/messages', '/settings', '/admin', '/verify']
     const isProtectedRoute = protectedRoutes.some(route =>
         request.nextUrl.pathname.startsWith(route)
     )
@@ -85,15 +85,20 @@ export async function middleware(request: NextRequest) {
         request.nextUrl.pathname.startsWith(route)
     )
 
-    if (isProtectedRoute && !session) {
-        // Redirect to login if trying to access protected route without session
+    if (isProtectedRoute && !session && request.nextUrl.pathname !== '/verify') {
         const redirectUrl = new URL('/login', request.url)
         redirectUrl.searchParams.set('redirectTo', request.nextUrl.pathname)
         return NextResponse.redirect(redirectUrl)
     }
 
+    // Special Admin Protection (Hardcoded Email)
+    if (request.nextUrl.pathname.startsWith('/admin')) {
+        if (!session || session.user.email !== 'utkarsh@abes.ac.in') {
+            return NextResponse.redirect(new URL('/', request.url))
+        }
+    }
+
     if (isAuthRoute && session) {
-        // Redirect to dashboard if already logged in
         return NextResponse.redirect(new URL('/dashboard', request.url))
     }
 

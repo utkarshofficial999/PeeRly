@@ -18,6 +18,9 @@ export interface Database {
                     college_id: string | null
                     college_email: string | null
                     is_verified: boolean
+                    verification_status: 'pending' | 'approved' | 'rejected'
+                    id_card_url: string | null
+                    rejection_reason: string | null
                     phone: string | null
                     created_at: string
                     updated_at: string
@@ -112,6 +115,8 @@ export interface Database {
                     college_id: string | null
                     location: string | null
                     is_active: boolean
+                    approval_status: 'pending' | 'approved' | 'rejected'
+                    rejection_reason: string | null
                     is_sold: boolean
                     views_count: number
                     created_at: string
