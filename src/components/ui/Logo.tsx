@@ -8,63 +8,74 @@ const Logo: React.FC<LogoProps> = ({ className = '' }) => {
     return (
         <div className={`flex items-center ${className}`}>
             <svg
-                width="140"
-                height="40"
-                viewBox="0 0 140 40"
+                width="160"
+                height="44"
+                viewBox="0 0 160 44"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-9 w-auto"
+                className="h-10 w-auto"
             >
-                {/* 'p' with shopping bag icon inside */}
+                {/* Dark Navy Base Typography Style */}
+                <g fill="#0F172A">
+                    {/* 'p' stem */}
+                    <rect x="12" y="10" width="7" height="28" rx="3.5" />
+
+                    {/* 'p' loop outer */}
+                    <path d="M12 18C12 13 16 9 21 9C26 9 30 13 30 18C30 23 26 27 21 27C19 27 17 26.5 15.5 25.5L13 28L12 27V18Z" />
+
+                    {/* 'r' */}
+                    <path d="M78 18V38H84V28C84 25 86 23 89 23H91V18H89C86 18 84 19.5 83 21L82 18H78Z" />
+
+                    {/* 'l' */}
+                    <rect x="96" y="8" width="6" height="30" rx="3" />
+
+                    {/* 'y' */}
+                    <path d="M108 18L114 34L120 18H126L116 42H110L102 18H108Z" />
+                </g>
+
+                {/* Shopping Bag Icon inside 'p' */}
+                <rect x="18" y="17" width="8" height="7" rx="1.5" fill="url(#bag_grad)" />
                 <path
-                    d="M15 12V32"
-                    stroke="#0F172A"
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                />
-                <path
-                    d="M15 18C15 14 19 12 23 12C27 12 31 16 31 22C31 28 27 32 23 32C20 32 18 31 15 28.5"
-                    stroke="#0F172A"
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                />
-                {/* Shopping bag icon */}
-                <rect x="19" y="19" width="8" height="7" rx="1.5" fill="#F97316" />
-                <path
-                    d="M21 19V17.5C21 16.67 21.67 16 22.5 16V16C23.33 16 24 16.67 24 17.5V19"
-                    stroke="#F97316"
+                    d="M20 17V15.5C20 14.7 20.7 14 21.5 14C22.3 14 23 14.7 23 15.5V17"
+                    stroke="#F43F5E"
                     strokeWidth="1.2"
                     strokeLinecap="round"
                 />
 
-                {/* 'oo' or 'ee' styled as loop arrows */}
-                {/* First arrow loop */}
+                {/* Interlocking 'ee' Arrow Loops */}
+                {/* Orange/Red Arrow */}
                 <path
-                    d="M50 15C44 15 39 20 39 25C39 30 44 35 50 35"
-                    stroke="#F97316"
-                    strokeWidth="5"
+                    d="M48 12C41.5 12 36 17.5 36 24C36 30.5 41.5 36 48 36"
+                    stroke="url(#orange_grad)"
+                    strokeWidth="7"
                     strokeLinecap="round"
                 />
-                <path d="M53 15L48 12M53 15L48 18" stroke="#F97316" strokeWidth="3" strokeLinecap="round" />
+                <path d="M51 12L45 8M51 12L45 16" stroke="#F97316" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
 
-                {/* Second arrow loop interlocking */}
+                {/* Blue/Purple Arrow */}
                 <path
-                    d="M60 35C66 35 71 30 71 25C71 20 66 15 60 15"
-                    stroke="#3B82F6"
-                    strokeWidth="5"
+                    d="M62 36C68.5 36 74 30.5 74 24C74 17.5 68.5 12 62 12"
+                    stroke="url(#blue_grad)"
+                    strokeWidth="7"
                     strokeLinecap="round"
                 />
-                <path d="M57 35L62 32M57 35L62 38" stroke="#3B82F6" strokeWidth="3" strokeLinecap="round" />
+                <path d="M59 36L65 32M59 36L65 40" stroke="#3B82F6" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
 
-                {/* 'rly' text */}
-                <text
-                    x="80"
-                    y="32"
-                    fill="#0F172A"
-                    style={{ font: '900 26px "Inter", sans-serif', letterSpacing: '-1.5px' }}
-                >
-                    rly
-                </text>
+                {/* Gradients */}
+                <defs>
+                    <linearGradient id="bag_grad" x1="18" y1="17" x2="26" y2="24" gradientUnits="userSpaceOnUse">
+                        <stop stopColor="#F43F5E" />
+                        <stop offset="1" stopColor="#F97316" />
+                    </linearGradient>
+                    <linearGradient id="orange_grad" x1="36" y1="24" x2="51" y2="24" gradientUnits="userSpaceOnUse">
+                        <stop stopColor="#F97316" />
+                        <stop offset="1" stopColor="#F43F5E" />
+                    </linearGradient>
+                    <linearGradient id="blue_grad" x1="59" y1="24" x2="74" y2="24" gradientUnits="userSpaceOnUse">
+                        <stop stopColor="#3B82F6" />
+                        <stop offset="1" stopColor="#8B5CF6" />
+                    </linearGradient>
+                </defs>
             </svg>
         </div>
     );

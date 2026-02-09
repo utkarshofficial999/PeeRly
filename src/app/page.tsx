@@ -17,6 +17,7 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import ListingCard from '@/components/cards/ListingCard'
 import { createClient } from '@/lib/supabase/client'
+import Logo from '@/components/ui/Logo'
 
 
 const features = [
@@ -124,6 +125,10 @@ export default function HomePage() {
                                     <span className="relative inline-flex rounded-full h-2 w-2 bg-mint-500"></span>
                                 </span>
                                 <span className="text-xs font-black text-surface-900 tracking-wide uppercase">Live at ABES Engineering College</span>
+                            </div>
+                            {/* Logo Hero */}
+                            <div className="flex justify-center mb-6 animate-in fade-in stagger-1">
+                                <Logo className="scale-150 md:scale-[2]" />
                             </div>
 
                             {/* Heading */}

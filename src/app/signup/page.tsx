@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Mail, Lock, Eye, EyeOff, ArrowRight, User, Check, AlertCircle } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import Header from '@/components/layout/Header'
+import Logo from '@/components/ui/Logo'
 
 export default function SignupPage() {
     const router = useRouter()
@@ -95,6 +96,9 @@ export default function SignupPage() {
                 <div className="max-w-md mx-auto">
                     {/* Card */}
                     <div className="premium-card p-8">
+                        <div className="flex justify-center mb-6">
+                            <Logo className="scale-110" />
+                        </div>
                         {/* Header */}
                         <div className="text-center mb-8">
                             <h1 className="text-3xl font-black text-surface-900 mb-2">

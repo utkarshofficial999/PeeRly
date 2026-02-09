@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import Header from '@/components/layout/Header'
+import Logo from '@/components/ui/Logo'
 
 function LoginContent() {
     const router = useRouter()
@@ -69,6 +70,9 @@ function LoginContent() {
             <main className="pt-24 md:pt-32 pb-16 px-4">
                 <div className="max-w-md mx-auto">
                     <div className="premium-card p-8 relative z-10">
+                        <div className="flex justify-center mb-6">
+                            <Logo className="scale-110" />
+                        </div>
                         <div className="text-center mb-8">
                             <h1 className="text-3xl font-black text-surface-900 mb-2">
                                 Welcome Back
