@@ -126,6 +126,23 @@ export default function DashboardPage() {
                         <h1 className="text-3xl md:text-4xl font-black text-surface-900 mb-2">
                             Welcome back, {profile?.full_name?.split(' ')[0] || 'there'}! 👋
                         </h1>
+                        {/* Verification Banner */}
+                        {profile?.verification_status === 'pending' && (
+                            <div className="mb-8 p-6 rounded-[2rem] bg-amber-50 border-2 border-amber-100 flex flex-col md:flex-row items-center gap-6 animate-in slide-in-from-top-4 duration-500">
+                                <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-amber-500 shadow-sm">
+                                    <ShieldCheck className="w-8 h-8" />
+                                </div>
+                                <div className="flex-1 text-center md:text-left">
+                                    <h3 className="text-xl font-black text-amber-900 mb-1">Verification Pending</h3>
+                                    <p className="text-amber-700 font-bold">
+                                        Your ID is currently being reviewed by our team. You'll get a verification badge once approved!
+                                    </p>
+                                </div>
+                                <div className="px-6 py-2 bg-white rounded-xl text-amber-600 text-xs font-black uppercase tracking-widest shadow-sm">
+                                    Processing
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Quick Actions */}
