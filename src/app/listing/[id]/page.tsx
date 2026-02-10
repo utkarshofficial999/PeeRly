@@ -31,6 +31,7 @@ export default function ListingDetailPage() {
     const [status, setStatus] = useState<FetchStatus>('idle')
     const [activeImage, setActiveImage] = useState(0)
     const [isSaved, setIsSaved] = useState(false)
+    const [showCopied, setShowCopied] = useState(false)
     const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
     // CRITICAL: Track last successfully fetched ID to prevent refetch
@@ -255,6 +256,30 @@ export default function ListingDetailPage() {
         }
     }
 
+    const handleShare = async () => {
+        if (!listing) return
+
+        const shareData = {
+            title: listing.title,
+            text: `Check out this ${listing.title} on PeerLY!`,
+            url: window.location.href,
+        }
+
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData)
+            } else {
+                await navigator.clipboard.writeText(window.location.href)
+                setShowCopied(true)
+                setTimeout(() => setShowCopied(false), 2000)
+            }
+        } catch (err) {
+            if (err instanceof Error && err.name !== 'AbortError') {
+                console.error('Error sharing:', err)
+            }
+        }
+    }
+
     const handleMarkAsSold = async () => {
         if (!user || user.id !== listing?.seller_id) return
 
@@ -473,8 +498,19 @@ export default function ListingDetailPage() {
                                 >
                                     <Heart className={`w-7 h-7 ${isSaved ? 'fill-current' : ''}`} />
                                 </button>
-                                <button className="w-20 h-16 rounded-2xl border-2 border-surface-100 bg-white text-surface-400 hover:border-primary-200 hover:bg-primary-50 hover:text-primary-500 transition-all">
+                                <button
+                                    onClick={handleShare}
+                                    className={`w-20 h-16 rounded-2xl border-2 transition-all flex items-center justify-center relative ${showCopied
+                                        ? 'bg-primary-500 border-primary-500 text-white'
+                                        : 'border-surface-100 bg-white text-surface-400 hover:border-primary-200 hover:bg-primary-50 hover:text-primary-500'
+                                        }`}
+                                >
                                     <Share2 className="w-7 h-7" />
+                                    {showCopied && (
+                                        <span className="absolute -top-12 left-1/2 -translate-x-1/2 bg-surface-900 text-white text-[10px] font-black px-3 py-1.5 rounded-lg animate-in fade-in slide-in-from-bottom-2">
+                                            COPIED!
+                                        </span>
+                                    )}
                                 </button>
                             </div>
                         )}
@@ -486,9 +522,25 @@ export default function ListingDetailPage() {
                                 </div>
                                 <p className="text-primary-900 font-black text-xl mb-1">Your Portfolio Piece</p>
                                 <p className="text-primary-600 font-medium text-sm mb-6">This listing is under your stewardship.</p>
-                                <Link href="/dashboard" className="btn-primary py-3 px-8 text-sm">
-                                    Manage from Dashboard
-                                </Link>
+                                <div className="flex gap-3">
+                                    <Link href="/dashboard" className="flex-1 btn-primary py-3 px-8 text-sm">
+                                        Manage from Dashboard
+                                    </Link>
+                                    <button
+                                        onClick={handleShare}
+                                        className={`w-12 h-12 rounded-xl border-2 transition-all flex items-center justify-center relative ${showCopied
+                                                ? 'bg-primary-500 border-primary-500 text-white'
+                                                : 'border-primary-200 bg-white text-primary-500 hover:bg-primary-100/50'
+                                            }`}
+                                    >
+                                        <Share2 className="w-5 h-5" />
+                                        {showCopied && (
+                                            <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-surface-900 text-white text-[8px] font-black px-2 py-1 rounded-lg">
+                                                COPIED!
+                                            </span>
+                                        )}
+                                    </button>
+                                </div>
                                 {!listing.is_sold && (
                                     <button
                                         onClick={handleMarkAsSold}
@@ -501,8 +553,8 @@ export default function ListingDetailPage() {
                         )}
                     </div>
                 </div>
-            </main>
+            </main >
             <Footer />
-        </div>
+        </div >
     )
 }
