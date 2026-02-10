@@ -109,6 +109,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
         });
 
+        // Realtime profile subscription for instant status updates
+        let profileChannel: any;
+        if (user) {
+            profileChannel = supabase
+                .channel(`profile_realtime_${user.id}`)
+                .on(
+                    'postgres_changes',
+                    {
+                        event: 'UPDATE',
+                        schema: 'public',
+                        table: 'profiles',
+                        filter: `id=eq.${user.id}`
+                    },
+                    (payload: { new: Profile }) => {
+                        console.log('🔐 AuthContext: Profile Updated Realtime');
+                        setProfile(payload.new as Profile);
+                    }
+                )
+                .subscribe();
+        }
+
         // Safety timeout: If still loading after 5 seconds, force-clear it
         const safetyTimeoutId = setTimeout(() => {
             if (mounted && isLoading) {
@@ -121,8 +142,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             mounted = false;
             clearTimeout(safetyTimeoutId);
             subscription.unsubscribe();
+            if (profileChannel) supabase.removeChannel(profileChannel);
         };
-    }, [supabase, fetchProfile]);
+    }, [supabase, fetchProfile, user?.id]);
 
     // Sign up with email and password
     const signUp = async (email: string, password: string, fullName: string) => {
