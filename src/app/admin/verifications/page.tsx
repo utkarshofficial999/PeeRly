@@ -39,7 +39,6 @@ export default function VerificationsPage() {
     const [rejectionReason, setRejectionReason] = useState('')
     const [showRejectionModal, setShowRejectionModal] = useState(false)
     const [isActionLoading, setIsActionLoading] = useState(false)
-    const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
     const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
 
@@ -103,7 +102,6 @@ export default function VerificationsPage() {
     const handleApprove = async (user: PendingUser) => {
         setIsActionLoading(true)
         try {
-            setErrorMsg(null)
             const { error } = await supabase
                 .from('profiles')
                 .update({
@@ -113,14 +111,6 @@ export default function VerificationsPage() {
                 .eq('id', user.id)
 
             if (error) throw error
-
-            // Create notification for seller
-            await supabase.from('notifications').insert({
-                user_id: user.id,
-                title: 'Profile Verified! ✅',
-                message: 'Your college ID has been verified by the Super Admin. You now have a verification badge!',
-                type: 'id_verified'
-            })
 
             // Log action
             await supabase.from('audit_logs').insert({
@@ -132,9 +122,8 @@ export default function VerificationsPage() {
 
             setPendingUsers(prev => prev.filter(u => u.id !== user.id))
             setShowPreview(false)
-        } catch (err: any) {
+        } catch (err) {
             console.error('Approval failed:', err)
-            setErrorMsg(err.message || 'Failed to approve ID verification')
         } finally {
             setIsActionLoading(false)
         }
@@ -145,7 +134,6 @@ export default function VerificationsPage() {
 
         setIsActionLoading(true)
         try {
-            setErrorMsg(null)
             const { error } = await supabase
                 .from('profiles')
                 .update({
@@ -156,15 +144,6 @@ export default function VerificationsPage() {
                 .eq('id', selectedUser.id)
 
             if (error) throw error
-
-            // Create notification for user
-            await supabase.from('notifications').insert({
-                user_id: selectedUser.id,
-                title: 'Verification Update ⚠️',
-                message: `Your ID verification was not approved. Reason: ${rejectionReason}. Please re-upload a clear photo.`,
-                type: 'id_rejected',
-                metadata: { reason: rejectionReason }
-            })
 
             // Log action
             await supabase.from('audit_logs').insert({
@@ -177,9 +156,8 @@ export default function VerificationsPage() {
             setPendingUsers(prev => prev.filter(u => u.id !== selectedUser.id))
             setShowRejectionModal(false)
             setShowPreview(false)
-        } catch (err: any) {
+        } catch (err) {
             console.error('Rejection failed:', err)
-            setErrorMsg(err.message || 'Failed to reject verification')
         } finally {
             setIsActionLoading(false)
         }
@@ -199,17 +177,6 @@ export default function VerificationsPage() {
                     </span>
                 </div>
             </div>
-
-            {/* Error Alert */}
-            {errorMsg && (
-                <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm font-bold flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
-                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                    <p className="flex-1">{errorMsg}</p>
-                    <button onClick={() => setErrorMsg(null)} className="p-1 hover:bg-red-100 rounded-lg transition-colors">
-                        <XCircle className="w-4 h-4" />
-                    </button>
-                </div>
-            )}
 
             {/* Content Card */}
             <div className="premium-card bg-white overflow-hidden border border-surface-200">
