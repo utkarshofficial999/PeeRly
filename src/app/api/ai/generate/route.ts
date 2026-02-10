@@ -8,9 +8,9 @@ export async function POST(req: Request) {
         const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
         if (!apiKey) {
-            console.error('CRITICAL: GEMINI_API_KEY is missing from process.env');
+            console.error('CRITICAL: AI API Key not found in process.env');
             return NextResponse.json(
-                { error: 'GEMINI_API_KEY is not configured (v2)' },
+                { error: 'AI Assistant initialization failed. Please check back in a few minutes while we sync our systems.' },
                 { status: 500 }
             )
         }
