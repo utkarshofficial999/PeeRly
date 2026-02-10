@@ -55,61 +55,23 @@ export default function ListingApprovalsPage() {
         setIsLoading(true)
         setErrorMsg(null)
         try {
-            // First attempt with full joins
+            // Simple fetch without joins for maximum reliability
             const { data, error } = await supabase
                 .from('listings')
-                .select(`
-                    id, 
-                    title, 
-                    price, 
-                    created_at, 
-                    images, 
-                    description,
-                    approval_status,
-                    seller_id,
-                    categories(name),
-                    profiles(full_name, is_verified)
-                `)
+                .select('*')
                 .eq('approval_status', 'pending')
                 .order('created_at', { ascending: true })
 
-            if (error) {
-                console.error('Initial fetch failed, trying fallback...', error)
-
-                // Fallback: simpler select without joins
-                const { data: simpleData, error: simpleError } = await supabase
-                    .from('listings')
-                    .select('*')
-                    .eq('approval_status', 'pending')
-                    .order('created_at', { ascending: true })
-
-                if (simpleError) throw simpleError
-
-                if (simpleData) {
-                    const formatted = simpleData.map((l: any) => ({
-                        id: l.id,
-                        title: l.title,
-                        price: l.price,
-                        category_name: 'Item',
-                        seller_name: 'Student Seller',
-                        seller_is_verified: false,
-                        created_at: l.created_at,
-                        images: l.images || [],
-                        description: l.description || ''
-                    }))
-                    setListings(formatted)
-                    return
-                }
-            }
+            if (error) throw error
 
             if (data) {
                 const formatted = data.map((l: any) => ({
                     id: l.id,
                     title: l.title,
                     price: l.price,
-                    category_name: l.categories?.name || 'Other',
-                    seller_name: l.profiles?.full_name || 'Student',
-                    seller_is_verified: l.profiles?.is_verified || false,
+                    category_name: 'Item',
+                    seller_name: 'Student',
+                    seller_is_verified: false,
                     created_at: l.created_at,
                     images: l.images || [],
                     description: l.description || ''
@@ -206,7 +168,14 @@ export default function ListingApprovalsPage() {
                         {errorMsg}
                     </div>
                 )}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => fetchPendingListings()}
+                        className="p-2 text-surface-400 hover:text-indigo-600 transition-colors"
+                        title="Refresh List"
+                    >
+                        <ArrowUpRight className="w-5 h-5 rotate-45" />
+                    </button>
                     <span className="bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border border-indigo-200">
                         {listings.length} Pending Approvals
                     </span>
