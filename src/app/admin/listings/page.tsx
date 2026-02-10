@@ -199,6 +199,12 @@ export default function ListingApprovalsPage() {
                         <p className="text-surface-500 font-bold max-w-sm mx-auto">
                             Great job! All marketplace listings have been reviewed and processed.
                         </p>
+                        <button
+                            onClick={() => fetchPendingListings()}
+                            className="mt-4 text-xs font-black text-indigo-600 uppercase tracking-widest border-b-2 border-indigo-100 hover:border-indigo-600 transition-all"
+                        >
+                            Force Queue Sync
+                        </button>
                     </div>
                 </div>
             ) : (
