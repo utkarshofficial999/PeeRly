@@ -391,11 +391,11 @@ export default function MessagesContent() {
                                 </div>
 
                                 {/* Messages Area */}
-                                <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-4">
-                                    <div className="bg-red-50 border border-red-100 p-3 md:p-3 rounded-2xl flex items-start gap-3 mb-2 md:mb-4">
+                                <div className="flex-1 p-3 md:p-6 overflow-y-auto space-y-3 md:space-y-4">
+                                    <div className="bg-red-50 border border-red-100 p-2.5 md:p-3 rounded-2xl flex items-start gap-2 md:gap-3 mb-2 md:mb-4">
                                         <ShieldAlert className="w-4 h-4 md:w-5 md:h-5 text-red-500 shrink-0 mt-0.5" />
-                                        <p className="text-[10px] md:text-xs text-red-800 font-bold italic leading-relaxed">
-                                            ⚠️ Safety: Never share OTPs or financial details. Meet in public.
+                                        <p className="text-[9px] md:text-xs text-red-800 font-bold italic leading-relaxed">
+                                            ⚠️ Safety: Never share OTPs or financial details. Meet in public places.
                                         </p>
                                     </div>
 
@@ -405,13 +405,13 @@ export default function MessagesContent() {
                                         messages.map((msg, idx) => {
                                             const isMe = msg.sender_id === user?.id
                                             return (
-                                                <div key={msg.id} className={`flex gap-3 max-w-[80%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`}>
-                                                    <div className={`p-3 md:p-4 rounded-2xl text-xs md:text-sm leading-relaxed ${isMe
-                                                        ? 'bg-primary-600 text-white rounded-tr-none shadow-lg shadow-primary-500/20'
+                                                <div key={msg.id} className={`flex gap-2.5 md:gap-3 max-w-[85%] md:max-w-[80%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`}>
+                                                    <div className={`p-2.5 md:p-4 rounded-2xl text-xs md:text-sm leading-relaxed ${isMe
+                                                        ? 'bg-primary-600 text-white rounded-tr-none shadow-md md:shadow-lg shadow-primary-500/20'
                                                         : 'bg-surface-100 border border-surface-200 text-surface-800 rounded-tl-none'
                                                         }`}>
                                                         {msg.content}
-                                                        <div className={`text-[9px] mt-1 font-bold uppercase opacity-50 ${isMe ? 'text-right' : ''}`}>
+                                                        <div className={`text-[8px] md:text-[9px] mt-1 font-bold uppercase opacity-50 ${isMe ? 'text-right' : ''}`}>
                                                             {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                         </div>
                                                     </div>
@@ -423,18 +423,18 @@ export default function MessagesContent() {
                                 </div>
 
                                 {/* Input Area */}
-                                <div className="p-4 border-t border-surface-100 bg-white">
-                                    <form onSubmit={handleSendMessage} className="flex gap-3">
+                                <div className="p-3 md:p-4 border-t border-surface-100 bg-white">
+                                    <form onSubmit={handleSendMessage} className="flex gap-2 md:gap-3">
                                         <input
                                             type="text"
                                             value={newMessage}
                                             onChange={(e) => setNewMessage(e.target.value)}
-                                            placeholder="Write a message..."
-                                            className="flex-1 bg-surface-50 border border-surface-200 rounded-xl px-4 py-2 text-surface-900 focus:border-primary-500 transition-colors outline-none"
+                                            placeholder="Message..."
+                                            className="flex-1 bg-surface-50 border border-surface-200 rounded-xl px-4 py-2 text-sm text-surface-900 focus:border-primary-500 transition-colors outline-none"
                                         />
                                         <button
                                             disabled={isSending || !newMessage.trim()}
-                                            className="w-10 h-10 rounded-xl bg-primary-500 text-white flex items-center justify-center hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100"
+                                            className="w-10 h-10 rounded-xl bg-primary-500 text-white flex items-center justify-center hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 shrink-0"
                                         >
                                             {isSending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                                         </button>
