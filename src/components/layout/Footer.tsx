@@ -1,10 +1,6 @@
 import Link from 'next/link'
 import Logo from '@/components/ui/Logo'
 import {
-    Facebook,
-    Twitter,
-    Instagram,
-    Linkedin,
     Mail,
     Phone,
     MapPin
@@ -36,12 +32,7 @@ const footerLinks = {
     ],
 }
 
-const socialLinks = [
-    { name: 'Facebook', icon: Facebook, href: '#' },
-    { name: 'Twitter', icon: Twitter, href: '#' },
-    { name: 'Instagram', icon: Instagram, href: '#' },
-    { name: 'LinkedIn', icon: Linkedin, href: '#' },
-]
+
 
 export default function Footer() {
     return (
@@ -135,19 +126,7 @@ export default function Footer() {
                             © {new Date().getFullYear()} PeerLY. Engineered for Excellence.
                         </p>
 
-                        {/* Social Links */}
-                        <div className="flex items-center gap-4">
-                            {socialLinks.map((social) => (
-                                <a
-                                    key={social.name}
-                                    href={social.href}
-                                    className="w-12 h-12 rounded-[1.2rem] bg-surface-50 flex items-center justify-center text-surface-400 hover:text-white hover:bg-primary-500 hover:shadow-lg hover:shadow-primary-500/30 transition-all border border-surface-100"
-                                    aria-label={social.name}
-                                >
-                                    <social.icon className="w-5 h-5 transition-transform hover:scale-110" />
-                                </a>
-                            ))}
-                        </div>
+
                     </div>
                 </div>
             </div>
