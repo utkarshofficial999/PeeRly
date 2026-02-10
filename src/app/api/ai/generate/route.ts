@@ -5,11 +5,12 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request) {
     try {
-        const apiKey = process.env.GEMINI_API_KEY
+        const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+
         if (!apiKey) {
-            console.error('AI ERROR: GEMINI_API_KEY is missing from environment variables')
+            console.error('CRITICAL: GEMINI_API_KEY is missing from process.env');
             return NextResponse.json(
-                { error: 'GEMINI_API_KEY is not configured' },
+                { error: 'GEMINI_API_KEY is not configured (v2)' },
                 { status: 500 }
             )
         }
