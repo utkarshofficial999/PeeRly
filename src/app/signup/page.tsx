@@ -142,8 +142,8 @@ export default function SignupPage() {
     return (
         <div className="min-h-screen bg-surface-50 relative overflow-hidden">
             {/* Background Decorations */}
-            <div className="glow-orb-accent w-[500px] h-[500px] -top-48 -left-48 opacity-20" />
-            <div className="glow-orb-primary w-[400px] h-[400px] bottom-0 -right-32 opacity-20" />
+            <div className="absolute -top-48 -left-48 w-[500px] h-[500px] bg-accent-500/10 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-0 -right-32 w-[400px] h-[400px] bg-primary-500/10 rounded-full blur-[100px] pointer-events-none" />
 
             <Header />
 

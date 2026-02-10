@@ -77,6 +77,10 @@ function LoginContent() {
 
     return (
         <div className="min-h-screen bg-surface-50 relative overflow-hidden">
+            {/* Background Decorations */}
+            <div className="absolute -top-48 -left-48 w-[500px] h-[500px] bg-accent-500/10 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-1/4 -right-32 w-[400px] h-[400px] bg-primary-500/10 rounded-full blur-[100px] pointer-events-none" />
+
             <Header />
 
             <main className="pt-20 md:pt-24 pb-16 px-4">
