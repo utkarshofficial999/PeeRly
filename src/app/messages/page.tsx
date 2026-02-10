@@ -10,7 +10,7 @@ import { Loader2 } from 'lucide-react'
 const MessagesContent = dynamic(() => import('./MessagesContent'), {
     ssr: false,
     loading: () => (
-        <div className="min-h-screen bg-dark-950 flex items-center justify-center">
+        <div className="min-h-screen bg-surface-50 flex items-center justify-center">
             <Loader2 className="w-12 h-12 text-primary-500 animate-spin" />
         </div>
     )
@@ -19,7 +19,7 @@ const MessagesContent = dynamic(() => import('./MessagesContent'), {
 export default function MessagesPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-dark-950 flex items-center justify-center">
+            <div className="min-h-screen bg-surface-50 flex items-center justify-center">
                 <Loader2 className="w-12 h-12 text-primary-500 animate-spin" />
             </div>
         }>

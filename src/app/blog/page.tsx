@@ -13,7 +13,6 @@ export default function BlogPage() {
             category: 'Smart Living',
             date: 'Feb 4, 2026',
             author: 'Ananya S.',
-            image: '/blog/save-money.jpg'
         },
         {
             title: 'How to Sell Faster on PeeRly: Pro Tips',
@@ -21,7 +20,6 @@ export default function BlogPage() {
             category: 'Selling Tips',
             date: 'Feb 1, 2026',
             author: 'Rahul K.',
-            image: '/blog/sell-tips.jpg'
         },
         {
             title: 'Safety Tips for Campus Exchanges',
@@ -29,22 +27,21 @@ export default function BlogPage() {
             category: 'Safety',
             date: 'Jan 28, 2026',
             author: 'PeeRly Team',
-            image: '/blog/safety-spots.jpg'
         }
     ]
 
     return (
-        <div className="min-h-screen bg-dark-950">
+        <div className="min-h-screen bg-surface-50 text-surface-900">
             <Header />
 
             <main className="pt-32 pb-20 px-4">
                 <div className="max-w-6xl mx-auto">
                     {/* Hero */}
                     <div className="text-center mb-16 animate-fade-in">
-                        <h1 className="text-4xl md:text-5xl font-display font-bold text-white mb-6">
+                        <h1 className="text-4xl md:text-5xl font-black text-surface-900 mb-6 uppercase tracking-tight">
                             The <span className="gradient-text">PeeRly</span> Blog
                         </h1>
-                        <p className="text-xl text-dark-300 max-w-2xl mx-auto">
+                        <p className="text-xl text-surface-600 font-bold max-w-2xl mx-auto">
                             Campus Life. Smart Buying. Student Hustles.
                         </p>
                     </div>
@@ -54,19 +51,19 @@ export default function BlogPage() {
                         {posts.map((post, index) => (
                             <div
                                 key={index}
-                                className="glass-card overflow-hidden group hover:bg-white/5 transition-all duration-300 animate-slide-up"
+                                className="bg-white border border-surface-200 rounded-3xl overflow-hidden group hover:border-primary-500/30 transition-all duration-300 shadow-soft animate-slide-up"
                                 style={{ animationDelay: `${index * 100}ms` }}
                             >
                                 {/* Thumbnail Placeholder */}
-                                <div className="aspect-[16/9] bg-dark-800 relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 to-accent-500/20 mix-blend-overlay group-hover:scale-110 transition-transform duration-500" />
-                                    <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-primary-500/80 text-white text-xs font-bold backdrop-blur-md">
+                                <div className="aspect-[16/9] bg-surface-100 relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-accent-500/5 group-hover:scale-110 transition-transform duration-500" />
+                                    <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-primary-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg">
                                         {post.category}
                                     </div>
                                 </div>
 
                                 <div className="p-6">
-                                    <div className="flex items-center gap-4 text-xs text-dark-400 mb-4">
+                                    <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-surface-400 mb-4">
                                         <span className="flex items-center gap-1">
                                             <Calendar className="w-3 h-3" />
                                             {post.date}
@@ -76,14 +73,14 @@ export default function BlogPage() {
                                             {post.author}
                                         </span>
                                     </div>
-                                    <h2 className="text-xl font-bold text-white mb-3 group-hover:text-primary-400 transition-colors leading-tight">
+                                    <h2 className="text-xl font-black text-surface-900 mb-3 group-hover:text-primary-600 transition-colors leading-tight uppercase tracking-tight">
                                         {post.title}
                                     </h2>
-                                    <p className="text-dark-400 text-sm mb-6 line-clamp-2 leading-relaxed">
+                                    <p className="text-surface-500 font-bold text-sm mb-6 line-clamp-2 leading-relaxed italic">
                                         {post.description}
                                     </p>
-                                    <Link href="#" className="inline-flex items-center gap-2 text-primary-400 font-bold text-sm group-hover:gap-3 transition-all underline underline-offset-4 decoration-primary-500/30">
-                                        Read More <ArrowRight className="w-4 h-4" />
+                                    <Link href="#" className="inline-flex items-center gap-2 text-primary-600 font-black text-xs uppercase tracking-widest group-hover:gap-3 transition-all pt-4 border-t border-surface-50 w-full">
+                                        Read Dispatch <ArrowRight className="w-4 h-4" />
                                     </Link>
                                 </div>
                             </div>
@@ -91,12 +88,12 @@ export default function BlogPage() {
                     </div>
 
                     {/* Newsletter Simple */}
-                    <div className="mt-20 glass-card p-10 text-center relative overflow-hidden">
+                    <div className="mt-20 bg-white border border-surface-200 rounded-3xl p-10 text-center relative overflow-hidden shadow-premium">
                         <div className="absolute inset-0 bg-gradient-to-r from-primary-500/5 to-accent-500/5" />
                         <div className="relative z-10">
-                            <h3 className="text-2xl font-display font-bold text-white mb-2">Want to write for us?</h3>
-                            <p className="text-dark-400 mb-6">We love hearing stories from students about their campus hustle.</p>
-                            <a href="mailto:blog@peerly.in" className="btn-secondary">Get in touch</a>
+                            <h3 className="text-2xl font-black text-surface-900 mb-2 uppercase tracking-tight">Contributor Protocol</h3>
+                            <p className="text-surface-500 font-bold mb-6">We are actively seeking dispatches from the campus economy.</p>
+                            <a href="mailto:blog@peerly.in" className="btn-primary px-8 py-3 rounded-2xl">Get in touch</a>
                         </div>
                     </div>
                 </div>

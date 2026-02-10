@@ -54,17 +54,17 @@ export default function Footer() {
                         <Link href="/" className="flex items-center mb-6 group">
                             <Logo className="transition-transform duration-300 group-hover:scale-105" />
                         </Link>
-                        <p className="text-surface-400 font-medium text-base mb-8 max-w-xs leading-relaxed">
+                        <p className="text-surface-600 font-bold text-base mb-8 max-w-xs leading-relaxed italic">
                             The definitive student-to-student marketplace. Building a safer, more connected campus economy.
                         </p>
                         {/* Contact Info */}
-                        <div className="space-y-3 font-bold text-sm tracking-tight">
-                            <a href="mailto:hello@peerly.in" className="flex items-center gap-3 text-surface-400 hover:text-primary-600 transition-colors">
+                        <div className="space-y-3 font-black text-sm tracking-tight">
+                            <a href="mailto:hello@peerly.in" className="flex items-center gap-3 text-surface-600 hover:text-primary-600 transition-colors">
                                 <Mail className="w-4 h-4" />
                                 hello@peerly.in
                             </a>
-                            <div className="flex items-center gap-3 text-surface-400">
-                                <MapPin className="w-4 h-4 text-primary-500" />
+                            <div className="flex items-center gap-3 text-surface-600">
+                                <MapPin className="w-4 h-4 text-primary-600" />
                                 ABES Engineering College, Ghaziabad
                             </div>
                         </div>
@@ -76,7 +76,7 @@ export default function Footer() {
                         <ul className="space-y-4">
                             {footerLinks.product.map((link) => (
                                 <li key={link.name}>
-                                    <Link href={link.href} className="text-sm font-bold text-surface-400 hover:text-primary-600 transition-colors">
+                                    <Link href={link.href} className="text-sm font-bold text-surface-700 hover:text-primary-600 transition-colors">
                                         {link.name}
                                     </Link>
                                 </li>
@@ -90,7 +90,7 @@ export default function Footer() {
                         <ul className="space-y-4">
                             {footerLinks.company.map((link) => (
                                 <li key={link.name}>
-                                    <Link href={link.href} className="text-sm font-bold text-surface-400 hover:text-primary-600 transition-colors">
+                                    <Link href={link.href} className="text-sm font-bold text-surface-700 hover:text-primary-600 transition-colors">
                                         {link.name}
                                     </Link>
                                 </li>
@@ -104,7 +104,7 @@ export default function Footer() {
                         <ul className="space-y-4">
                             {footerLinks.support.map((link) => (
                                 <li key={link.name}>
-                                    <Link href={link.href} className="text-sm font-bold text-surface-400 hover:text-primary-600 transition-colors">
+                                    <Link href={link.href} className="text-sm font-bold text-surface-700 hover:text-primary-600 transition-colors">
                                         {link.name}
                                     </Link>
                                 </li>
@@ -118,7 +118,7 @@ export default function Footer() {
                         <ul className="space-y-4">
                             {footerLinks.legal.map((link) => (
                                 <li key={link.name}>
-                                    <Link href={link.href} className="text-sm font-bold text-surface-400 hover:text-primary-600 transition-colors">
+                                    <Link href={link.href} className="text-sm font-bold text-surface-700 hover:text-primary-600 transition-colors">
                                         {link.name}
                                     </Link>
                                 </li>
@@ -131,7 +131,7 @@ export default function Footer() {
                 <div className="border-t border-surface-100 pt-10">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-8">
                         {/* Copyright */}
-                        <p className="text-xs font-bold text-surface-400 tracking-widest uppercase">
+                        <p className="text-xs font-black text-surface-500 tracking-widest uppercase">
                             © {new Date().getFullYear()} PeerLY. Engineered for Excellence.
                         </p>
 

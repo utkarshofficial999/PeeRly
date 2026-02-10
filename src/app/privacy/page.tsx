@@ -24,20 +24,23 @@ export default function PrivacyPage() {
     ]
 
     return (
-        <div className="min-h-screen bg-dark-950">
+        <div className="min-h-screen bg-surface-50 text-surface-900">
             <Header />
 
             <main className="pt-32 pb-20 px-4">
                 <div className="max-w-3xl mx-auto">
-                    <div className="glass-card p-10 md:p-16">
-                        <h1 className="text-4xl font-display font-bold text-white mb-2">Privacy Policy</h1>
-                        <p className="text-dark-400 mb-10 pb-10 border-b border-white/5">Last Updated: February 4, 2026</p>
+                    <div className="bg-white border border-surface-200 rounded-3xl shadow-premium p-10 md:p-16">
+                        <h1 className="text-4xl md:text-5xl font-black text-surface-900 mb-2 tracking-tight uppercase">Privacy Policy</h1>
+                        <p className="text-surface-400 font-black mb-10 pb-10 border-b border-surface-100 uppercase tracking-widest text-xs italic">Last Updated: February 10, 2026</p>
 
                         <div className="space-y-12">
                             {sections.map((section, index) => (
                                 <section key={index} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
-                                    <h2 className="text-xl font-bold text-white mb-4">{section.title}</h2>
-                                    <p className="text-dark-300 leading-relaxed">
+                                    <h2 className="text-xl font-black text-surface-900 mb-4 tracking-tight uppercase flex items-center gap-3">
+                                        <div className="w-2 h-8 bg-primary-500 rounded-full" />
+                                        {section.title}
+                                    </h2>
+                                    <p className="text-surface-700 leading-relaxed font-bold pl-5 italic">
                                         {section.content}
                                     </p>
                                 </section>

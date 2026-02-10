@@ -85,14 +85,14 @@ export default function SavedItemsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-dark-950">
+        <div className="min-h-screen bg-surface-50 text-surface-900">
             <Header />
 
             <main className="pt-32 pb-20 px-4">
                 <div className="max-w-6xl mx-auto">
                     <div className="mb-10">
-                        <h1 className="text-3xl font-display font-bold text-white mb-2">Saved Items</h1>
-                        <p className="text-dark-400">Keep track of the things you&apos;re interested in.</p>
+                        <h1 className="text-3xl font-display font-bold text-surface-900 mb-2">Saved Items</h1>
+                        <p className="text-surface-500 font-bold">Keep track of the things you&apos;re interested in.</p>
                     </div>
 
                     {isLoading ? (
@@ -105,7 +105,7 @@ export default function SavedItemsPage() {
                         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {savedItems.map((item) => (
                                 <div key={item.id} className="glass-card overflow-hidden group h-full flex flex-col">
-                                    <div className="aspect-[4/5] bg-dark-800 relative overflow-hidden">
+                                    <div className="aspect-[4/5] bg-surface-100 relative overflow-hidden">
                                         {item.images?.[0] && (
                                             <Image
                                                 src={item.images[0]}
@@ -122,10 +122,10 @@ export default function SavedItemsPage() {
                                         </button>
                                     </div>
                                     <div className="p-5 flex-1 flex flex-col">
-                                        <h3 className="text-white font-bold mb-1 truncate">{item.title}</h3>
-                                        <p className="text-primary-400 font-bold mb-4">₹{item.price}</p>
+                                        <h3 className="text-surface-900 font-bold mb-1 truncate">{item.title}</h3>
+                                        <p className="text-primary-600 font-bold mb-4">₹{item.price}</p>
                                         <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
-                                            <Link href={`/listing/${item.id}`} className="text-sm font-bold text-white hover:text-primary-400 transition-colors flex items-center gap-1 group/link">
+                                            <Link href={`/listing/${item.id}`} className="text-sm font-bold text-surface-900 hover:text-primary-600 transition-colors flex items-center gap-1 group/link">
                                                 View Details <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
                                             </Link>
                                         </div>
@@ -138,8 +138,8 @@ export default function SavedItemsPage() {
                             <div className="w-20 h-20 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-6">
                                 <Heart className="w-10 h-10 text-rose-500" />
                             </div>
-                            <h2 className="text-2xl font-bold text-white mb-2">No saved items</h2>
-                            <p className="text-dark-400 mb-8 max-w-sm mx-auto italic">
+                            <h2 className="text-2xl font-bold text-surface-900 mb-2">No saved items</h2>
+                            <p className="text-surface-400 mb-8 max-w-sm mx-auto italic">
                                 &quot;Found something interesting? Save listings and come back later without searching again.&quot;
                             </p>
                             <Link href="/browse" className="btn-secondary px-8 py-3 mx-auto flex items-center gap-2">

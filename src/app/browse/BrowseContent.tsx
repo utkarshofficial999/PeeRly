@@ -269,7 +269,7 @@ export default function BrowseContent() {
                                 onClick={clearFilters}
                                 className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border ${!filters.category
                                     ? 'bg-primary-500 text-white border-primary-500 shadow-lg shadow-primary-500/20'
-                                    : 'bg-white text-surface-500 border-surface-100 hover:border-primary-200 hover:text-primary-600'
+                                    : 'bg-white text-surface-900 border-surface-100 hover:border-primary-200 hover:text-primary-600'
                                     }`}
                             >
                                 All Feed
@@ -280,7 +280,7 @@ export default function BrowseContent() {
                                     onClick={() => handleFilterChange('category', cat.slug)}
                                     className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border ${filters.category === cat.slug
                                         ? 'bg-primary-500 text-white border-primary-500 shadow-lg shadow-primary-500/20'
-                                        : 'bg-white text-surface-500 border-surface-100 hover:border-primary-200 hover:text-primary-600'
+                                        : 'bg-white text-surface-900 border-surface-100 hover:border-primary-200 hover:text-primary-600'
                                         }`}
                                 >
                                     {cat.name}
@@ -320,7 +320,7 @@ export default function BrowseContent() {
                         <h1 className="text-4xl md:text-5xl font-display font-black text-surface-900 mb-3 tracking-tight">
                             Campus <span className="gradient-text">Marketplace</span>
                         </h1>
-                        <p className="text-surface-600 font-bold text-lg">
+                        <p className="text-surface-900 font-black text-lg uppercase tracking-tight">
                             Curated treasures from students at your campus
                         </p>
                     </div>
@@ -335,7 +335,7 @@ export default function BrowseContent() {
                     </div>
 
                     <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
-                        <p className="text-sm font-black text-surface-600 tracking-wide uppercase">
+                        <p className="text-sm font-black text-surface-900 tracking-wide uppercase">
                             {isLoading ? (
                                 'Syncing listings...'
                             ) : (

@@ -28,29 +28,29 @@ export default function TermsPage() {
     ]
 
     return (
-        <div className="min-h-screen bg-dark-950">
+        <div className="min-h-screen bg-surface-50">
             <Header />
 
             <main className="pt-32 pb-20 px-4">
                 <div className="max-w-3xl mx-auto">
-                    <div className="glass-card p-10 md:p-16">
-                        <h1 className="text-4xl font-display font-bold text-white mb-2">Terms of Service</h1>
-                        <p className="text-dark-400 mb-10 pb-10 border-b border-white/5">Last Updated: February 4, 2026</p>
+                    <div className="premium-card p-10 md:p-16">
+                        <h1 className="text-4xl md:text-5xl font-display font-black text-surface-900 mb-2 tracking-tight">Terms of Service</h1>
+                        <p className="text-surface-400 font-bold mb-10 pb-10 border-b border-surface-100 uppercase tracking-widest text-xs">Last Updated: February 10, 2026</p>
 
                         <div className="space-y-12">
                             {sections.map((section, index) => (
                                 <section key={index} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
-                                    <h2 className="text-xl font-bold text-white mb-4">{section.title}</h2>
-                                    <p className="text-dark-300 leading-relaxed">
+                                    <h2 className="text-xl font-black text-surface-900 mb-4 tracking-tight uppercase tracking-wider">{section.title}</h2>
+                                    <p className="text-surface-600 leading-relaxed font-medium">
                                         {section.content}
                                     </p>
                                 </section>
                             ))}
                         </div>
 
-                        <div className="mt-16 p-6 rounded-2xl bg-primary-500/5 border border-primary-500/10">
-                            <p className="text-sm text-dark-300">
-                                If you have any questions about these Terms, please contact us at <a href="mailto:legal@peerly.in" className="text-primary-400 hover:underline">legal@peerly.in</a>.
+                        <div className="mt-16 p-8 rounded-[2rem] bg-surface-50 border border-surface-200 group">
+                            <p className="text-base text-surface-500 font-medium">
+                                Questions about our terms? We&apos;re committed to transparency. Reach out at <a href="mailto:legal@peerly.in" className="text-primary-600 font-black hover:text-primary-700 transition-colors border-b-2 border-primary-500/20 hover:border-primary-500">legal@peerly.in</a>.
                             </p>
                         </div>
                     </div>

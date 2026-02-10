@@ -24,30 +24,30 @@ export default function CollegesPage() {
     ]
 
     return (
-        <div className="min-h-screen bg-dark-950">
+        <div className="min-h-screen bg-surface-50">
             <Header />
 
             <main className="pt-32 pb-20 px-4">
                 <div className="max-w-4xl mx-auto">
                     {/* Hero */}
                     <div className="text-center mb-16 animate-fade-in">
-                        <h1 className="text-4xl md:text-5xl font-display font-bold text-white mb-6">
-                            For <span className="gradient-text">Colleges</span>
+                        <h1 className="text-4xl md:text-6xl font-display font-black text-surface-900 mb-6 tracking-tight">
+                            For <span className="gradient-text italic">Colleges</span>
                         </h1>
-                        <p className="text-xl text-dark-300 max-w-2xl mx-auto leading-relaxed">
-                            Support your students and promote sustainability by officializing PeeRly as your campus&apos;s trusted trade partner.
+                        <p className="text-xl text-surface-600 max-w-2xl mx-auto leading-relaxed font-medium">
+                            Empower your students and champion sustainability by officializing PeeRly as your campus&apos;s trusted trade ecosystem.
                         </p>
                     </div>
 
                     {/* Why colleges love us */}
                     <div className="grid md:grid-cols-3 gap-6 mb-20">
                         {benefits.map((benefit, index) => (
-                            <div key={index} className="glass-card p-8 border-primary-500/10 hover:border-primary-500/30 transition-all duration-300">
-                                <div className="w-12 h-12 rounded-xl bg-primary-500/10 flex items-center justify-center mb-6">
-                                    <benefit.icon className="w-6 h-6 text-primary-400" />
+                            <div key={index} className="premium-card p-10 hover:border-primary-100 transition-all duration-300">
+                                <div className="w-14 h-14 rounded-2xl bg-primary-500/5 flex items-center justify-center mb-8 shadow-sm">
+                                    <benefit.icon className="w-7 h-7 text-primary-500" />
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-3">{benefit.title}</h3>
-                                <p className="text-dark-400">
+                                <h3 className="text-2xl font-black text-surface-900 mb-4 tracking-tight">{benefit.title}</h3>
+                                <p className="text-surface-500 font-medium leading-relaxed">
                                     {benefit.desc}
                                 </p>
                             </div>
@@ -55,41 +55,48 @@ export default function CollegesPage() {
                     </div>
 
                     {/* Partnership Section */}
-                    <div className="glass-card p-8 md:p-12 animate-slide-up relative overflow-hidden">
-                        <div className="absolute -bottom-8 -right-8 w-64 h-64 bg-accent-500/5 blur-3xl rounded-full" />
+                    <div className="premium-card p-10 md:p-16 animate-slide-up relative overflow-hidden bg-gradient-to-br from-white to-primary-50/30">
+                        <div className="absolute -bottom-8 -right-8 w-80 h-80 bg-primary-500/5 blur-3xl rounded-full" />
                         <div className="relative z-10">
-                            <h2 className="text-3xl font-display font-bold text-white mb-6 flex items-center gap-3">
-                                <Building2 className="w-8 h-8 text-accent-400" />
+                            <h2 className="text-3xl font-black text-surface-900 mb-8 flex items-center gap-4 tracking-tight">
+                                <div className="w-12 h-12 rounded-2xl bg-primary-500/10 flex items-center justify-center">
+                                    <Building2 className="w-7 h-7 text-primary-600" />
+                                </div>
                                 Support Campus Entrepreneurship
                             </h2>
-                            <p className="text-lg text-dark-300 mb-8 leading-relaxed">
-                                We work closely with administrative bodies to ensure a safe, clean, and professional environment. officially partnering with us means:
+                            <p className="text-lg text-surface-700 mb-10 leading-relaxed font-medium">
+                                We collaborate with university administrations to foster a secure, student-led marketplace. Official partnership guarantees:
                             </p>
-                            <ul className="space-y-4 mb-10">
+                            <div className="grid sm:grid-cols-2 gap-6 mb-12">
                                 {[
                                     'Pre-verified email whitelist for your college',
-                                    'Dashboard for security team to verify sellers',
-                                    'Sustainability reports for campus recycling goals',
-                                    'Direct support for student-led initiatives'
+                                    'Dashboard for security team verification',
+                                    'Sustainability reports for ESG goals',
+                                    'Direct support for student initiatives'
                                 ].map((item, i) => (
-                                    <li key={i} className="flex items-start gap-3 text-dark-200">
-                                        <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary-500" />
-                                        {item}
-                                    </li>
+                                    <div key={i} className="flex items-center gap-4 bg-white p-5 rounded-2xl border border-surface-100 shadow-sm">
+                                        <div className="w-3 h-3 rounded-full bg-primary-500 shadow-[0_0_10px_rgba(79,70,229,0.4)]" />
+                                        <span className="text-surface-800 font-bold">{item}</span>
+                                    </div>
                                 ))}
-                            </ul>
+                            </div>
 
                             {/* Contact Box */}
-                            <div className="p-8 rounded-2xl bg-white/5 border border-white/10 text-center">
-                                <h3 className="text-xl font-bold text-white mb-2">Interested in partnering?</h3>
-                                <p className="text-dark-400 mb-6">Let&apos;s talk about how we can help your students.</p>
-                                <a
-                                    href="mailto:colleges@peerly.in"
-                                    className="inline-flex items-center gap-2 text-primary-400 hover:text-primary-300 font-bold text-lg transition-colors underline underline-offset-8 decoration-primary-500/30"
-                                >
-                                    <Mail className="w-5 h-5" />
-                                    colleges@peerly.in
-                                </a>
+                            <div className="p-10 rounded-3xl bg-white border border-primary-200 text-center shadow-premium relative group overflow-hidden">
+                                <div className="absolute inset-0 bg-primary-50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <div className="relative z-10">
+                                    <h3 className="text-2xl font-black text-surface-900 mb-2">Interested in partnering?</h3>
+                                    <p className="text-surface-500 font-medium mb-8 max-w-md mx-auto italic">Let&apos;s discuss how we can integrate PeeRly into your campus digital landscape.</p>
+                                    <a
+                                        href="mailto:colleges@peerly.in"
+                                        className="inline-flex items-center gap-3 text-primary-600 hover:text-primary-700 font-black text-xl transition-all"
+                                    >
+                                        <div className="w-12 h-12 rounded-xl bg-primary-500 text-white flex items-center justify-center shadow-lg shadow-primary-500/30">
+                                            <Mail className="w-6 h-6" />
+                                        </div>
+                                        colleges@peerly.in
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>

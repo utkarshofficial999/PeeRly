@@ -18,18 +18,18 @@ export default function CategoriesPage() {
     ]
 
     return (
-        <div className="min-h-screen bg-dark-950">
+        <div className="min-h-screen bg-surface-50 text-surface-900">
             <Header />
 
             <main className="pt-32 pb-20 px-4">
                 <div className="max-w-7xl mx-auto">
                     {/* Header */}
                     <div className="text-center mb-16 animate-fade-in">
-                        <h1 className="text-4xl md:text-5xl font-display font-bold text-white mb-6">
-                            Browse by <span className="gradient-text">Category</span>
+                        <h1 className="text-4xl md:text-5xl font-black text-surface-900 mb-6 uppercase tracking-tight">
+                            Browse by <span className="gradient-text">Department</span>
                         </h1>
-                        <p className="text-xl text-dark-300">
-                            Find exactly what you need for your campus life.
+                        <p className="text-xl text-surface-600 font-bold">
+                            Direct access to specialized campus inventory.
                         </p>
                     </div>
 
@@ -39,24 +39,24 @@ export default function CategoriesPage() {
                             <Link
                                 key={category.slug}
                                 href={`/browse?category=${category.slug}`}
-                                className="glass-card-hover p-8 group overflow-hidden relative animate-slide-up"
+                                className="bg-white border border-surface-200 p-8 group overflow-hidden relative animate-slide-up rounded-3xl shadow-soft hover:shadow-premium hover:-translate-y-1 transition-all duration-300"
                                 style={{ animationDelay: `${index * 50}ms` }}
                             >
                                 <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${category.color} opacity-5 blur-2xl group-hover:opacity-10 transition-opacity`} />
 
-                                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${category.color} p-4 mb-6 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-lg shadow-black/20`}>
+                                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${category.color} p-4 mb-6 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-lg`}>
                                     <category.icon className="w-full h-full text-white" />
                                 </div>
 
-                                <h2 className="text-2xl font-bold text-white mb-2 group-hover:text-primary-400 transition-colors">
+                                <h2 className="text-2xl font-black text-surface-900 mb-2 group-hover:text-primary-600 transition-colors uppercase tracking-tight">
                                     {category.name}
                                 </h2>
-                                <p className="text-dark-400 mb-6 line-clamp-2">
+                                <p className="text-surface-500 font-bold mb-6 line-clamp-2 italic">
                                     {category.desc}
                                 </p>
 
-                                <div className="flex items-center gap-2 text-primary-400 font-bold group-hover:gap-3 transition-all">
-                                    Browse Items <ArrowRight className="w-4 h-4" />
+                                <div className="flex items-center gap-2 text-primary-600 font-black uppercase text-xs tracking-widest group-hover:gap-3 transition-all pt-4 border-t border-surface-50">
+                                    Analyze Inventory <ArrowRight className="w-4 h-4" />
                                 </div>
                             </Link>
                         ))}

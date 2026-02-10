@@ -207,10 +207,10 @@ export default function HomePage() {
                     <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary-900/50 to-transparent" />
                     <div className="container-custom relative z-10">
                         <div className="text-center mb-20">
-                            <h2 className="text-4xl md:text-5xl font-display font-extrabold mb-6 tracking-tight">
+                            <h2 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight">
                                 Built for the <span className="text-mint-400">Campus Social</span>
                             </h2>
-                            <p className="text-surface-400 text-lg max-w-2xl mx-auto">
+                            <p className="text-surface-300 text-lg max-w-2xl mx-auto font-bold uppercase tracking-widest text-sm">
                                 PeerLY isn&apos;t just a marketplace. It&apos;s where your college network meets commerce.
                             </p>
                         </div>
@@ -221,8 +221,12 @@ export default function HomePage() {
                                     <div className={`w-14 h-14 rounded-2xl ${feature.bgColor} flex items-center justify-center mb-6 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6`}>
                                         <feature.icon className={`w-7 h-7 ${feature.color}`} />
                                     </div>
-                                    <h3 className="text-xl font-bold mb-3 tracking-tight">{feature.title}</h3>
-                                    <p className="text-surface-300 leading-relaxed text-sm font-medium">{feature.description}</p>
+                                    <h3 className="text-xl font-black mb-3 tracking-tight uppercase">
+                                        {feature.title}
+                                    </h3>
+                                    <p className="text-surface-200 leading-relaxed text-sm font-bold italic">
+                                        {feature.description}
+                                    </p>
                                 </div>
                             ))}
                         </div>
@@ -233,10 +237,10 @@ export default function HomePage() {
                 <section className="py-24">
                     <div className="container-custom">
                         <div className="text-center mb-20">
-                            <h2 className="text-4xl md:text-5xl font-display font-black text-surface-900 mb-6 racking-tight">
+                            <h2 className="text-4xl md:text-5xl font-black text-surface-900 mb-6 tracking-tight uppercase">
                                 Trusted by <span className="text-primary-600">Students</span>
                             </h2>
-                            <p className="text-surface-400 text-lg">Join the thousands of peers trading on PeerLY</p>
+                            <p className="text-surface-600 font-black text-lg uppercase tracking-widest">Join the thousands of peers trading on PeerLY</p>
                         </div>
 
                         <div className="grid md:grid-cols-3 gap-8">

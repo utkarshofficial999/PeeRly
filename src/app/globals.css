@@ -70,11 +70,12 @@
 
   /* Modern Card Layout */
   .premium-card {
-    @apply bg-white border border-black/[0.03] rounded-3xl shadow-soft transition-all duration-300;
+    @apply bg-white border border-surface-200 rounded-3xl shadow-soft transition-all duration-300;
   }
 
-  .premium-card-hover {
-    @apply premium-card hover:shadow-premium hover:-translate-y-1;
+  /* Soft Glassmorphism */
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl shadow-soft;
   }
 
   /* Soft Glassmorphism */
