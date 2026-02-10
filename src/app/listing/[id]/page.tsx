@@ -259,24 +259,59 @@ export default function ListingDetailPage() {
     const handleShare = async () => {
         if (!listing) return
 
+        const shareUrl = window.location.href
         const shareData = {
             title: listing.title,
             text: `Check out this ${listing.title} on PeerLY!`,
-            url: window.location.href,
+            url: shareUrl,
+        }
+
+        const performLegacyCopy = (text: string) => {
+            const textArea = document.createElement("textarea")
+            textArea.value = text
+            textArea.style.position = "fixed"
+            textArea.style.left = "-9999px"
+            textArea.style.top = "0"
+            document.body.appendChild(textArea)
+            textArea.focus()
+            textArea.select()
+            try {
+                const successful = document.execCommand('copy')
+                if (successful) {
+                    setShowCopied(true)
+                    setTimeout(() => setShowCopied(false), 2000)
+                }
+            } catch (err) {
+                console.error('Fallback copy failed:', err)
+            }
+            document.body.removeChild(textArea)
         }
 
         try {
+            // 1. Try Web Share API if available and allowed
             if (navigator.share) {
-                await navigator.share(shareData)
-            } else {
-                await navigator.clipboard.writeText(window.location.href)
+                try {
+                    await navigator.share(shareData)
+                    return // Success
+                } catch (shareErr: any) {
+                    // Only abort if user cancelled, otherwise proceed to clipboard
+                    if (shareErr.name === 'AbortError') return
+                    console.warn('Navigator share failed, trying clipboard:', shareErr)
+                }
+            }
+
+            // 2. Try Clipboard API
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(shareUrl)
                 setShowCopied(true)
                 setTimeout(() => setShowCopied(false), 2000)
+            } else {
+                // 3. Last Resort Fallback
+                performLegacyCopy(shareUrl)
             }
         } catch (err) {
-            if (err instanceof Error && err.name !== 'AbortError') {
-                console.error('Error sharing:', err)
-            }
+            console.error('Share system error:', err)
+            performLegacyCopy(shareUrl)
         }
     }
 
@@ -529,8 +564,8 @@ export default function ListingDetailPage() {
                                     <button
                                         onClick={handleShare}
                                         className={`w-12 h-12 rounded-xl border-2 transition-all flex items-center justify-center relative ${showCopied
-                                                ? 'bg-primary-500 border-primary-500 text-white'
-                                                : 'border-primary-200 bg-white text-primary-500 hover:bg-primary-100/50'
+                                            ? 'bg-primary-500 border-primary-500 text-white'
+                                            : 'border-primary-200 bg-white text-primary-500 hover:bg-primary-100/50'
                                             }`}
                                     >
                                         <Share2 className="w-5 h-5" />
