@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 // Note: Not using Edge runtime for better Netlify compatibility
 
 interface ListingsQuery {
@@ -56,6 +58,7 @@ export async function GET(request: NextRequest) {
                 images,
                 created_at,
                 views_count,
+                listing_type,
                 seller:profiles!listings_seller_id_fkey(full_name, avatar_url),
                 college:colleges(name)
             `, { count: 'exact' })
