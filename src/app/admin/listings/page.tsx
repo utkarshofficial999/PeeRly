@@ -33,6 +33,7 @@ interface PendingListing {
     created_at: string
     images: string[]
     description: string
+    seller_id: string
 }
 
 export default function ListingApprovalsPage() {
@@ -74,7 +75,8 @@ export default function ListingApprovalsPage() {
                     seller_is_verified: false,
                     created_at: l.created_at,
                     images: l.images || [],
-                    description: l.description || ''
+                    description: l.description || '',
+                    seller_id: l.seller_id
                 }))
                 setListings(formatted)
             }
@@ -98,6 +100,15 @@ export default function ListingApprovalsPage() {
                 .eq('id', listing.id)
 
             if (error) throw error
+
+            // Create notification for seller
+            await supabase.from('notifications').insert({
+                user_id: listing.seller_id,
+                title: 'Listing Approved! 🚀',
+                message: `Your listing "${listing.title}" has been approved by the Super Admin and is now live on the marketplace.`,
+                type: 'listing_approved',
+                metadata: { listing_id: listing.id }
+            })
 
             // Log action
             await supabase.from('audit_logs').insert({
@@ -131,6 +142,15 @@ export default function ListingApprovalsPage() {
                 .eq('id', selectedListing.id)
 
             if (error) throw error
+
+            // Create notification for seller
+            await supabase.from('notifications').insert({
+                user_id: selectedListing.seller_id,
+                title: 'Listing Update ⚠️',
+                message: `Your listing "${selectedListing.title}" was not approved. Reason: ${rejectionReason}. You can edit it from your dashboard.`,
+                type: 'listing_rejected',
+                metadata: { listing_id: selectedListing.id, reason: rejectionReason }
+            })
 
             // Log action
             await supabase.from('audit_logs').insert({
