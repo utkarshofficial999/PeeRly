@@ -17,6 +17,7 @@ interface ListingCardProps {
     createdAt: string
     isSaved?: boolean
     isVerified?: boolean
+    isSold?: boolean
     onSave?: () => void
 }
 
@@ -33,6 +34,7 @@ export default function ListingCard({
     createdAt,
     isSaved = false,
     isVerified = false,
+    isSold = false,
     onSave,
 }: ListingCardProps) {
     const conditionInfo = CONDITIONS[condition]
@@ -51,6 +53,17 @@ export default function ListingCard({
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 25vw"
                 />
+
+                {/* Sold Overlay */}
+                {isSold && (
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-10 flex items-center justify-center p-4">
+                        <div className="bg-white/95 backdrop-blur-md px-6 py-2.5 rounded-2xl shadow-2xl border border-white/20 transform -rotate-12 scale-110">
+                            <span className="text-xl md:text-2xl font-black text-surface-900 tracking-tighter uppercase italic">
+                                SOLD
+                            </span>
+                        </div>
+                    </div>
+                )}
 
                 {/* Save Button */}
                 {onSave && (
@@ -75,6 +88,15 @@ export default function ListingCard({
                         {conditionInfo.label}
                     </span>
                 </div>
+
+                {/* Sold Badge */}
+                {isSold && (
+                    <div className="absolute top-4 left-4 z-20">
+                        <span className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-amber-500 text-white shadow-lg shadow-amber-500/30 border border-amber-400">
+                            Sold Out
+                        </span>
+                    </div>
+                )}
             </div>
 
             {/* Content */}

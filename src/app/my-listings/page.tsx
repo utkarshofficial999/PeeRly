@@ -68,6 +68,26 @@ export default function MyListingsPage() {
         }
     }, [user, supabase])
 
+    const handleMarkAsSold = async (id: string) => {
+        const confirmSold = window.confirm('Are you sure you want to mark this item as sold? It will be hidden from the browse feed.')
+        if (!confirmSold) return
+
+        try {
+            const { error } = await supabase
+                .from('listings')
+                .update({ is_sold: true })
+                .eq('id', id)
+
+            if (error) throw error
+
+            setListings(prev => prev.map(item => item.id === id ? { ...prev.find(i => i.id === id), is_sold: true } : item))
+            alert('Item marked as sold!')
+        } catch (err: any) {
+            console.error('Error marking as sold:', err)
+            alert(`Failed to mark as sold: ${err.message}`)
+        }
+    }
+
     useEffect(() => {
         if (user) {
             fetchMyListings()
@@ -107,10 +127,19 @@ export default function MyListingsPage() {
                                                 src={item.images[0]}
                                                 alt={item.title}
                                                 fill
-                                                className="object-cover"
+                                                className={`object-cover ${item.is_sold ? 'grayscale' : ''}`}
                                             />
                                         )}
-                                        <div className="absolute top-4 right-4 flex gap-2">
+                                        {item.is_sold && (
+                                            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                                                <div className="bg-white/95 backdrop-blur-md px-4 py-1.5 rounded-xl shadow-xl border border-white/20 transform -rotate-12">
+                                                    <span className="text-sm font-black text-surface-900 tracking-tighter uppercase italic">
+                                                        SOLD
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div className="absolute top-4 right-4 flex gap-2 z-20">
                                             <button className="p-2 rounded-lg bg-white/90 text-surface-900 backdrop-blur-md shadow-soft hover:bg-primary-600 hover:text-white transition-all">
                                                 <Edit2 className="w-4 h-4" />
                                             </button>
@@ -124,18 +153,35 @@ export default function MyListingsPage() {
                                             <h3 className="text-xl font-black text-surface-900 truncate">{item.title}</h3>
                                             <span className="text-primary-600 font-black">₹{item.price}</span>
                                         </div>
-                                        <div className="flex items-center gap-4 text-sm text-surface-700 font-bold mb-6">
+                                        <div className="flex flex-wrap items-center gap-3 text-sm text-surface-700 font-bold mb-6">
                                             <span className="flex items-center gap-1">
                                                 <Eye className="w-4 h-4 text-surface-400" />
                                                 {item.views_count || 0} views
                                             </span>
-                                            <span className={`px-3 py-0.5 rounded-full text-[10px] uppercase font-black tracking-wider ${item.is_active ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-surface-200 text-surface-700'}`}>
-                                                {item.is_active ? 'Active' : 'Draft'}
-                                            </span>
+                                            <div className="flex gap-2">
+                                                <span className={`px-3 py-0.5 rounded-full text-[10px] uppercase font-black tracking-wider ${item.is_active ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-surface-200 text-surface-700'}`}>
+                                                    {item.is_active ? 'Active' : 'Draft'}
+                                                </span>
+                                                {item.is_sold && (
+                                                    <span className="px-3 py-0.5 rounded-full text-[10px] uppercase font-black tracking-wider bg-amber-500 text-white border border-amber-400">
+                                                        Sold
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
-                                        <Link href={`/listing/${item.id}`} className="text-center block w-full py-3 rounded-xl bg-surface-50 text-surface-900 font-black border border-surface-100 hover:bg-white hover:shadow-soft transition-all">
-                                            View Stats
-                                        </Link>
+                                        <div className="flex gap-3">
+                                            <Link href={`/listing/${item.id}`} className="flex-1 text-center py-3 rounded-xl bg-surface-50 text-surface-900 font-black border border-surface-100 hover:bg-white hover:shadow-soft transition-all">
+                                                View Stats
+                                            </Link>
+                                            {!item.is_sold && item.is_active && (
+                                                <button
+                                                    onClick={() => handleMarkAsSold(item.id)}
+                                                    className="flex-1 py-3 rounded-xl bg-amber-500 text-white font-black hover:bg-amber-600 transition-all shadow-lg shadow-amber-500/20"
+                                                >
+                                                    Mark Sold
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             ))}

@@ -255,6 +255,28 @@ export default function ListingDetailPage() {
         }
     }
 
+    const handleMarkAsSold = async () => {
+        if (!user || user.id !== listing?.seller_id) return
+
+        const confirmSold = window.confirm('Are you sure you want to mark this item as sold? It will be hidden from the browse feed.')
+        if (!confirmSold) return
+
+        try {
+            const { error } = await supabase
+                .from('listings')
+                .update({ is_sold: true })
+                .eq('id', id)
+
+            if (error) throw error
+
+            setListing((prev: any) => ({ ...prev, is_sold: true }))
+            alert('Item marked as sold! It will no longer appear in the browse feed.')
+        } catch (err: any) {
+            console.error('Error marking as sold:', err)
+            alert(`Failed to mark as sold: ${err.message}`)
+        }
+    }
+
     // Render based on status
     if (status === 'idle' || status === 'loading') {
         return (
@@ -356,6 +378,11 @@ export default function ListingDetailPage() {
                                 <span className="px-4 py-1.5 rounded-2xl bg-mint-50 text-mint-600 border border-mint-100 text-xs font-black uppercase tracking-wider">
                                     {CONDITIONS[listing.condition as keyof typeof CONDITIONS]?.label || listing.condition}
                                 </span>
+                                {listing.is_sold && (
+                                    <span className="px-4 py-1.5 rounded-2xl bg-amber-500 text-white border border-amber-400 text-xs font-black uppercase tracking-wider shadow-lg shadow-amber-500/20">
+                                        Sold Out
+                                    </span>
+                                )}
                                 <span className="flex items-center gap-1.5 text-xs font-bold text-surface-400 uppercase tracking-widest">
                                     <MapPin className="w-3.5 h-3.5 text-primary-500" />
                                     {listing.college?.name || 'CAMPUS'}
@@ -428,13 +455,18 @@ export default function ListingDetailPage() {
 
                         {!isOwnListing && (
                             <div className="flex gap-4">
-                                <button onClick={handleChat} className="flex-1 btn-primary py-5 text-lg font-black justify-center gap-3 rounded-[1.5rem] shadow-button">
+                                <button
+                                    onClick={handleChat}
+                                    disabled={listing.is_sold}
+                                    className={`flex-1 btn-primary py-5 text-lg font-black justify-center gap-3 rounded-[1.5rem] shadow-button ${listing.is_sold ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
+                                >
                                     <MessageSquare className="w-6 h-6" />
-                                    Initiate Connection
+                                    {listing.is_sold ? 'Item Sold' : 'Initiate Connection'}
                                 </button>
                                 <button
                                     onClick={toggleSave}
-                                    className={`w-20 h-16 rounded-2xl border-2 flex items-center justify-center transition-all ${isSaved
+                                    disabled={listing.is_sold}
+                                    className={`w-20 h-16 rounded-2xl border-2 flex items-center justify-center transition-all ${listing.is_sold ? 'opacity-50 grayscale cursor-not-allowed' : ''} ${isSaved
                                         ? 'bg-peach-50 border-peach-200 text-peach-500 shadow-lg shadow-peach-500/10'
                                         : 'bg-white border-surface-100 text-surface-400 hover:border-peach-200 hover:bg-peach-50 hover:text-peach-400'
                                         }`}
@@ -457,6 +489,14 @@ export default function ListingDetailPage() {
                                 <Link href="/dashboard" className="btn-primary py-3 px-8 text-sm">
                                     Manage from Dashboard
                                 </Link>
+                                {!listing.is_sold && (
+                                    <button
+                                        onClick={handleMarkAsSold}
+                                        className="mt-4 w-full py-4 rounded-xl bg-amber-500 text-white font-black hover:bg-amber-600 transition-all shadow-lg shadow-amber-500/20"
+                                    >
+                                        Mark as Sold
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>
