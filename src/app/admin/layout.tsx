@@ -42,7 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     useEffect(() => {
         const fetchCounts = async () => {
             const [ids, listings] = await Promise.all([
-                supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('verification_status', 'pending'),
+                supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('verification_status', 'pending').not('id_card_url', 'is', null),
                 supabase.from('listings').select('*', { count: 'exact', head: true }).eq('approval_status', 'pending')
             ])
             setStats({
