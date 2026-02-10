@@ -5,12 +5,14 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request) {
     try {
-        const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+        const apiKey = process.env.GEMINI_API_KEY ||
+            process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
+            process.env['GEMINI_API_KEY'];
 
         if (!apiKey) {
-            console.error('CRITICAL: AI API Key not found in process.env');
+            console.error('AI_ERROR_DIAGNOSTIC: No API key found in current environment.');
             return NextResponse.json(
-                { error: 'AI Assistant initialization failed. Please check back in a few minutes while we sync our systems.' },
+                { error: 'AI Assistant Syncing: Please ensure the GEMINI_API_KEY is saved and redeployed in Vercel.' },
                 { status: 500 }
             )
         }
