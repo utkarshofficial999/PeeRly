@@ -18,7 +18,7 @@ interface DashboardStats {
 }
 
 export default function DashboardPage() {
-    const { user, profile, isLoading } = useAuth()
+    const { user, profile, isLoading, refreshProfile } = useAuth()
     const router = useRouter() // Use router for redirection
     const [stats, setStats] = useState<DashboardStats>({
         activeListings: 0,
@@ -92,8 +92,9 @@ export default function DashboardPage() {
     useEffect(() => {
         if (user) {
             fetchDashboardData()
+            refreshProfile() // Refresh profile to get updated verification status
         }
-    }, [user, fetchDashboardData])
+    }, [user, fetchDashboardData, refreshProfile])
 
     if (isLoading) {
         return (
