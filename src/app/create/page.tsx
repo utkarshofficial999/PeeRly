@@ -46,6 +46,7 @@ export default function CreateListingPage() {
         price: '',
         condition: '',
         location: '',
+        listing_type: 'sell',
     })
 
     // Fetch categories from DB
@@ -168,6 +169,7 @@ export default function CreateListingPage() {
                 price: parseFloat(formData.price) || 0,
                 category_id: selectedCat.id,
                 condition: formData.condition,
+                listing_type: formData.listing_type,
                 images: uploadedImageUrls,
                 college_id: profile.college_id,
                 location: formData.location,
@@ -316,6 +318,33 @@ export default function CreateListingPage() {
                                     <p className="mt-1 text-xs text-surface-400 font-bold">{formData.description.length}/500 characters</p>
                                 </div>
 
+                                {/* Listing Type */}
+                                <div>
+                                    <label className="block text-sm font-black text-surface-700 mb-3">
+                                        Listing Type <span className="text-peach-500">*</span>
+                                    </label>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        {[
+                                            { value: 'sell', label: 'Sell', icon: '💰' },
+                                            { value: 'rent', label: 'Rent', icon: '⏰' },
+                                            { value: 'barter', label: 'Barter', icon: '🤝' },
+                                        ].map((t) => (
+                                            <button
+                                                key={t.value}
+                                                type="button"
+                                                onClick={() => setFormData(prev => ({ ...prev, listing_type: t.value }))}
+                                                className={`p-4 rounded-2xl border transition-all text-center ${formData.listing_type === t.value
+                                                    ? 'bg-primary-50 border-primary-500 text-primary-600 shadow-sm'
+                                                    : 'bg-surface-50 border-surface-200 text-surface-700 hover:border-primary-300 hover:bg-white'
+                                                    }`}
+                                            >
+                                                <span className="text-xl mb-1 block">{t.icon}</span>
+                                                <span className="text-xs font-black uppercase tracking-widest">{t.label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
                                 {/* Price */}
                                 <div>
                                     <label className="block text-sm font-black text-surface-700 mb-2">
@@ -460,6 +489,9 @@ export default function CreateListingPage() {
                                             <p className="text-surface-700 font-medium mb-4">{formData.description}</p>
                                         )}
                                         <div className="flex flex-wrap gap-3 text-sm text-surface-600">
+                                            <span className="px-4 py-1.5 bg-primary-100/50 text-primary-700 rounded-full font-black border border-primary-200 uppercase text-[10px] tracking-widest">
+                                                {formData.listing_type}
+                                            </span>
                                             <span className="px-4 py-1.5 bg-surface-100 rounded-full font-bold border border-surface-200">
                                                 {conditions.find(c => c.value === formData.condition)?.label}
                                             </span>

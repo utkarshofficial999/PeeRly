@@ -438,6 +438,14 @@ export default function ListingDetailPage() {
                                 <span className="px-4 py-1.5 rounded-2xl bg-mint-50 text-mint-600 border border-mint-100 text-xs font-black uppercase tracking-wider">
                                     {CONDITIONS[listing.condition as keyof typeof CONDITIONS]?.label || listing.condition}
                                 </span>
+                                <span className={`px-4 py-1.5 rounded-2xl text-xs font-black uppercase tracking-wider border ${listing.listing_type === 'rent'
+                                    ? 'bg-amber-50 text-amber-600 border-amber-200'
+                                    : listing.listing_type === 'barter'
+                                        ? 'bg-primary-50 text-primary-600 border-primary-200'
+                                        : 'bg-surface-100 text-surface-600 border-surface-200'
+                                    }`}>
+                                    {listing.listing_type || 'sell'}
+                                </span>
                                 {listing.is_sold && (
                                     <span className="px-4 py-1.5 rounded-2xl bg-amber-500 text-white border border-amber-400 text-xs font-black uppercase tracking-wider shadow-lg shadow-amber-500/20">
                                         Sold Out

@@ -18,6 +18,7 @@ interface Listing {
     images: string[]
     created_at: string
     views_count: number
+    listing_type: 'sell' | 'rent' | 'barter'
     seller?: { full_name: string; avatar_url: string; is_verified?: boolean }
     college?: { name: string }
 }
@@ -160,6 +161,7 @@ export default function BrowseContent() {
                     images,
                     created_at,
                     views_count,
+                    listing_type,
                     seller:profiles!listings_seller_id_fkey(full_name, avatar_url, is_verified),
                     college:colleges(name)
                 `, { count: 'exact' })
@@ -439,6 +441,7 @@ export default function BrowseContent() {
                                                 viewsCount={listing.views_count}
                                                 isVerified={listing.seller?.is_verified}
                                                 createdAt={listing.created_at}
+                                                listingType={listing.listing_type}
                                                 onSave={() => console.log('Save', listing.id)}
                                             />
                                         ))}

@@ -18,6 +18,7 @@ interface ListingCardProps {
     isSaved?: boolean
     isVerified?: boolean
     isSold?: boolean
+    listingType?: 'sell' | 'rent' | 'barter'
     onSave?: () => void
 }
 
@@ -35,6 +36,7 @@ export default function ListingCard({
     isSaved = false,
     isVerified = false,
     isSold = false,
+    listingType = 'sell',
     onSave,
 }: ListingCardProps) {
     const conditionInfo = CONDITIONS[condition]
@@ -116,9 +118,18 @@ export default function ListingCard({
                     {title}
                 </h3>
 
-                {/* Price */}
-                <div className="text-2xl font-black gradient-text mb-4">
-                    {formatPrice(price)}
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="text-2xl font-black gradient-text">
+                        {formatPrice(price)}
+                    </div>
+                    {listingType !== 'sell' && (
+                        <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${listingType === 'rent'
+                            ? 'bg-amber-50 text-amber-600 border-amber-200'
+                            : 'bg-primary-50 text-primary-600 border-primary-200'
+                            }`}>
+                            {listingType}
+                        </span>
+                    )}
                 </div>
 
                 {/* Seller Info */}
