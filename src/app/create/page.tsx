@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { Upload, X, Camera, Plus, ArrowRight, ArrowLeft, Check, AlertCircle } from 'lucide-react'
+import { Upload, X, Camera, Plus, ArrowRight, ArrowLeft, Check, AlertCircle, Sparkles, Wand2 } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import { useAuth } from '@/context/AuthContext'
 import { createClient } from '@/lib/supabase/client'
@@ -47,7 +47,9 @@ export default function CreateListingPage() {
         condition: '',
         location: '',
         listing_type: 'sell',
+        aiNotes: '',
     })
+    const [isGeneratingAI, setIsGeneratingAI] = useState(false)
 
     // Fetch categories from DB
     useEffect(() => {
@@ -207,6 +209,51 @@ export default function CreateListingPage() {
         }
     }
 
+    const handleAIGenerate = async () => {
+        if (!formData.aiNotes) {
+            alert('Please enter some short notes first!')
+            return
+        }
+
+        setIsGeneratingAI(true)
+        try {
+            let imageBase64 = null
+            if (images.length > 0) {
+                const reader = new FileReader()
+                const promise = new Promise((resolve) => {
+                    reader.onload = () => resolve(reader.result)
+                    reader.readAsDataURL(images[0])
+                })
+                imageBase64 = await promise
+            }
+
+            const response = await fetch('/api/ai/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    notes: formData.aiNotes,
+                    category: formData.category,
+                    image: imageBase64
+                })
+            })
+
+            const data = await response.json()
+            if (data.error) throw new Error(data.error)
+
+            setFormData(prev => ({
+                ...prev,
+                title: data.title || prev.title,
+                description: data.description || prev.description,
+                price: data.suggestedPrice?.toString() || prev.price
+            }))
+        } catch (err: any) {
+            console.error('AI Error:', err)
+            alert(err.message || 'Failed to generate content. Please check your API key.')
+        } finally {
+            setIsGeneratingAI(false)
+        }
+    }
+
     const canProceed = () => {
         switch (step) {
             case 1: return formData.category !== ''
@@ -284,6 +331,51 @@ export default function CreateListingPage() {
                                         Item Details
                                     </h2>
                                     <p className="text-surface-700 font-bold">Tell buyers about your item</p>
+                                </div>
+
+                                {/* AI Assistant Section */}
+                                <div className="p-6 rounded-[2rem] bg-gradient-to-br from-primary-50 to-primary-100/50 border border-primary-200 shadow-sm relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform duration-500">
+                                        <Sparkles className="w-16 h-16 text-primary-600" />
+                                    </div>
+                                    <div className="relative z-10">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <div className="w-8 h-8 rounded-xl bg-primary-600 flex items-center justify-center text-white shadow-lg shadow-primary-500/30">
+                                                <Wand2 className="w-4 h-4" />
+                                            </div>
+                                            <h3 className="text-lg font-black text-surface-900 tracking-tight">Magic AI Assistant</h3>
+                                        </div>
+                                        <p className="text-sm text-surface-700 font-bold mb-4 leading-relaxed">
+                                            Struggling with words? Just tell us what it is, and we'll write the title and description for you!
+                                        </p>
+                                        <div className="space-y-4">
+                                            <textarea
+                                                value={formData.aiNotes}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, aiNotes: e.target.value }))}
+                                                placeholder="e.g., Old calculus book, almost new, includes previous year papers"
+                                                className="w-full px-5 py-4 rounded-2xl bg-white border border-primary-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all font-bold text-sm text-surface-900 placeholder:text-surface-400"
+                                                rows={2}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={handleAIGenerate}
+                                                disabled={isGeneratingAI || !formData.aiNotes}
+                                                className="w-full py-4 bg-primary-600 hover:bg-primary-700 disabled:bg-surface-300 disabled:cursor-not-allowed text-white rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 shadow-lg shadow-primary-500/20 active:scale-95 transition-all"
+                                            >
+                                                {isGeneratingAI ? (
+                                                    <>
+                                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                        Casting Spells...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Sparkles className="w-4 h-4" />
+                                                        Magic Generate
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Title */}
