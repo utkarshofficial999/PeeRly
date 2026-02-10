@@ -1,19 +1,19 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { NextResponse } from 'next/server'
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
-
 export async function POST(req: Request) {
     try {
-        const { notes, image, category } = await req.json()
-
-        if (!process.env.GEMINI_API_KEY) {
+        const apiKey = process.env.GEMINI_API_KEY
+        if (!apiKey) {
+            console.error('AI ERROR: GEMINI_API_KEY is missing from environment variables')
             return NextResponse.json(
                 { error: 'GEMINI_API_KEY is not configured' },
                 { status: 500 }
             )
         }
 
+        const { notes, image, category } = await req.json()
+        const genAI = new GoogleGenerativeAI(apiKey)
         const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 
         // Prepare parts for multimodal prompt
