@@ -50,9 +50,9 @@ export default function Footer() {
                         </p>
                         {/* Contact Info */}
                         <div className="space-y-3 font-black text-sm tracking-tight">
-                            <a href="mailto:hello@peerly.in" className="flex items-center gap-3 text-surface-600 hover:text-primary-600 transition-colors">
+                            <a href="mailto:utkarshofficial999@gmail.com" className="flex items-center gap-3 text-surface-600 hover:text-primary-600 transition-colors">
                                 <Mail className="w-4 h-4" />
-                                hello@peerly.in
+                                utkarshofficial999@gmail.com
                             </a>
                             <div className="flex items-center gap-3 text-surface-600">
                                 <MapPin className="w-4 h-4 text-primary-600" />
