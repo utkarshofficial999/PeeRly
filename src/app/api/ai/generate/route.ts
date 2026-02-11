@@ -25,7 +25,7 @@ export async function POST(req: Request) {
             Act as a professional marketplace listing assistant for a college student marketplace called PeerLY.
             Generate a high-quality listing based on:
             - Category: ${category || 'General'}
-            - User Notes: ${notes || 'Analyze the item in the image'}
+            - User Notes: ${notes || 'Analyze the item'}
             - Image provided: ${image ? 'Yes' : 'No'}
 
             Rules:
@@ -42,8 +42,8 @@ export async function POST(req: Request) {
             }
         `
 
-        // Use gemini-1.5-flash for everything as it supports both text and vision
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+        // Try 'gemini-1.5-flash-latest' which sometimes resolves 404s in specific regions better
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' })
 
         try {
             let result;
@@ -78,19 +78,16 @@ export async function POST(req: Request) {
         } catch (genError: any) {
             console.error('GENERATE_CONTENT_ERROR:', genError)
 
-            // If 1.5-flash fails (some regions), try 1.5-pro or return specific error
-            if (genError.message?.includes('404')) {
-                return NextResponse.json(
-                    { error: "AI Model Error: The Gemini model is currently unavailable in your region on Vercel. Please check Google AI Studio availability." },
-                    { status: 500 }
-                )
-            }
-            throw genError
+            // If even 'flash-latest' fails with 404, we'll try a generic version or throw a clear error
+            return NextResponse.json(
+                { error: `AI Error: ${genError.message}. This usually means your Google AI project is not configured for the 'gemini-1.5-flash' model. Please check Google AI Studio.` },
+                { status: 500 }
+            )
         }
     } catch (error: any) {
         console.error('AI_GENERATION_FAILED:', error)
         return NextResponse.json(
-            { error: `AI Error [v5]: ${error.message || 'Unknown failure'}` },
+            { error: `AI Error [v6]: ${error.message || 'Unknown failure'}` },
             { status: 500 }
         )
     }
