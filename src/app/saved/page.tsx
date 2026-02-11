@@ -80,8 +80,20 @@ export default function SavedItemsPage() {
     }, [user, fetchSavedItems])
 
     const removeSaved = async (id: string) => {
-        // Logic to remove from DB would go here
-        setSavedItems(prev => prev.filter(item => item.id !== id))
+        if (!user) return
+        try {
+            const { error } = await supabase
+                .from('saved_listings')
+                .delete()
+                .eq('user_id', user.id)
+                .eq('listing_id', id)
+
+            if (error) throw error
+            setSavedItems(prev => prev.filter(item => item.id !== id))
+        } catch (err) {
+            console.error('Error removing saved item:', err)
+            alert('Failed to remove item from saved list.')
+        }
     }
 
     return (

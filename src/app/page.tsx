@@ -13,10 +13,12 @@ import {
     MapPin,
     Loader2
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import ListingCard from '@/components/cards/ListingCard'
 import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/context/AuthContext'
 import Logo from '@/components/ui/Logo'
 
 
@@ -75,8 +77,11 @@ const testimonials = [
 
 export default function HomePage() {
     const supabase = createClient()
+    const { user } = useAuth()
+    const router = useRouter()
     const [recentListings, setRecentListings] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
+    const [savedIds, setSavedIds] = useState<Set<string>>(new Set())
 
     useEffect(() => {
         const fetchRecent = async () => {
@@ -99,6 +104,71 @@ export default function HomePage() {
         fetchRecent()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
+
+    // Fetch saved listings for current user
+    useEffect(() => {
+        if (!user) {
+            setSavedIds(new Set())
+            return
+        }
+
+        const fetchSavedIds = async () => {
+            try {
+                const { data } = await supabase
+                    .from('saved_listings')
+                    .select('listing_id')
+                    .eq('user_id', user.id)
+
+                if (data) {
+                    setSavedIds(new Set(data.map((item: { listing_id: string }) => item.listing_id)))
+                }
+            } catch (err) {
+                console.error('Failed to fetch saved listings:', err)
+            }
+        }
+
+        fetchSavedIds()
+    }, [user, supabase])
+
+    const handleToggleSave = async (listingId: string) => {
+        if (!user) {
+            router.push(`/login?next=/`)
+            return
+        }
+
+        const isCurrentlySaved = savedIds.has(listingId)
+
+        // Optimistic update
+        setSavedIds(prev => {
+            const next = new Set(prev)
+            if (isCurrentlySaved) next.delete(listingId)
+            else next.add(listingId)
+            return next
+        })
+
+        try {
+            if (isCurrentlySaved) {
+                await supabase
+                    .from('saved_listings')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .eq('listing_id', listingId)
+            } else {
+                await supabase
+                    .from('saved_listings')
+                    .insert({ user_id: user.id, listing_id: listingId })
+            }
+        } catch (err) {
+            console.error('Save error:', err)
+            // Rollback on error
+            setSavedIds(prev => {
+                const next = new Set(prev)
+                if (isCurrentlySaved) next.add(listingId)
+                else next.delete(listingId)
+                return next
+            })
+        }
+    }
 
     return (
         <div className="min-h-screen bg-surface-50 relative overflow-hidden">
@@ -190,7 +260,8 @@ export default function HomePage() {
                                         isVerified={listing.seller?.is_verified}
                                         createdAt={listing.created_at}
                                         listingType={listing.listing_type}
-                                        onSave={() => console.log('Save', listing.id)}
+                                        isSaved={savedIds.has(listing.id)}
+                                        onSave={() => handleToggleSave(listing.id)}
                                     />
                                 ))}
                             </div>

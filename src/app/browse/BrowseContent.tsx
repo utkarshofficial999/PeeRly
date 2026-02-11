@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import SearchBar from '@/components/ui/SearchBar'
 import FilterSidebar from '@/components/ui/FilterSidebar'
 import ListingCard from '@/components/cards/ListingCard'
@@ -61,6 +61,9 @@ export default function BrowseContent() {
         college: '',
     })
 
+    const router = useRouter()
+    const [savedIds, setSavedIds] = useState<Set<string>>(new Set())
+
     const initialLoadRef = useRef(false)
     const abortControllerRef = useRef<AbortController | null>(null)
     const isMountedRef = useRef(true)
@@ -110,6 +113,31 @@ export default function BrowseContent() {
         loadMetadata()
         return () => controller.abort()
     }, [supabase])
+
+    // Fetch saved listings for current user
+    useEffect(() => {
+        if (!user) {
+            setSavedIds(new Set())
+            return
+        }
+
+        const fetchSavedIds = async () => {
+            try {
+                const { data } = await supabase
+                    .from('saved_listings')
+                    .select('listing_id')
+                    .eq('user_id', user.id)
+
+                if (data && isMountedRef.current) {
+                    setSavedIds(new Set(data.map((item: { listing_id: string }) => item.listing_id)))
+                }
+            } catch (err) {
+                console.error('Failed to fetch saved listings:', err)
+            }
+        }
+
+        fetchSavedIds()
+    }, [user, supabase])
 
     // Debounce search
     useEffect(() => {
@@ -254,6 +282,48 @@ export default function BrowseContent() {
         setFilters({ category: '', condition: '', priceMin: '', priceMax: '', college: '' })
         setSearchInput('')
         setSearchQuery('')
+    }
+
+    const handleToggleSave = async (listingId: string) => {
+        if (!user) {
+            router.push(`/login?next=/browse`)
+            return
+        }
+
+        const isCurrentlySaved = savedIds.has(listingId)
+
+        // Optimistic update
+        setSavedIds(prev => {
+            const next = new Set(prev)
+            if (isCurrentlySaved) next.delete(listingId)
+            else next.add(listingId)
+            return next
+        })
+
+        try {
+            if (isCurrentlySaved) {
+                const { error } = await supabase
+                    .from('saved_listings')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .eq('listing_id', listingId)
+                if (error) throw error
+            } else {
+                const { error } = await supabase
+                    .from('saved_listings')
+                    .insert({ user_id: user.id, listing_id: listingId })
+                if (error) throw error
+            }
+        } catch (err) {
+            console.error('Save error:', err)
+            // Rollback on error
+            setSavedIds(prev => {
+                const next = new Set(prev)
+                if (isCurrentlySaved) next.add(listingId)
+                else next.delete(listingId)
+                return next
+            })
+        }
     }
 
     return (
@@ -442,7 +512,8 @@ export default function BrowseContent() {
                                                 isVerified={listing.seller?.is_verified}
                                                 createdAt={listing.created_at}
                                                 listingType={listing.listing_type}
-                                                onSave={() => console.log('Save', listing.id)}
+                                                isSaved={savedIds.has(listing.id)}
+                                                onSave={() => handleToggleSave(listing.id)}
                                             />
                                         ))}
                                     </div>
