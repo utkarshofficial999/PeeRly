@@ -66,9 +66,9 @@ export async function POST(req: Request) {
 
         return NextResponse.json(data)
     } catch (error: any) {
-        console.error('AI Generation Error:', error)
+        console.error('AI_GENERATION_FAILED:', error)
         return NextResponse.json(
-            { error: 'Failed to generate listing content' },
+            { error: `AI Error: ${error.message || 'Unknown failure'}` },
             { status: 500 }
         )
     }
