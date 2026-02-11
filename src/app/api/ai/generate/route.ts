@@ -1,4 +1,3 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -18,7 +17,6 @@ export async function POST(req: Request) {
         }
 
         const { notes, image, category } = await req.json()
-        const genAI = new GoogleGenerativeAI(apiKey)
 
         // Prepare prompt
         const promptText = `
@@ -42,52 +40,76 @@ export async function POST(req: Request) {
             }
         `
 
-        // Try 'gemini-1.5-flash-latest' which sometimes resolves 404s in specific regions better
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' })
+        // Raw API request parts
+        const contentsParts: any[] = [{ text: promptText }]
 
-        try {
-            let result;
-            if (image) {
+        if (image) {
+            try {
                 const b64Data = image.split(',')[1]
                 const mimeType = image.split(';')[0].split(':')[1]
-                result = await model.generateContent([
-                    promptText,
-                    {
-                        inlineData: {
-                            data: b64Data,
-                            mimeType: mimeType
-                        }
+                contentsParts.push({
+                    inline_data: {
+                        mime_type: mimeType,
+                        data: b64Data
                     }
-                ])
-            } else {
-                result = await model.generateContent(promptText)
+                })
+            } catch (err) {
+                console.error('Image processing error:', err)
             }
+        }
 
-            const response = await result.response
-            const text = response.text()
+        // Use direct fetch to the v1 stable endpoint to bypass SDK beta issues
+        const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
-            const firstBrace = text.indexOf('{')
-            const lastBrace = text.lastIndexOf('}')
-            if (firstBrace === -1 || lastBrace === -1) {
-                throw new Error('AI provided an invalid response format (No JSON found)')
-            }
-            const jsonStr = text.substring(firstBrace, lastBrace + 1)
-            const data = JSON.parse(jsonStr)
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: contentsParts
+                }],
+                generationConfig: {
+                    temperature: 0.7,
+                    topP: 0.8,
+                    topK: 40,
+                }
+            })
+        });
 
-            return NextResponse.json(data)
-        } catch (genError: any) {
-            console.error('GENERATE_CONTENT_ERROR:', genError)
+        const result = await response.json();
 
-            // If even 'flash-latest' fails with 404, we'll try a generic version or throw a clear error
+        if (!response.ok) {
+            console.error('Gemini API Error:', result);
             return NextResponse.json(
-                { error: `AI Error: ${genError.message}. This usually means your Google AI project is not configured for the 'gemini-1.5-flash' model. Please check Google AI Studio.` },
-                { status: 500 }
+                { error: `Gemini API Error [v7]: ${result.error?.message || 'API request failed'}` },
+                { status: response.status }
             )
         }
+
+        // Extract text from the stable v1 response structure
+        const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!generatedText) {
+            throw new Error('No content returned from Gemini');
+        }
+
+        // Parse JSON from text
+        const firstBrace = generatedText.indexOf('{')
+        const lastBrace = generatedText.lastIndexOf('}')
+        if (firstBrace === -1 || lastBrace === -1) {
+            throw new Error('AI response did not contain JSON');
+        }
+        const jsonStr = generatedText.substring(firstBrace, lastBrace + 1)
+        const data = JSON.parse(jsonStr)
+
+        return NextResponse.json(data)
+
     } catch (error: any) {
-        console.error('AI_GENERATION_FAILED:', error)
+        console.error('AI_GENERATION_FAILED_V7:', error)
         return NextResponse.json(
-            { error: `AI Error [v6]: ${error.message || 'Unknown failure'}` },
+            { error: `AI Assistant Unavailable: ${error.message || 'Unknown network error'}` },
             { status: 500 }
         )
     }
