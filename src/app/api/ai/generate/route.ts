@@ -5,15 +5,16 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request) {
     try {
-        const apiKey = process.env.GEMINI_API_KEY ||
-            process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
+        // Prioritize NEXT_PUBLIC version for broader availability across environments
+        const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
+            process.env.GEMINI_API_KEY ||
             process.env['GEMINI_API_KEY'];
 
         if (!apiKey) {
-            const envType = process.env.VERCEL_ENV || 'local/unknown';
-            console.error(`AI_ERROR: Key missing in ${envType} environment.`);
+            const envType = process.env.VERCEL_ENV || 'development/local';
+            console.error(`ERROR: API Key missing in ${envType}.`);
             return NextResponse.json(
-                { error: `AI Sync Error: Key not found in [${envType}]. Please verify project settings and REDEPLOY.` },
+                { error: `AI Assistant Error: No key found in [${envType}]. Please verify project settings.` },
                 { status: 500 }
             )
         }
