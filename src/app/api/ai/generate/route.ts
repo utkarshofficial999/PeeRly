@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
+// Build v8 - Using stable v1 endpoint
 
 export async function POST(req: Request) {
     try {
