@@ -1,116 +1,119 @@
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai"
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
-// Build v8 - Using stable v1 endpoint
+
+/**
+ * PRODUCTION-READY Gemini 2.0 Integration
+ * This route handles AI generation for marketplace listings.
+ * It uses the latest @google/generative-ai SDK and gemini-2.0-flash model.
+ */
 
 export async function POST(req: Request) {
     try {
-        const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
-            process.env.GEMINI_API_KEY ||
-            process.env['GEMINI_API_KEY'];
+        const apiKey = process.env.GEMINI_API_KEY;
 
         if (!apiKey) {
-            const envType = process.env.VERCEL_ENV || 'development/local';
+            console.error("Missing GEMINI_API_KEY environment variable");
             return NextResponse.json(
-                { error: `AI Assistant Error: No key found in [${envType}]. Please verify Vercel settings.` },
+                { error: "AI Assistant configuration error: Missing API Key." },
                 { status: 500 }
             )
         }
 
         const { notes, image, category } = await req.json()
 
+        // Initialize Gemini SDK
+        const genAI = new GoogleGenerativeAI(apiKey);
+
+        // Use gemini-2.0-flash for speed and cost-effectiveness
+        const model = genAI.getGenerativeModel({
+            model: "gemini-2.0-flash",
+            // Use JSON response mode for consistent parsing
+            generationConfig: {
+                responseMimeType: "application/json",
+            }
+        });
+
         // Prepare prompt
         const promptText = `
             Act as a professional marketplace listing assistant for a college student marketplace called PeerLY.
-            Generate a high-quality listing based on:
-            - Category: ${category || 'General'}
-            - User Notes: ${notes || 'Analyze the item'}
-            - Image provided: ${image ? 'Yes' : 'No'}
+            Generate a high-quality listing based on the provided details.
+            
+            Category: ${category || 'General'}
+            User Notes: ${notes || 'Analyze the item'}
+            Image included: ${image ? 'Yes' : 'No'}
 
             Rules:
             1. Title: Catchy, under 60 chars.
             2. Description: Compelling, includes condition and key features.
-            3. Price: Suggest a realistic price in INR (₹) for a college student.
-            4. If image is provided, ensure details match what is visible.
+            3. SuggestedPrice: Suggest a realistic price in INR (₹) for a college student. No currency symbols in the number.
+            4. If an image is provided, ensure details match what is visible.
 
-            Respond strictly with valid JSON:
+            Respond strictly with valid JSON following this schema:
             {
-              "title": "...",
-              "description": "...",
-              "suggestedPrice": 0
+              "title": "string",
+              "description": "string",
+              "suggestedPrice": number
             }
         `
 
-        // Raw API request parts
-        const contentsParts: any[] = [{ text: promptText }]
+        // Prepare request parts
+        const parts: any[] = [{ text: promptText }]
 
-        if (image) {
+        // Handle image if provided (base64 string from frontend)
+        if (image && typeof image === 'string' && image.includes(',')) {
             try {
-                const b64Data = image.split(',')[1]
-                const mimeType = image.split(';')[0].split(':')[1]
-                contentsParts.push({
-                    inline_data: {
-                        mime_type: mimeType,
+                const [header, b64Data] = image.split(',')
+                const mimeType = header.split(';')[0].split(':')[1]
+
+                parts.push({
+                    inlineData: {
+                        mimeType: mimeType,
                         data: b64Data
                     }
                 })
             } catch (err) {
                 console.error('Image processing error:', err)
+                // Continue without image if processing fails
             }
         }
 
-        // Use direct fetch to the v1 stable endpoint to bypass SDK beta issues
-        const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        // Generate content
+        const result = await model.generateContent(parts);
+        const response = await result.response;
+        const text = response.text();
 
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: contentsParts
-                }],
-                generationConfig: {
-                    temperature: 0.7,
-                    topP: 0.8,
-                    topK: 40,
-                }
-            })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            console.error('Gemini API Error:', result);
-            return NextResponse.json(
-                { error: `Gemini API Error [v7]: ${result.error?.message || 'API request failed'}` },
-                { status: response.status }
-            )
+        if (!text) {
+            throw new Error('AI failed to generate a response');
         }
 
-        // Extract text from the stable v1 response structure
-        const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-
-        if (!generatedText) {
-            throw new Error('No content returned from Gemini');
+        // Parse and return the generated JSON
+        try {
+            const data = JSON.parse(text);
+            return NextResponse.json(data);
+        } catch (parseError) {
+            console.error('Failed to parse Gemini JSON response:', text);
+            // Fallback parsing if JSON mode fails for some reason
+            const firstBrace = text.indexOf('{')
+            const lastBrace = text.lastIndexOf('}')
+            if (firstBrace !== -1 && lastBrace !== -1) {
+                const cleanedJson = text.substring(firstBrace, lastBrace + 1)
+                return NextResponse.json(JSON.parse(cleanedJson));
+            }
+            throw new Error('AI response was not valid JSON');
         }
-
-        // Parse JSON from text
-        const firstBrace = generatedText.indexOf('{')
-        const lastBrace = generatedText.lastIndexOf('}')
-        if (firstBrace === -1 || lastBrace === -1) {
-            throw new Error('AI response did not contain JSON');
-        }
-        const jsonStr = generatedText.substring(firstBrace, lastBrace + 1)
-        const data = JSON.parse(jsonStr)
-
-        return NextResponse.json(data)
 
     } catch (error: any) {
-        console.error('AI_GENERATION_FAILED_V7:', error)
+        console.error('AI_GENERATION_FAILED:', error)
+
+        // Return a structured error that the UI can handle gracefully
+        const errorMessage = error.message?.includes('API key')
+            ? 'Invalid API configuration. Please contact admin.'
+            : 'AI assistant is temporarily unavailable. Please try again.';
+
         return NextResponse.json(
-            { error: `AI Assistant Unavailable: ${error.message || 'Unknown network error'}` },
+            { error: errorMessage, details: process.env.NODE_ENV === 'development' ? error.message : undefined },
             { status: 500 }
         )
     }
