@@ -10,9 +10,10 @@ export async function POST(req: Request) {
             process.env['GEMINI_API_KEY'];
 
         if (!apiKey) {
-            console.error('AI_ERROR_DIAGNOSTIC: No API key found in current environment.');
+            const envType = process.env.VERCEL_ENV || 'local/unknown';
+            console.error(`AI_ERROR: Key missing in ${envType} environment.`);
             return NextResponse.json(
-                { error: 'AI Assistant Syncing: Please ensure the GEMINI_API_KEY is saved and redeployed in Vercel.' },
+                { error: `AI Sync Error: Key not found in [${envType}]. Please verify project settings and REDEPLOY.` },
                 { status: 500 }
             )
         }
