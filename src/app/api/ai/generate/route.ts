@@ -5,14 +5,12 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request) {
     try {
-        // Robust lookup for the API key
         const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
             process.env.GEMINI_API_KEY ||
             process.env['GEMINI_API_KEY'];
 
         if (!apiKey) {
             const envType = process.env.VERCEL_ENV || 'development/local';
-            console.error(`ERROR: API Key missing in ${envType}.`);
             return NextResponse.json(
                 { error: `AI Assistant Error: No key found in [${envType}]. Please verify project settings.` },
                 { status: 500 }
@@ -44,30 +42,35 @@ export async function POST(req: Request) {
             }
         `
 
-        const parts: any[] = [promptText]
-        if (image) {
-            const b64Data = image.split(',')[1]
-            const mimeType = image.split(';')[0].split(':')[1]
-            parts.push({
-                inlineData: {
-                    data: b64Data,
-                    mimeType: mimeType
-                }
-            })
-        }
-
-        // Use standard gemini-1.5-flash which is widely available
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+        // Use gemini-pro as primary to guarantee success while flash has regional issues
+        const modelName = image ? 'gemini-1.5-flash' : 'gemini-pro'
+        const model = genAI.getGenerativeModel({ model: modelName })
 
         try {
-            const result = await model.generateContent(parts)
+            let result;
+            if (image && modelName === 'gemini-1.5-flash') {
+                const b64Data = image.split(',')[1]
+                const mimeType = image.split(';')[0].split(':')[1]
+                result = await model.generateContent([
+                    promptText,
+                    {
+                        inlineData: {
+                            data: b64Data,
+                            mimeType: mimeType
+                        }
+                    }
+                ])
+            } else {
+                result = await model.generateContent(promptText)
+            }
+
             const response = await result.response
             const text = response.text()
 
             const firstBrace = text.indexOf('{')
             const lastBrace = text.lastIndexOf('}')
             if (firstBrace === -1 || lastBrace === -1) {
-                throw new Error('AI provided an invalid response format')
+                throw new Error('AI provided an invalid response format (No JSON found)')
             }
             const jsonStr = text.substring(firstBrace, lastBrace + 1)
             const data = JSON.parse(jsonStr)
@@ -76,7 +79,7 @@ export async function POST(req: Request) {
         } catch (genError: any) {
             console.error('GENERATE_CONTENT_ERROR:', genError)
 
-            // Fallback for 404/Not Found error (happens if 1.5-flash is restricted)
+            // Final fallback to gemini-pro with text-only
             const backupModel = genAI.getGenerativeModel({ model: 'gemini-pro' })
             const result = await backupModel.generateContent(promptText)
             const response = await result.response
@@ -90,7 +93,7 @@ export async function POST(req: Request) {
     } catch (error: any) {
         console.error('AI_GENERATION_FAILED:', error)
         return NextResponse.json(
-            { error: `AI Error: ${error.message || 'Unknown failure'}` },
+            { error: `AI Final Error [v4]: ${error.message || 'Unknown failure'}` },
             { status: 500 }
         )
     }
