@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request) {
     try {
-        // Prioritize NEXT_PUBLIC version for broader availability across environments
+        // Robust lookup for the API key
         const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
             process.env.GEMINI_API_KEY ||
             process.env['GEMINI_API_KEY'];
@@ -21,9 +21,8 @@ export async function POST(req: Request) {
 
         const { notes, image, category } = await req.json()
         const genAI = new GoogleGenerativeAI(apiKey)
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 
-        // Prepare parts for multimodal prompt
+        // Prepare prompt
         const promptText = `
             Act as a professional marketplace listing assistant for a college student marketplace called PeerLY.
             Based on the ${image ? 'provided image and ' : ''}user notes, generate a high-quality listing.
@@ -57,14 +56,37 @@ export async function POST(req: Request) {
             })
         }
 
-        const result = await model.generateContent(parts)
-        const response = await result.response
-        const text = response.text()
+        // Use standard gemini-1.5-flash which is widely available
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 
-        const jsonMatch = text.match(/\{[\s\S]*\}/)
-        const data = JSON.parse(jsonMatch ? jsonMatch[0] : text)
+        try {
+            const result = await model.generateContent(parts)
+            const response = await result.response
+            const text = response.text()
 
-        return NextResponse.json(data)
+            const firstBrace = text.indexOf('{')
+            const lastBrace = text.lastIndexOf('}')
+            if (firstBrace === -1 || lastBrace === -1) {
+                throw new Error('AI provided an invalid response format')
+            }
+            const jsonStr = text.substring(firstBrace, lastBrace + 1)
+            const data = JSON.parse(jsonStr)
+
+            return NextResponse.json(data)
+        } catch (genError: any) {
+            console.error('GENERATE_CONTENT_ERROR:', genError)
+
+            // Fallback for 404/Not Found error (happens if 1.5-flash is restricted)
+            const backupModel = genAI.getGenerativeModel({ model: 'gemini-pro' })
+            const result = await backupModel.generateContent(promptText)
+            const response = await result.response
+            const text = response.text()
+
+            const firstBrace = text.indexOf('{')
+            const lastBrace = text.lastIndexOf('}')
+            const jsonStr = text.substring(firstBrace, lastBrace + 1)
+            return NextResponse.json(JSON.parse(jsonStr))
+        }
     } catch (error: any) {
         console.error('AI_GENERATION_FAILED:', error)
         return NextResponse.json(
