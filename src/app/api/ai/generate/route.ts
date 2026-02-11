@@ -1,22 +1,20 @@
-import { GoogleGenerativeAI } from "@google/generative-ai"
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
 /**
- * PRODUCTION-READY Gemini Integration
- * Updated for maximum compatibility and robust error reporting.
+ * PRODUCTION-READY SambaNova AI Integration
+ * Switched from Gemini to SambaNova (Llama-3.2-Vision)
  */
 
 export async function POST(req: Request) {
     try {
-        // Support multiple naming conventions for the API key to avoid Vercel config mismatches
-        const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+        const apiKey = process.env.SAMBANOVA_API_KEY;
 
         if (!apiKey) {
-            console.error("Missing Gemini API Key in environment variables");
+            console.error("Missing SAMBANOVA_API_KEY environment variable");
             return NextResponse.json(
-                { error: "AI Configuration Error: GEMINI_API_KEY is missing in Vercel/Local environment variables." },
+                { error: "AI Assistant configuration error: Missing SambaNova API Key." },
                 { status: 500 }
             )
         }
@@ -24,29 +22,14 @@ export async function POST(req: Request) {
         const body = await req.json().catch(() => ({}));
         const { notes, image, category } = body;
 
-        // Initialize Gemini SDK
-        const genAI = new GoogleGenerativeAI(apiKey);
-
-        /**
-         * Use gemini-1.5-flash as the primary stable model. 
-         * It supports the v1 stable API and is widely available.
-         */
-        const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
-            generationConfig: {
-                responseMimeType: "application/json",
-                temperature: 0.7,
-            }
-        });
-
-        // Prepare prompt
+        // Prepare the prompt
         const promptText = `
             Act as a professional marketplace listing assistant for PeerLY (college marketplace).
             Generate a listing based on these details:
             - Category: ${category || 'General'}
-            - Notes: ${notes || 'Analyze the item'}
+            - User Notes: ${notes || 'Analyze the item'}
             
-            Return ONLY a valid JSON object with:
+            Return ONLY a valid JSON object with EXACTLY this structure:
             {
               "title": "Short catchy title (max 50 chars)",
               "description": "Engaging description (max 300 chars)",
@@ -54,36 +37,59 @@ export async function POST(req: Request) {
             }
         `
 
-        // Prepare content parts
-        const parts: any[] = [{ text: promptText }]
-
-        // Robust image handling
-        if (image && typeof image === 'string' && image.includes('base64,')) {
-            try {
-                const parts_img = image.split(';base64,');
-                const mimeType = parts_img[0].split(':')[1];
-                const data = parts_img[1];
-
-                if (mimeType && data) {
-                    parts.push({
-                        inlineData: {
-                            mimeType,
-                            data
-                        }
-                    });
-                }
-            } catch (err) {
-                console.warn('Image skip: Malformed base64 data');
+        // Prepare messages for SambaNova (OpenAI compatible format)
+        const messages: any[] = [
+            {
+                role: "system",
+                content: "You are a professional marketplace assistant. Always respond with valid JSON."
             }
+        ];
+
+        // Handle text and image content
+        const userContent: any[] = [{ type: "text", text: promptText }];
+
+        if (image && typeof image === 'string' && image.includes('base64,')) {
+            userContent.push({
+                type: "image_url",
+                image_url: {
+                    url: image // data:image/jpeg;base64,...
+                }
+            });
         }
 
-        // Call Gemini
-        const result = await model.generateContent(parts);
-        const response = await result.response;
-        const text = response.text();
+        messages.push({
+            role: "user",
+            content: userContent
+        });
+
+        // Call SambaNova API
+        const response = await fetch("https://api.sambanova.ai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${apiKey}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "Llama-3.2-11B-Vision-Instruct",
+                messages: messages,
+                temperature: 0.1,
+                top_p: 0.1,
+                // Asking for JSON format directly if supported
+                response_format: { type: "json_object" }
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error("SambaNova API Error:", errorData);
+            throw new Error(errorData.error?.message || `SambaNova API failed with status ${response.status}`);
+        }
+
+        const result = await response.json();
+        const text = result.choices?.[0]?.message?.content;
 
         if (!text) {
-            throw new Error('Gemini returned an empty response.');
+            throw new Error('SambaNova returned an empty response.');
         }
 
         // Robust JSON extraction
@@ -100,16 +106,10 @@ export async function POST(req: Request) {
         }
 
     } catch (error: any) {
-        console.error('AI_ERROR:', error);
+        console.error('AI_GENERATION_FAILED:', error)
 
-        // Provide more descriptive error for debugging in the UI
         let userMessage = "AI assistant is temporarily unavailable.";
-
-        if (error.message?.includes('404') || error.message?.includes('not found')) {
-            userMessage = "AI model error: The requested Gemini model is not accessible. Please check your API key region/permisons.";
-        } else if (error.message?.includes('API key')) {
-            userMessage = "AI Authentication failed: The provided API key is invalid or restricted.";
-        } else if (error.message) {
+        if (error.message) {
             userMessage = `AI Error: ${error.message}`;
         }
 
