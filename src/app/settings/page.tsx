@@ -10,7 +10,7 @@ import Image from 'next/image'
 
 export default function SettingsPage() {
     const { profile, user, signOut, refreshProfile } = useAuth()
-    const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'privacy'>('profile')
+    const [activeTab, setActiveTab] = useState<'profile'>('profile')
     const [isUploading, setIsUploading] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
     const [uploadProgress, setUploadProgress] = useState(0)
@@ -45,8 +45,6 @@ export default function SettingsPage() {
 
     const tabs = [
         { id: 'profile', label: 'Profile Settings', icon: User },
-        { id: 'notifications', label: 'Notifications', icon: Bell },
-        { id: 'privacy', label: 'Privacy & Security', icon: Shield },
     ]
 
     const handleAvatarClick = () => {
@@ -333,30 +331,6 @@ export default function SettingsPage() {
                                                 )}
                                                 {isSaving ? 'Processing...' : 'Save Profile'}
                                             </button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {activeTab === 'notifications' && (
-                                    <div className="py-12 text-center space-y-4">
-                                        <div className="w-20 h-20 bg-surface-50 rounded-3xl flex items-center justify-center mx-auto">
-                                            <Bell className="w-10 h-10 text-surface-300" />
-                                        </div>
-                                        <div>
-                                            <h2 className="text-xl font-black text-surface-900 uppercase tracking-tight">Notification Terminal</h2>
-                                            <p className="text-surface-500 font-bold mt-1">This communication module is currently being optimized.</p>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {activeTab === 'privacy' && (
-                                    <div className="py-12 text-center space-y-4">
-                                        <div className="w-20 h-20 bg-surface-50 rounded-3xl flex items-center justify-center mx-auto">
-                                            <Shield className="w-10 h-10 text-surface-300" />
-                                        </div>
-                                        <div>
-                                            <h2 className="text-xl font-black text-surface-900 uppercase tracking-tight">Security Protocol</h2>
-                                            <p className="text-surface-500 font-bold mt-1">Privacy shielding configurations are in development.</p>
                                         </div>
                                     </div>
                                 )}
