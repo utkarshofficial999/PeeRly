@@ -12,7 +12,7 @@ export async function POST(req: Request) {
         if (!apiKey) {
             const envType = process.env.VERCEL_ENV || 'development/local';
             return NextResponse.json(
-                { error: `AI Assistant Error: No key found in [${envType}]. Please verify project settings.` },
+                { error: `AI Assistant Error: No key found in [${envType}]. Please verify Vercel settings.` },
                 { status: 500 }
             )
         }
@@ -23,10 +23,10 @@ export async function POST(req: Request) {
         // Prepare prompt
         const promptText = `
             Act as a professional marketplace listing assistant for a college student marketplace called PeerLY.
-            Based on the ${image ? 'provided image and ' : ''}user notes, generate a high-quality listing.
-
-            Category: ${category || 'General'}
-            Notes: ${notes || 'Analyze the item in the image'}
+            Generate a high-quality listing based on:
+            - Category: ${category || 'General'}
+            - User Notes: ${notes || 'Analyze the item in the image'}
+            - Image provided: ${image ? 'Yes' : 'No'}
 
             Rules:
             1. Title: Catchy, under 60 chars.
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
             3. Price: Suggest a realistic price in INR (₹) for a college student.
             4. If image is provided, ensure details match what is visible.
 
-            Respond strictly with JSON:
+            Respond strictly with valid JSON:
             {
               "title": "...",
               "description": "...",
@@ -42,13 +42,12 @@ export async function POST(req: Request) {
             }
         `
 
-        // Use gemini-pro as primary to guarantee success while flash has regional issues
-        const modelName = image ? 'gemini-1.5-flash' : 'gemini-pro'
-        const model = genAI.getGenerativeModel({ model: modelName })
+        // Use gemini-1.5-flash for everything as it supports both text and vision
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 
         try {
             let result;
-            if (image && modelName === 'gemini-1.5-flash') {
+            if (image) {
                 const b64Data = image.split(',')[1]
                 const mimeType = image.split(';')[0].split(':')[1]
                 result = await model.generateContent([
@@ -79,21 +78,19 @@ export async function POST(req: Request) {
         } catch (genError: any) {
             console.error('GENERATE_CONTENT_ERROR:', genError)
 
-            // Final fallback to gemini-pro with text-only
-            const backupModel = genAI.getGenerativeModel({ model: 'gemini-pro' })
-            const result = await backupModel.generateContent(promptText)
-            const response = await result.response
-            const text = response.text()
-
-            const firstBrace = text.indexOf('{')
-            const lastBrace = text.lastIndexOf('}')
-            const jsonStr = text.substring(firstBrace, lastBrace + 1)
-            return NextResponse.json(JSON.parse(jsonStr))
+            // If 1.5-flash fails (some regions), try 1.5-pro or return specific error
+            if (genError.message?.includes('404')) {
+                return NextResponse.json(
+                    { error: "AI Model Error: The Gemini model is currently unavailable in your region on Vercel. Please check Google AI Studio availability." },
+                    { status: 500 }
+                )
+            }
+            throw genError
         }
     } catch (error: any) {
         console.error('AI_GENERATION_FAILED:', error)
         return NextResponse.json(
-            { error: `AI Final Error [v4]: ${error.message || 'Unknown failure'}` },
+            { error: `AI Error [v5]: ${error.message || 'Unknown failure'}` },
             { status: 500 }
         )
     }
