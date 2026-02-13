@@ -95,7 +95,7 @@ export default function MyListingsPage() {
     }, [user, fetchMyListings])
 
     return (
-        <div className="min-h-screen bg-surface-50">
+        <div className="min-h-screen">
             <Header />
 
             <main className="pt-24 md:pt-32 pb-20 px-4">

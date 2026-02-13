@@ -98,7 +98,7 @@ export default function DashboardPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-surface-50 flex items-center justify-center">
+            <div className="min-h-screen flex items-center justify-center">
                 <div className="w-12 h-12 border-4 border-primary-500/30 border-t-primary-600 rounded-full animate-spin" />
             </div>
         )
@@ -117,7 +117,7 @@ export default function DashboardPage() {
 
 
     return (
-        <div className="min-h-screen bg-surface-50">
+        <div className="min-h-screen">
             <Header />
 
             <main className="pt-20 md:pt-28 pb-16 px-4">
@@ -147,7 +147,7 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Quick Actions */}
-                    <div className="premium-card p-4 md:p-6 mb-6 md:mb-8">
+                    <div className="premium-card bg-white/40 backdrop-blur-sm p-4 md:p-6 mb-6 md:mb-8">
                         <h2 className="text-base md:text-lg font-black text-surface-900 mb-3 md:mb-4">Quick Actions</h2>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 md:gap-3">
                             {quickActions.map((action, index) => (
@@ -179,7 +179,7 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Recent Listings */}
-                    <div className="premium-card p-4 md:p-6">
+                    <div className="premium-card bg-white/40 backdrop-blur-sm p-4 md:p-6">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-base md:text-lg font-black text-surface-900">Recent Listings</h2>
                             <Link href="/my-listings" className="text-primary-600 hover:text-primary-700 text-xs md:text-sm font-black flex items-center gap-1">

@@ -264,7 +264,7 @@ export default function CreateListingPage() {
     }
 
     return (
-        <div className="min-h-screen bg-surface-50">
+        <div className="min-h-screen">
             <Header />
 
             <main className="pt-24 md:pt-32 pb-16 px-4">

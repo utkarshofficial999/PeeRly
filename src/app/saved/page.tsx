@@ -97,7 +97,7 @@ export default function SavedItemsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-surface-50 text-surface-900">
+        <div className="min-h-screen text-surface-900">
             <Header />
 
             <main className="pt-32 pb-20 px-4">

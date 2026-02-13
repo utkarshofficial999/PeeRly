@@ -386,7 +386,7 @@ export default function ListingDetailPage() {
     const isOwnListing = user?.id === listing.seller_id
 
     return (
-        <div className="min-h-screen bg-surface-50 flex flex-col relative overflow-hidden">
+        <div className="min-h-screen flex flex-col relative overflow-hidden">
             {/* Background Orbs */}
             <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-100/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
 
