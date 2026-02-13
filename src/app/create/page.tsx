@@ -334,7 +334,7 @@ export default function CreateListingPage() {
                                 </div>
 
                                 {/* AI Assistant Section */}
-                                <div className="p-6 rounded-[2rem] bg-gradient-to-br from-primary-50 to-primary-100/50 border border-primary-200 shadow-sm relative overflow-hidden group">
+                                <div className="p-6 rounded-[2.5rem] bg-gradient-to-br from-primary-50 to-primary-100/50 border-2 border-primary-200 shadow-sm relative overflow-hidden group">
                                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform duration-500">
                                         <Sparkles className="w-16 h-16 text-primary-600" />
                                     </div>
