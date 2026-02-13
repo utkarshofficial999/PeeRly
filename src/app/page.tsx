@@ -183,13 +183,13 @@ export default function HomePage() {
                 <section className="relative pt-32 md:pt-48 pb-20 px-4 min-h-[90vh] flex items-center overflow-hidden">
                     {/* Background Container with Zoom & Blur */}
                     <div className="absolute inset-0 z-0">
-                        <div className="absolute inset-0 bg-surface-950/40 z-10" /> {/* Dark tint */}
-                        <div className="absolute inset-0 bg-gradient-to-b from-surface-950/60 via-transparent to-surface-50 z-20" /> {/* Gradient overlay */}
+                        <div className="absolute inset-0 bg-white/60 z-10" /> {/* Light tint overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-surface-50 z-20" />
                         <div
                             className="absolute inset-0 bg-cover bg-center animate-hero-zoom transition-opacity duration-1000"
                             style={{
                                 backgroundImage: `url('https://images.unsplash.com/photo-1541339907198-e08756eaa63f?q=80&w=2070&auto=format&fit=crop')`,
-                                filter: 'blur(4px) brightness(0.7)'
+                                filter: 'blur(3px)'
                             }}
                         />
                     </div>
@@ -197,27 +197,27 @@ export default function HomePage() {
                     <div className="container-custom relative z-30">
                         <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
                             {/* Live Badge */}
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 mb-8 animate-in fade-in transition-all hover:scale-105 cursor-default group">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white shadow-soft border border-surface-100 mb-8 animate-in fade-in transition-all hover:scale-105 cursor-default group">
                                 <span className="flex h-2 w-2 relative">
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-mint-400 opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-2 w-2 bg-mint-500"></span>
                                 </span>
-                                <span className="text-xs font-black text-white tracking-wide uppercase">Live at ABES Engineering College</span>
+                                <span className="text-xs font-black text-surface-900 tracking-wide uppercase">Live at ABES Engineering College</span>
                             </div>
                             {/* Logo Hero */}
-                            <div className="flex justify-center mb-6 animate-in fade-in stagger-1 invert brightness-0">
+                            <div className="flex justify-center mb-6 animate-in fade-in stagger-1">
                                 <Logo className="scale-150 md:scale-[2]" />
                             </div>
 
                             {/* Heading */}
-                            <h1 className="text-6xl md:text-8xl font-display font-extrabold text-white tracking-tight mb-8 animate-in slide-in-from-bottom-8 drop-shadow-2xl">
-                                Buy, Sell & <span className="gradient-text brightness-125">Collaborate</span>
+                            <h1 className="text-6xl md:text-8xl font-display font-extrabold text-surface-900 tracking-tight mb-8 animate-in slide-in-from-bottom-8">
+                                Buy, Sell & <span className="gradient-text">Collaborate</span>
                             </h1>
 
                             {/* Subheading */}
-                            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-2xl mx-auto animate-in fade-in stagger-1 leading-relaxed font-medium drop-shadow-lg">
+                            <p className="text-xl md:text-2xl text-surface-800 mb-12 max-w-2xl mx-auto animate-in fade-in stagger-1 leading-relaxed font-medium">
                                 The ultimate student marketplace. Trade resources, share skills, and connect with
-                                <span className="text-primary-300 font-black px-1">verified peers</span> across your campus.
+                                <span className="text-primary-600 font-black px-1">verified peers</span> across your campus.
                             </p>
 
                             {/* Main CTAs */}
