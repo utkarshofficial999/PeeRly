@@ -2,7 +2,7 @@
 
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import { CheckCircle, MessageSquare, MapPin, Shield, Pointer, ArrowRight } from 'lucide-react'
+import { CheckCircle, MessageSquare, MapPin, Shield, Pointer, ArrowRight, Heart } from 'lucide-react'
 import Link from 'next/link'
 
 export default function HowItWorks() {
@@ -25,6 +25,14 @@ export default function HowItWorks() {
         },
         {
             number: '03',
+            title: 'Admin Approval',
+            description: 'Every listing is carefully reviewed by our Super Admins to ensure quality and safety. Once approved, it goes live and is ready to be loved by the campus!',
+            icon: Heart,
+            color: 'text-peach-400',
+            bgColor: 'bg-peach-500/10'
+        },
+        {
+            number: '04',
             title: 'Chat & Decide',
             description: 'Use our in-app messaging to talk safely. Discuss the price, condition, and where you want to meet up on campus.',
             icon: MessageSquare,
@@ -32,7 +40,7 @@ export default function HowItWorks() {
             bgColor: 'bg-amber-500/10'
         },
         {
-            number: '04',
+            number: '05',
             title: 'Meet & Exchange',
             description: 'Meet at a safe, public spot on campus. Inspect the item, handle the payment, and complete your trade. It&apos;s that easy!',
             icon: MapPin,
