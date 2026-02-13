@@ -30,7 +30,7 @@ const Logo: React.FC<LogoProps> = ({ className = '' }) => {
                     <rect x="96" y="8" width="6" height="30" rx="3" />
 
                     {/* 'y' */}
-                    <path d="M108 18L114 34L120 18H126L116 42H110L102 18H108Z" />
+                    <path d="M102 18H108L114 28L120 18H126L112 44H106L111 34L102 18Z" />
                 </g>
 
                 {/* Shopping Bag Icon inside 'p' */}
