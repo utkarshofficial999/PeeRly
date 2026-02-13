@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import { User, Bell, Shield, LogOut, Camera, Save, X } from 'lucide-react'
+import { User, Shield, LogOut, Camera, Save, X } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'

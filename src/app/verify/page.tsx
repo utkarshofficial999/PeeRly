@@ -301,7 +301,7 @@ export default function VerificationPage() {
                                 </p>
                                 <div className="bg-surface-50 rounded-3xl p-6 border border-surface-100 flex items-center gap-4 text-left max-w-md mx-auto">
                                     <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-soft">
-                                        <Bell className="w-6 h-6 text-primary-600" />
+                                        <Clock className="w-6 h-6 text-primary-600" />
                                     </div>
                                     <div>
                                         <p className="text-sm font-black text-surface-900">We'll Notify You</p>
@@ -366,6 +366,4 @@ function StepItem({ number, label, status }: { number: number, label: string, st
     )
 }
 
-function Bell({ className }: { className?: string }) {
-    return <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
-}
+

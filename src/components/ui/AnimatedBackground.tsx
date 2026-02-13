@@ -1,95 +1,99 @@
 'use client'
 
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState, useMemo, memo } from 'react'
 
 /**
- * AnimatedBackground Component
- * Implements an Infinite SVG Triangle Fusion effect globally.
- * Features:
- * - GPU Accelerated transforms
- * - Responsive grid density
- * - Smooth HSL color cycling
- * - Sit behind all content (z-index: -1)
+ * Highly Optimized Animated Background
+ * - Reduced shape count (12 triangles)
+ * - CSS-only transforms (scale, rotate, opacity)
+ * - GPU acceleration with will-change
+ * - Page Visibility API to pause animations
+ * - Hidden on mobile to save battery/CPU
  */
-const AnimatedBackground = () => {
+const AnimatedBackground = memo(() => {
+    const [isVisible, setIsVisible] = useState(true)
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
         setMounted(true)
+
+        // Page Visibility API to pause animation when tab is inactive
+        const handleVisibilityChange = () => {
+            setIsVisible(document.visibilityState === 'visible')
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange)
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange)
+        }
     }, [])
 
-    const gridItems = useMemo(() => {
-        if (!mounted) return []
-
-        // Dynamic grid based on screen size
-        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-        const cols = isMobile ? 4 : 8
-        const rows = isMobile ? 8 : 10
-        const total = cols * rows
-
-        return Array.from({ length: total }).map((_, i) => ({
+    const shapes = useMemo(() => {
+        // Drastically reduced shape count (12 shapes as requested)
+        return Array.from({ length: 12 }).map((_, i) => ({
             id: i,
-            row: Math.floor(i / cols),
-            col: i % cols,
-            delayOffset: Math.random() * 2 // Add some organic randomness
+            // Spread shapes across the screen
+            left: `${(i % 4) * 25 + Math.random() * 10}%`,
+            top: `${Math.floor(i / 4) * 33 + Math.random() * 10}%`,
+            delay: i * 0.8,
+            duration: 10 + Math.random() * 5,
+            scale: 0.5 + Math.random() * 1.5,
+            rotation: Math.random() * 360
         }))
-    }, [mounted])
+    }, [])
 
-    // Prevent hydration mismatch
     if (!mounted) {
         return <div className="fixed inset-0 z-0 bg-[#F9F9F9]" />
     }
 
     return (
-        <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
-            {/* Ambient Base Gradient */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(98,35,210,0.08),transparent_70%)]" />
+        <div
+            className={`fixed inset-0 z-0 pointer-events-none overflow-hidden hidden md:block ${!isVisible ? 'pause-animations' : ''}`}
+            aria-hidden="true"
+        >
+            {/* Ambient Background Base */}
+            <div className="absolute inset-0 bg-[#F9F9F9]" />
 
-            {/* The Fusion Grid */}
-            <div
-                className="absolute inset-[-10%] w-[120%] h-[120%] grid grid-cols-4 md:grid-cols-8"
-                style={{
-                    // Slightly rotate for more dynamic feel
-                    transform: 'rotate(-5deg) scale(1.1)'
-                }}
-            >
-                {gridItems.map((item) => (
-                    <div
-                        key={item.id}
-                        className="relative w-full aspect-square clip-hexagon opacity-[0.25] transition-opacity duration-1000"
+            {/* Ambient Radial Gradients (Static) */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(98,35,210,0.03),transparent_70%)]" />
+
+            <svg className="w-full h-full opacity-[0.22]" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="tri-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#6223D2" stopOpacity="0.4" />
+                        <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.2" />
+                    </linearGradient>
+                </defs>
+
+                {shapes.map((shape) => (
+                    <g
+                        key={shape.id}
                         style={{
-                            // Hexagonal staggering logic
-                            transform: item.row % 2 === 0 ? 'translateX(0)' : 'translateX(50%)',
-                            marginTop: item.row === 0 ? 0 : '-18%',
+                            transform: `translate(${shape.left}, ${shape.top}) rotate(${shape.rotation}deg) scale(${shape.scale})`,
+                            transformBox: 'fill-box',
+                            transformOrigin: 'center'
                         }}
                     >
-                        <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
-                            {/* SVG Triangle Polygons with CSS Animations */}
-                            {[0, 90, 180, 270].map((rotation, i) => (
-                                <polygon
-                                    key={rotation}
-                                    points="50,50 80,20 20,20"
-                                    className="animate-triangle-fusion"
-                                    style={{
-                                        transformOrigin: '50% 50%',
-                                        // Complex delay logic for the 'fusion' flow
-                                        animationDelay: `${(i * -1) - (item.id * 0.05) - item.delayOffset}s`,
-                                        transform: `rotate(${rotation}deg)`,
-                                    }}
-                                />
-                            ))}
-                        </svg>
-                    </div>
+                        <path
+                            d="M 50,20 L 80,80 L 20,80 Z"
+                            fill="url(#tri-grad)"
+                            className="optimized-triangle-float"
+                            style={{
+                                animationDelay: `${shape.delay}s`,
+                                animationDuration: `${shape.duration}s`,
+                                willChange: 'transform, opacity'
+                            }}
+                        />
+                    </g>
                 ))}
-            </div>
+            </svg>
 
-            {/* Premium Dark Overlay */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,rgba(2,6,23,0.03)_100%)]" />
-
-            {/* Grain Texture (Optional but adds premium feel) */}
-            <div className="absolute inset-0 opacity-[0.02] pointer-events-none mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+            {/* Subtle Overlay to blend */}
+            <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px]" />
         </div>
     )
-}
+})
+
+AnimatedBackground.displayName = 'AnimatedBackground'
 
 export default AnimatedBackground

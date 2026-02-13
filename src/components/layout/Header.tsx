@@ -4,7 +4,7 @@ import Link from 'next/link'
 import NextImage from 'next/image'
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Menu, X, Search, Plus, User, Bell, MessageSquare, LogOut, ShieldCheck } from 'lucide-react'
+import { Menu, X, Search, Plus, User, MessageSquare, LogOut, ShieldCheck } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/ui/Logo'
@@ -164,10 +164,6 @@ export default function Header() {
                                 <div className="w-10 h-10 rounded-xl bg-surface-100 animate-pulse" />
                             ) : user ? (
                                 <>
-                                    {/* Notifications */}
-                                    <button className="p-2.5 text-surface-600 hover:text-primary-600 rounded-xl hover:bg-primary-50 transition-all relative">
-                                        <Bell className="w-5 h-5" />
-                                    </button>
                                     {/* Messages */}
                                     <Link href="/messages" className="p-2.5 text-surface-600 hover:text-primary-600 rounded-xl hover:bg-primary-50 transition-all relative">
                                         <MessageSquare className="w-5 h-5" />

@@ -11,7 +11,6 @@ import {
     Users,
     History,
     LogOut,
-    Bell,
     Search,
     UserCircle,
     Menu,
@@ -172,11 +171,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                 />
                             </div>
 
-                            {/* Notifications */}
-                            <button className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-surface-50 hover:bg-surface-100 text-surface-600 transition-colors">
-                                <Bell className="w-5 h-5" />
-                                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                            </button>
+
 
                             <div className="h-8 w-px bg-surface-200 mx-1 hidden sm:block" />
 
