@@ -108,7 +108,7 @@ export default function ListingCard({
                     <span className="text-[10px] font-bold text-primary-600 uppercase tracking-widest truncate max-w-[120px]">
                         {collegeName || 'CAMPUS'}
                     </span>
-                    <span className="text-[10px] font-black text-surface-600 uppercase tracking-tighter">
+                    <span className="text-[10px] font-black text-surface-900 uppercase tracking-tighter">
                         {formatRelativeTime(createdAt)}
                     </span>
                 </div>
@@ -162,7 +162,7 @@ export default function ListingCard({
                     </div>
 
                     {viewsCount > 0 && (
-                        <div className="flex items-center gap-1.5 text-surface-700">
+                        <div className="flex items-center gap-1.5 text-surface-900">
                             <Eye className="w-3.5 h-3.5" />
                             <span className="text-[10px] font-black">{viewsCount}</span>
                         </div>

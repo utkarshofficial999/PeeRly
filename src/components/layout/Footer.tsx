@@ -45,16 +45,16 @@ export default function Footer() {
                         <Link href="/" className="flex items-center mb-6 group">
                             <Logo className="transition-transform duration-300 group-hover:scale-105" />
                         </Link>
-                        <p className="text-surface-600 font-bold text-base mb-8 max-w-xs leading-relaxed italic">
+                        <p className="text-surface-900 font-bold text-base mb-8 max-w-xs leading-relaxed italic">
                             The definitive student-to-student marketplace. Building a safer, more connected campus economy.
                         </p>
                         {/* Contact Info */}
                         <div className="space-y-3 font-black text-sm tracking-tight">
-                            <a href="mailto:utkarshofficial999@gmail.com" className="flex items-center gap-3 text-surface-600 hover:text-primary-600 transition-colors">
+                            <a href="mailto:utkarshofficial999@gmail.com" className="flex items-center gap-3 text-surface-900 hover:text-primary-600 transition-colors">
                                 <Mail className="w-4 h-4" />
                                 utkarshofficial999@gmail.com
                             </a>
-                            <div className="flex items-center gap-3 text-surface-600">
+                            <div className="flex items-center gap-3 text-surface-900">
                                 <MapPin className="w-4 h-4 text-primary-600" />
                                 ABES Engineering College, Ghaziabad
                             </div>
