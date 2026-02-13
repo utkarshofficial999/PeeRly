@@ -21,6 +21,7 @@ export default function SignupPage() {
         fullName: '',
         email: '',
         password: '',
+        year: '',
         agreeTerms: false,
     })
     const [selectedImage, setSelectedImage] = useState<File | null>(null)
@@ -93,7 +94,7 @@ export default function SignupPage() {
         setIsLoading(true)
 
         try {
-            const { data, error } = await signUp(formData.email, formData.password, formData.fullName)
+            const { data, error } = await signUp(formData.email, formData.password, formData.fullName, formData.year)
 
             if (error) {
                 if (user) return;
@@ -219,6 +220,29 @@ export default function SignupPage() {
                                         )}
                                     </p>
                                 )}
+                            </div>
+
+                            {/* Academic Year */}
+                            <div>
+                                <label htmlFor="year" className="block text-sm font-black text-surface-700 mb-2">
+                                    Academic Year
+                                </label>
+                                <select
+                                    id="year"
+                                    value={formData.year}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, year: e.target.value }))}
+                                    required
+                                    className="input-field appearance-none bg-white"
+                                    style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236B7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.5em' }}
+                                >
+                                    <option value="" disabled>Select your year</option>
+                                    <option value="1st Year">1st Year</option>
+                                    <option value="2nd Year">2nd Year</option>
+                                    <option value="3rd Year">3rd Year</option>
+                                    <option value="4th Year">4th Year</option>
+                                    <option value="Final Year">Final Year</option>
+                                    <option value="Master/Postgrad">Master/Postgrad</option>
+                                </select>
                             </div>
 
                             {/* Password */}

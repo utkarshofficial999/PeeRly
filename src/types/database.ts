@@ -22,6 +22,7 @@ export interface Database {
                     id_card_url: string | null
                     rejection_reason: string | null
                     phone: string | null
+                    year: string | null
                     created_at: string
                     updated_at: string
                 }
@@ -34,6 +35,7 @@ export interface Database {
                     college_email?: string | null
                     is_verified?: boolean
                     phone?: string | null
+                    year?: string | null
                     created_at?: string
                     updated_at?: string
                 }
@@ -46,6 +48,7 @@ export interface Database {
                     college_email?: string | null
                     is_verified?: boolean
                     phone?: string | null
+                    year?: string | null
                     created_at?: string
                     updated_at?: string
                 }

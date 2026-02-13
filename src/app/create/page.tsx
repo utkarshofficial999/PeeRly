@@ -50,6 +50,9 @@ export default function CreateListingPage() {
         aiNotes: '',
     })
     const [isGeneratingAI, setIsGeneratingAI] = useState(false)
+    const [showYearModal, setShowYearModal] = useState(false)
+    const [selectedYear, setSelectedYear] = useState('')
+    const [isUpdatingYear, setIsUpdatingYear] = useState(false)
 
     // Fetch categories from DB
     useEffect(() => {
@@ -106,6 +109,12 @@ export default function CreateListingPage() {
         if (profile.verification_status !== 'approved') {
             setError(`Your account is not verified for selling. Status: ${profile.verification_status}`)
             setTimeout(() => router.push('/verify'), 2000)
+            return
+        }
+
+        // Academic Year Check
+        if (!profile.year) {
+            setShowYearModal(true)
             return
         }
 
@@ -641,6 +650,66 @@ export default function CreateListingPage() {
                     </div>
                 </div>
             </main>
+
+            {/* Academic Year Selection Modal */}
+            {showYearModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-surface-900/60 backdrop-blur-sm" onClick={() => setShowYearModal(false)} />
+                    <div className="relative bg-white rounded-[2.5rem] p-8 md:p-12 w-full max-w-lg shadow-2xl border border-surface-100 animate-in zoom-in-95 duration-300">
+                        <div className="text-center mb-8">
+                            <div className="w-20 h-20 bg-primary-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                                <Sparkles className="w-10 h-10 text-primary-500" />
+                            </div>
+                            <h2 className="text-3xl font-black text-surface-900 mb-3">Academic Milestone</h2>
+                            <p className="text-surface-600 font-medium">To keep our campus community accurate, please select your current year of study before posting.</p>
+                        </div>
+
+                        <div className="space-y-4 mb-10">
+                            {[
+                                '1st Year', '2nd Year', '3rd Year', '4th Year', 'Final Year', 'Master/Postgrad'
+                            ].map((y) => (
+                                <button
+                                    key={y}
+                                    onClick={() => setSelectedYear(y)}
+                                    className={`w-full p-5 rounded-2xl border-2 text-left font-black transition-all flex items-center justify-between group ${selectedYear === y
+                                        ? 'border-primary-500 bg-primary-50 text-primary-600 shadow-lg shadow-primary-500/10'
+                                        : 'border-surface-100 bg-white text-surface-400 hover:border-primary-200 hover:text-primary-500'
+                                        }`}
+                                >
+                                    {y}
+                                    {selectedYear === y && <Check className="w-6 h-6" />}
+                                </button>
+                            ))}
+                        </div>
+
+                        <button
+                            disabled={!selectedYear || isUpdatingYear}
+                            onClick={async () => {
+                                setIsUpdatingYear(true)
+                                try {
+                                    if (!user?.id) throw new Error('User not found')
+                                    const { error } = await supabase
+                                        .from('profiles')
+                                        .update({ year: selectedYear })
+                                        .eq('id', user.id)
+
+                                    if (error) throw error
+                                    setShowYearModal(false)
+                                    handleSubmit() // Retry submission
+                                } catch (err) {
+                                    console.error('Error updating year:', err)
+                                    alert('Failed to update year. Please try again.')
+                                } finally {
+                                    setIsUpdatingYear(false)
+                                }
+                            }}
+                            className="w-full btn-primary py-5 text-lg font-black rounded-2xl shadow-button disabled:opacity-50 disabled:grayscale"
+                        >
+                            {isUpdatingYear ? 'Updating...' : 'Confirm & Post'}
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

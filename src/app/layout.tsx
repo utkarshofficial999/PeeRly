@@ -10,6 +10,9 @@ export const metadata: Metadata = {
     description: 'The definitive peer-to-peer marketplace for campus icons. Buy, sell, and trade with trust in your college community.',
     keywords: ['student marketplace', 'peerly', 'campus buy sell', 'college trading', 'student economy'],
     authors: [{ name: 'PeerLY' }],
+    manifest: '/manifest.json',
+    themeColor: '#F9F9F9',
+    viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
     openGraph: {
         title: 'PeerLY - Premium Student Marketplace',
         description: 'Building the future of campus commerce.',

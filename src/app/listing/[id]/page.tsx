@@ -509,7 +509,7 @@ export default function ListingDetailPage() {
                                                 </div>
                                             )}
                                         </div>
-                                        <p className="text-xs font-bold text-mint-600 uppercase tracking-widest">Master Student</p>
+                                        <p className="text-xs font-bold text-mint-600 uppercase tracking-widest">{listing.seller.year || 'Student'}</p>
                                     </div>
                                 </div>
                                 <ArrowRight className="w-6 h-6 text-surface-200 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />

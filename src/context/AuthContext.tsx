@@ -10,7 +10,7 @@ interface AuthContextType {
     profile: Profile | null
     session: Session | null
     isLoading: boolean
-    signUp: (email: string, password: string, fullName: string) => Promise<{ data: any; error: Error | null }>
+    signUp: (email: string, password: string, fullName: string, year: string) => Promise<{ data: any; error: Error | null }>
     signIn: (email: string, password: string) => Promise<{ error: Error | null }>
     signInWithGoogle: () => Promise<{ error: Error | null }>
     signOut: () => Promise<void>
@@ -147,7 +147,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [supabase, fetchProfile, user?.id]);
 
     // Sign up with email and password
-    const signUp = async (email: string, password: string, fullName: string) => {
+    const signUp = async (email: string, password: string, fullName: string, year: string) => {
         try {
             console.log('🔐 AuthContext: Starting sign up for', email)
             const { data, error } = await supabase.auth.signUp({
@@ -156,6 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 options: {
                     data: {
                         full_name: fullName,
+                        year: year,
                     },
                     emailRedirectTo: `${window.location.origin}/auth/callback`,
                 },
