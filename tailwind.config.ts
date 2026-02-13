@@ -72,8 +72,13 @@ const config: Config = {
                 'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                 'gradient': 'gradient 8s linear infinite',
                 'shimmer': 'shimmer 2s linear infinite',
+                'hero-zoom': 'heroZoom 12s ease-in-out infinite',
             },
             keyframes: {
+                heroZoom: {
+                    '0%, 100%': { transform: 'scale(1)' },
+                    '50%': { transform: 'scale(1.15)' },
+                },
                 fadeIn: {
                     '0%': { opacity: '0' },
                     '100%': { opacity: '1' },
