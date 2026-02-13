@@ -24,13 +24,15 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en">
-            <body className="min-h-screen bg-surface-50 antialiased selection:bg-primary-500/10 selection:text-primary-600">
+            <body className="min-h-screen antialiased selection:bg-primary-500/10 selection:text-primary-600 bg-[#F9F9F9]">
                 <AnimatedBackground />
-                <AuthProvider>
-                    <VerificationGuard>
-                        {children}
-                    </VerificationGuard>
-                </AuthProvider>
+                <div className="relative z-10">
+                    <AuthProvider>
+                        <VerificationGuard>
+                            {children}
+                        </VerificationGuard>
+                    </AuthProvider>
+                </div>
             </body>
         </html>
     )

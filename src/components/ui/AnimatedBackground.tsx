@@ -37,17 +37,17 @@ const AnimatedBackground = () => {
 
     // Prevent hydration mismatch
     if (!mounted) {
-        return <div className="fixed inset-0 z-[-1] bg-surface-50" />
+        return <div className="fixed inset-0 z-0 bg-[#F9F9F9]" />
     }
 
     return (
-        <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden bg-surface-50" aria-hidden="true">
+        <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
             {/* Ambient Base Gradient */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(98,35,210,0.05),transparent_70%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(98,35,210,0.08),transparent_70%)]" />
 
             {/* The Fusion Grid */}
             <div
-                className="absolute inset-[-5%] w-[110%] h-[110%] grid grid-cols-4 md:grid-cols-8"
+                className="absolute inset-[-10%] w-[120%] h-[120%] grid grid-cols-4 md:grid-cols-8"
                 style={{
                     // Slightly rotate for more dynamic feel
                     transform: 'rotate(-5deg) scale(1.1)'
@@ -56,7 +56,7 @@ const AnimatedBackground = () => {
                 {gridItems.map((item) => (
                     <div
                         key={item.id}
-                        className="relative w-full aspect-square clip-hexagon opacity-[0.12] transition-opacity duration-1000"
+                        className="relative w-full aspect-square clip-hexagon opacity-[0.25] transition-opacity duration-1000"
                         style={{
                             // Hexagonal staggering logic
                             transform: item.row % 2 === 0 ? 'translateX(0)' : 'translateX(50%)',
@@ -69,7 +69,7 @@ const AnimatedBackground = () => {
                                 <polygon
                                     key={rotation}
                                     points="50,50 80,20 20,20"
-                                    className="animate-triangle-fusion animate-triangle-color"
+                                    className="animate-triangle-fusion"
                                     style={{
                                         transformOrigin: '50% 50%',
                                         // Complex delay logic for the 'fusion' flow
