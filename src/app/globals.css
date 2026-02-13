@@ -228,4 +228,58 @@
   .stagger-5 {
     animation-delay: 0.5s;
   }
+
+  .clip-hexagon {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+}
+
+@keyframes triangle-fusion {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(2.5) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+@keyframes triangle-color {
+  0% {
+    fill: #6223D2;
+  }
+
+  25% {
+    fill: #3b82f6;
+  }
+
+  50% {
+    fill: #06b6d4;
+  }
+
+  75% {
+    fill: #ec4899;
+  }
+
+  100% {
+    fill: #6223D2;
+  }
+}
+
+.animate-triangle-fusion {
+  animation: triangle-fusion 4s infinite linear;
+}
+
+.animate-triangle-color {
+  animation: triangle-color 8s infinite alternate ease-in-out;
 }
