@@ -179,7 +179,7 @@ export default function ListingDetailPage() {
         const checkSaved = async () => {
             const { data } = await supabase
                 .from('saved_listings')
-                .select('id')
+                .select('listing_id')
                 .eq('user_id', user.id)
                 .eq('listing_id', id)
                 .maybeSingle()
