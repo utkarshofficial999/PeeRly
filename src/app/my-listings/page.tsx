@@ -121,13 +121,13 @@ export default function MyListingsPage() {
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {listings.map((item) => (
                                 <div key={item.id} className="premium-card overflow-hidden group hover:shadow-premium hover:-translate-y-1 transition-all">
-                                    <div className="aspect-video bg-surface-200 relative">
+                                    <div className="aspect-square bg-surface-50 relative">
                                         {item.images?.[0] && (
                                             <Image
                                                 src={item.images[0]}
                                                 alt={item.title}
                                                 fill
-                                                className={`object-cover ${item.is_sold ? 'grayscale' : ''}`}
+                                                className={`object-contain p-4 ${item.is_sold ? 'grayscale' : ''}`}
                                             />
                                         )}
                                         {item.is_sold && (

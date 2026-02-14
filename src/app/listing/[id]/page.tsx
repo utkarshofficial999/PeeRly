@@ -395,13 +395,13 @@ export default function ListingDetailPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                     {/* Left: Images */}
                     <div className="space-y-6">
-                        <div className="relative aspect-[4/3] rounded-[2.5rem] overflow-hidden bg-white shadow-premium border border-surface-100 group">
+                        <div className="relative aspect-square rounded-[2.5rem] overflow-hidden bg-white shadow-premium border border-surface-100 group">
                             {images.length > 0 ? (
                                 <Image
                                     src={images[activeImage]}
                                     alt={listing.title}
                                     fill
-                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                    className="object-contain p-6 transition-transform duration-700 group-hover:scale-105"
                                     priority
                                     sizes="(max-width: 768px) 100vw, 50vw"
                                 />

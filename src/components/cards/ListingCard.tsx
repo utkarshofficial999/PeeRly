@@ -47,12 +47,12 @@ export default function ListingCard({
     return (
         <Link href={`/listing/${id}`} className="premium-card-hover group block overflow-hidden">
             {/* Image Container */}
-            <div className="relative aspect-[4/3] overflow-hidden bg-surface-100">
+            <div className="relative aspect-square overflow-hidden bg-surface-50">
                 <Image
                     src={imageUrl}
                     alt={title}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="object-contain p-4 transition-transform duration-700 group-hover:scale-105"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 25vw"
                 />
 

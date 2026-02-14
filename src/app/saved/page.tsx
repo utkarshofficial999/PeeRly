@@ -117,13 +117,13 @@ export default function SavedItemsPage() {
                         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {savedItems.map((item) => (
                                 <div key={item.id} className="glass-card overflow-hidden group h-full flex flex-col">
-                                    <div className="aspect-[4/5] bg-surface-100 relative overflow-hidden">
+                                    <div className="aspect-square bg-surface-50 relative overflow-hidden">
                                         {item.images?.[0] && (
                                             <Image
                                                 src={item.images[0]}
                                                 alt={item.title}
                                                 fill
-                                                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                                className="object-contain p-4 transition-transform duration-500 group-hover:scale-110"
                                             />
                                         )}
                                         <button
