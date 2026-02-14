@@ -402,6 +402,7 @@ export default function BrowseContent() {
                         <SearchBar
                             value={searchInput}
                             onChange={setSearchInput}
+                            onSearch={() => setSearchQuery(searchInput)}
                             onFilterClick={() => setIsFilterOpen(true)}
                         />
                     </div>

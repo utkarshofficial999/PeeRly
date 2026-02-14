@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Upload, X, Camera, Plus, ArrowRight, ArrowLeft, Check, AlertCircle, Sparkles, Wand2 } from 'lucide-react'
@@ -28,8 +28,8 @@ const conditions = [
 
 export default function CreateListingPage() {
     const router = useRouter()
-    const { user, profile } = useAuth()
-    const supabase = createClient()
+    const { user, profile, isLoading: isAuthLoading, refreshProfile } = useAuth()
+    const supabase = useMemo(() => createClient(), [])
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const [step, setStep] = useState(1)
@@ -99,7 +99,7 @@ export default function CreateListingPage() {
         setImagePreviews(newPreviews)
     }
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (skipYearCheck = false) => {
         if (!user || !profile) {
             setError('You must be logged in to create a listing')
             return
@@ -113,7 +113,7 @@ export default function CreateListingPage() {
         }
 
         // Academic Year Check
-        if (!profile.year) {
+        if (!skipYearCheck && !profile.year) {
             setShowYearModal(true)
             return
         }
@@ -632,7 +632,7 @@ export default function CreateListingPage() {
                                 </button>
                             ) : (
                                 <button
-                                    onClick={handleSubmit}
+                                    onClick={() => handleSubmit()}
                                     disabled={isLoading}
                                     className="btn-primary"
                                 >
@@ -694,8 +694,12 @@ export default function CreateListingPage() {
                                         .eq('id', user.id)
 
                                     if (error) throw error
+
+                                    // Refresh profile state in AuthContext
+                                    await refreshProfile()
+
                                     setShowYearModal(false)
-                                    handleSubmit() // Retry submission
+                                    handleSubmit(true) // Retry submission, skip check
                                 } catch (err) {
                                     console.error('Error updating year:', err)
                                     alert('Failed to update year. Please try again.')

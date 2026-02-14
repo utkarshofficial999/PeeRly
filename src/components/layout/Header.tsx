@@ -156,7 +156,10 @@ export default function Header() {
                         {/* Desktop Actions */}
                         <div className="hidden md:flex items-center gap-3">
                             {/* Search */}
-                            <button className="p-2.5 text-surface-600 hover:text-primary-600 rounded-xl hover:bg-primary-50 transition-all">
+                            <button
+                                onClick={() => router.push('/browse')}
+                                className="p-2.5 text-surface-600 hover:text-primary-600 rounded-xl hover:bg-primary-50 transition-all"
+                            >
                                 <Search className="w-5 h-5" />
                             </button>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import {
     Users,
@@ -28,7 +28,7 @@ export default function AdminPage() {
     })
     const [recentActivity, setRecentActivity] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
-    const supabase = createClient()
+    const supabase = useMemo(() => createClient(), [])
 
     useEffect(() => {
         const fetchDashboardData = async () => {

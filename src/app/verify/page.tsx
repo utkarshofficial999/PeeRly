@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import Header from '@/components/layout/Header'
@@ -34,7 +34,7 @@ export default function VerificationPage() {
     const [selectedCollegeId, setSelectedCollegeId] = useState<string>('')
     const fileInputRef = useRef<HTMLInputElement>(null)
 
-    const supabase = createClient()
+    const supabase = useMemo(() => createClient(), [])
 
     useEffect(() => {
         if (!authLoading && !user) {

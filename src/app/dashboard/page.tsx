@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -35,7 +35,7 @@ export default function DashboardPage() {
         }
     }, [user, isLoading])
     const [recentListings, setRecentListings] = useState<any[]>([])
-    const supabase = createClient()
+    const supabase = useMemo(() => createClient(), [])
 
     const fetchDashboardData = useCallback(async () => {
         if (!user) return

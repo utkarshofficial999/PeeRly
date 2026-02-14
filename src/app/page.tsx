@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import {
     ArrowRight,
@@ -76,7 +76,7 @@ const testimonials = [
 ]
 
 export default function HomePage() {
-    const supabase = createClient()
+    const supabase = useMemo(() => createClient(), [])
     const { user } = useAuth()
     const router = useRouter()
     const [recentListings, setRecentListings] = useState<any[]>([])

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import { User, Shield, LogOut, Camera, Save, X } from 'lucide-react'
@@ -21,7 +21,7 @@ export default function SettingsPage() {
         college_id: profile?.college_id || ''
     })
     const fileInputRef = useRef<HTMLInputElement>(null)
-    const supabase = createClient()
+    const supabase = useMemo(() => createClient(), [])
 
     // Fetch colleges
     useEffect(() => {

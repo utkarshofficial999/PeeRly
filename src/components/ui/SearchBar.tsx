@@ -8,6 +8,7 @@ interface SearchBarProps {
     onChange: (value: string) => void
     placeholder?: string
     onFilterClick?: () => void
+    onSearch?: () => void
     showFilters?: boolean
 }
 
@@ -16,6 +17,7 @@ export default function SearchBar({
     onChange,
     placeholder = 'Search for textbooks, electronics, cycles...',
     onFilterClick,
+    onSearch,
     showFilters = true,
 }: SearchBarProps) {
     const [isFocused, setIsFocused] = useState(false)
@@ -27,12 +29,23 @@ export default function SearchBar({
                 : 'bg-white border-surface-100 hover:border-primary-200 shadow-soft'
                 } border`}
         >
-            <Search className={`w-5 h-5 transition-colors duration-500 ${isFocused ? 'text-primary-600' : 'text-surface-600'}`} />
+            <button
+                onClick={onSearch}
+                className={`p-1 -ml-1 rounded-lg transition-colors duration-500 ${isFocused ? 'text-primary-600 hover:bg-primary-50' : 'text-surface-600 hover:bg-surface-50'}`}
+                title="Trigger Search"
+            >
+                <Search className="w-5 h-5" />
+            </button>
 
             <input
                 type="text"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' && onSearch) {
+                        onSearch()
+                    }
+                }}
                 placeholder={placeholder}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
