@@ -86,24 +86,40 @@ export default function HomePage() {
     const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
 
     useEffect(() => {
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(
+                    (reg) => console.log('SW Registered:', reg.scope),
+                    (err) => console.log('SW Registration Failed:', err)
+                );
+            });
+        }
+
         const handler = (e: any) => {
-            // Prevent the mini-infobar from appearing on mobile
             e.preventDefault()
-            // Stash the event so it can be triggered later.
             setDeferredPrompt(e)
         }
 
         window.addEventListener('beforeinstallprompt', handler)
-
-        return () => {
-            window.removeEventListener('beforeinstallprompt', handler)
-        }
+        return () => window.removeEventListener('beforeinstallprompt', handler)
     }, [])
 
+    const [isDownloading, setIsDownloading] = useState(false)
+
     const handleInstallClick = async () => {
+        setIsDownloading(true)
+
+        // Brief delay to make it feel like a "download" or preparation is happening
+        await new Promise(resolve => setTimeout(resolve, 800))
+
         if (!deferredPrompt) {
+            setIsDownloading(false)
             // Fallback for browsers that don't support beforeinstallprompt (like iOS Safari)
-            alert('To install PeerLY:\n\n1. Open this site in Safari\n2. Tap the Share button (square with arrow)\n3. Scroll down and tap "Add to Home Screen"');
+            alert('To install PeerLY App:\n\n' +
+                '• If you see an "Install" icon in your address bar, click it.\n' +
+                '• On iPhone: Tap the Share button and select "Add to Home Screen".\n' +
+                '• On Android: Tap the 3 dots and select "Install App".');
             return
         }
 
@@ -116,6 +132,7 @@ export default function HomePage() {
 
         // We've used the prompt, and can't use it again, throw it away
         setDeferredPrompt(null)
+        setIsDownloading(false)
     }
 
     useEffect(() => {
@@ -266,10 +283,20 @@ export default function HomePage() {
                                 </Link>
                                 <button
                                     onClick={handleInstallClick}
-                                    className="flex items-center gap-2 text-primary-600 font-black hover:text-primary-700 transition-colors py-3 px-6 rounded-2xl bg-white/50 backdrop-blur-sm shadow-soft hover:shadow-premium group"
+                                    disabled={isDownloading}
+                                    className="flex items-center gap-2 text-primary-600 font-black hover:text-primary-700 transition-colors py-3 px-6 rounded-2xl bg-white/50 backdrop-blur-sm shadow-soft hover:shadow-premium group disabled:opacity-50"
                                 >
-                                    <Smartphone className="w-5 h-5 transition-transform group-hover:scale-110" />
-                                    Download App
+                                    {isDownloading ? (
+                                        <>
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                            Downloading...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Smartphone className="w-5 h-5 transition-transform group-hover:scale-110" />
+                                            Download App
+                                        </>
+                                    )}
                                 </button>
                             </div>
 
@@ -437,9 +464,15 @@ export default function HomePage() {
                                 <div className="pt-4 flex flex-wrap gap-4">
                                     <button
                                         onClick={handleInstallClick}
-                                        className="btn-primary px-8 py-4 text-lg shadow-button hover:shadow-premium"
+                                        disabled={isDownloading}
+                                        className="btn-primary px-8 py-4 text-lg shadow-button hover:shadow-premium disabled:opacity-70 flex items-center gap-2"
                                     >
-                                        Download App Now
+                                        {isDownloading ? (
+                                            <>
+                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                                Downloading...
+                                            </>
+                                        ) : 'Download App Now'}
                                     </button>
                                 </div>
                             </div>
@@ -456,9 +489,15 @@ export default function HomePage() {
                                             <p className="text-surface-400 text-sm font-medium">Ready to install</p>
                                             <button
                                                 onClick={handleInstallClick}
-                                                className="w-full btn-primary py-2 text-sm rounded-xl"
+                                                disabled={isDownloading}
+                                                className="w-full btn-primary py-2 text-sm rounded-xl disabled:opacity-70 flex items-center justify-center gap-2"
                                             >
-                                                Install Now
+                                                {isDownloading ? (
+                                                    <>
+                                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                                        Installing...
+                                                    </>
+                                                ) : 'Install Now'}
                                             </button>
                                         </div>
                                     </div>
