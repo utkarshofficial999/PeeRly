@@ -11,7 +11,8 @@ import {
     Star,
     TrendingUp,
     MapPin,
-    Loader2
+    Loader2,
+    Smartphone
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
@@ -229,6 +230,17 @@ export default function HomePage() {
                                 <Link href="/create" className="btn-secondary w-full sm:w-auto text-lg px-10 py-5 border-none bg-white shadow-soft hover:shadow-premium">
                                     Post a Listing
                                 </Link>
+                                <a
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        alert('PeerLY is a Progressive Web App (PWA). To "download", simply tap the share button in your browser and select "Add to Home Screen"!');
+                                    }}
+                                    className="flex items-center gap-2 text-primary-600 font-black hover:text-primary-700 transition-colors py-3 px-6 rounded-2xl bg-white/50 backdrop-blur-sm shadow-soft hover:shadow-premium group"
+                                >
+                                    <Smartphone className="w-5 h-5 transition-transform group-hover:scale-110" />
+                                    Download App
+                                </a>
                             </div>
 
                         </div>
@@ -357,6 +369,75 @@ export default function HomePage() {
                     </div>
                 </section>
 
+                {/* Download App Section */}
+                <section className="py-24 bg-surface-50 relative overflow-hidden">
+                    <div className="container-custom">
+                        <div className="flex flex-col lg:flex-row items-center gap-16">
+                            <div className="lg:w-1/2 space-y-8 animate-in slide-in-from-left-8">
+                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-primary-50 border border-primary-100 mb-4">
+                                    <Smartphone className="w-4 h-4 text-primary-600" />
+                                    <span className="text-xs font-black text-primary-600 tracking-wider uppercase">Mobile Experience</span>
+                                </div>
+                                <h2 className="text-4xl md:text-5xl font-display font-black text-surface-900 leading-tight">
+                                    PeerLY in Your <span className="gradient-text">Pocket</span>
+                                </h2>
+                                <p className="text-xl text-surface-700 font-medium leading-relaxed">
+                                    Experience the smoothest way to buy and sell on campus. Install PeerLY as an app and get instant access to your listings and messages.
+                                </p>
+                                <div className="space-y-4">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-6 h-6 rounded-full bg-mint-100 flex items-center justify-center shrink-0 mt-1">
+                                            <CheckCircle className="w-4 h-4 text-mint-600" />
+                                        </div>
+                                        <p className="text-surface-700 font-bold">Installs in seconds - no app store required</p>
+                                    </div>
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-6 h-6 rounded-full bg-mint-100 flex items-center justify-center shrink-0 mt-1">
+                                            <CheckCircle className="w-4 h-4 text-mint-600" />
+                                        </div>
+                                        <p className="text-surface-700 font-bold">Fast, lightweight, and works offline</p>
+                                    </div>
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-6 h-6 rounded-full bg-mint-100 flex items-center justify-center shrink-0 mt-1">
+                                            <CheckCircle className="w-4 h-4 text-mint-600" />
+                                        </div>
+                                        <p className="text-surface-700 font-bold">Real-time alerts for your listings</p>
+                                    </div>
+                                </div>
+                                <div className="pt-4 flex flex-wrap gap-4">
+                                    <button
+                                        onClick={() => {
+                                            alert('To install PeerLY:\n\n1. Open this site on your phone\n2. Tap the Share button (iOS) or Menu (Android)\n3. Tap "Add to Home Screen"');
+                                        }}
+                                        className="btn-primary px-8 py-4 text-lg shadow-button hover:shadow-premium"
+                                    >
+                                        How to Download
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="lg:w-1/2 relative">
+                                <div className="relative z-10 animate-in zoom-in-95 duration-700">
+                                    {/* Phone Mockup Placeholder or generated image */}
+                                    <div className="relative w-full max-w-[320px] mx-auto aspect-[9/19] bg-surface-900 rounded-[3rem] border-[12px] border-surface-800 shadow-premium overflow-hidden">
+                                        <div className="absolute top-0 inset-x-0 h-10 bg-surface-800 flex items-center justify-center">
+                                            <div className="w-20 h-5 bg-black rounded-full" />
+                                        </div>
+                                        <div className="absolute inset-0 top-10 flex flex-col items-center justify-center p-6 text-center space-y-4">
+                                            <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center text-white text-2xl font-black">P</div>
+                                            <h3 className="text-white text-xl font-bold tracking-tight">PeerLY</h3>
+                                            <p className="text-surface-400 text-sm font-medium">Ready to install</p>
+                                            <button className="w-full btn-primary py-2 text-sm rounded-xl">Add to Home Screen</button>
+                                        </div>
+                                    </div>
+                                    {/* Decorative orbs */}
+                                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary-400/20 rounded-full blur-[40px] z-0 animate-pulse" />
+                                    <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-mint-400/20 rounded-full blur-[40px] z-0" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 {/* Final CTA */}
                 <section className="py-32">
                     <div className="container-custom">
@@ -386,6 +467,6 @@ export default function HomePage() {
             </main>
 
             <Footer />
-        </div>
+        </div >
     )
 }
