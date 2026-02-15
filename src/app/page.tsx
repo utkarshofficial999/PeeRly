@@ -83,6 +83,40 @@ export default function HomePage() {
     const [recentListings, setRecentListings] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [savedIds, setSavedIds] = useState<Set<string>>(new Set())
+    const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
+
+    useEffect(() => {
+        const handler = (e: any) => {
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault()
+            // Stash the event so it can be triggered later.
+            setDeferredPrompt(e)
+        }
+
+        window.addEventListener('beforeinstallprompt', handler)
+
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handler)
+        }
+    }, [])
+
+    const handleInstallClick = async () => {
+        if (!deferredPrompt) {
+            // Fallback for browsers that don't support beforeinstallprompt (like iOS Safari)
+            alert('To install PeerLY:\n\n1. Open this site in Safari\n2. Tap the Share button (square with arrow)\n3. Scroll down and tap "Add to Home Screen"');
+            return
+        }
+
+        // Show the install prompt
+        deferredPrompt.prompt()
+
+        // Wait for the user to respond to the prompt
+        const { outcome } = await deferredPrompt.userChoice
+        console.log(`User response to the install prompt: ${outcome}`)
+
+        // We've used the prompt, and can't use it again, throw it away
+        setDeferredPrompt(null)
+    }
 
     useEffect(() => {
         const fetchRecent = async () => {
@@ -230,17 +264,13 @@ export default function HomePage() {
                                 <Link href="/create" className="btn-secondary w-full sm:w-auto text-lg px-10 py-5 border-none bg-white shadow-soft hover:shadow-premium">
                                     Post a Listing
                                 </Link>
-                                <a
-                                    href="#"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        alert('PeerLY is a Progressive Web App (PWA). To "download", simply tap the share button in your browser and select "Add to Home Screen"!');
-                                    }}
+                                <button
+                                    onClick={handleInstallClick}
                                     className="flex items-center gap-2 text-primary-600 font-black hover:text-primary-700 transition-colors py-3 px-6 rounded-2xl bg-white/50 backdrop-blur-sm shadow-soft hover:shadow-premium group"
                                 >
                                     <Smartphone className="w-5 h-5 transition-transform group-hover:scale-110" />
                                     Download App
-                                </a>
+                                </button>
                             </div>
 
                         </div>
@@ -406,12 +436,10 @@ export default function HomePage() {
                                 </div>
                                 <div className="pt-4 flex flex-wrap gap-4">
                                     <button
-                                        onClick={() => {
-                                            alert('To install PeerLY:\n\n1. Open this site on your phone\n2. Tap the Share button (iOS) or Menu (Android)\n3. Tap "Add to Home Screen"');
-                                        }}
+                                        onClick={handleInstallClick}
                                         className="btn-primary px-8 py-4 text-lg shadow-button hover:shadow-premium"
                                     >
-                                        How to Download
+                                        Download App Now
                                     </button>
                                 </div>
                             </div>
@@ -426,7 +454,12 @@ export default function HomePage() {
                                             <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center text-white text-2xl font-black">P</div>
                                             <h3 className="text-white text-xl font-bold tracking-tight">PeerLY</h3>
                                             <p className="text-surface-400 text-sm font-medium">Ready to install</p>
-                                            <button className="w-full btn-primary py-2 text-sm rounded-xl">Add to Home Screen</button>
+                                            <button
+                                                onClick={handleInstallClick}
+                                                className="w-full btn-primary py-2 text-sm rounded-xl"
+                                            >
+                                                Install Now
+                                            </button>
                                         </div>
                                     </div>
                                     {/* Decorative orbs */}
